@@ -21,6 +21,10 @@ from accounts_app.api_views import (
     CourseModuleViewSet, CourseLessonViewSet,
     NotificationViewSet, LiveClassScheduleViewSet
 )
+from dashboard.views import (
+    JobApplicationViewSet, AgentRunViewSet,
+    LinkedInAccountViewSet, ResumeViewSet
+)
 
 router = DefaultRouter()
 router.register(r'api/users', UserViewSet, basename='user')
@@ -32,6 +36,12 @@ router.register(r'api/modules', CourseModuleViewSet, basename='coursemodule')
 router.register(r'api/lessons', CourseLessonViewSet, basename='courselesson')
 router.register(r'api/user-notifications', NotificationViewSet, basename='usernotification')
 router.register(r'api/live-sessions', LiveClassScheduleViewSet, basename='liveclasssession')
+
+# Dashboard & Agent ViewSets
+router.register(r'api/job-applications', JobApplicationViewSet, basename='jobapplication')
+router.register(r'api/agent-runs', AgentRunViewSet, basename='agentrun')
+router.register(r'api/linkedin-accounts', LinkedInAccountViewSet, basename='linkedinaccount')
+router.register(r'api/resumes', ResumeViewSet, basename='resume')
 
 
 def logout_view(request):

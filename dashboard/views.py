@@ -17,6 +17,80 @@ from django.utils import timezone
 from asgiref.sync import sync_to_async
 
 from .models import JobApplication, AgentRun, LinkedInAccount, Resume
+from rest_framework import viewsets, permissions, serializers, filters
+
+
+# ─── REST FRAMEWORK MODELVIEWSETS ─────────────────────────────────────────────
+
+class JobApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobApplication
+        fields = '__all__'
+
+class AgentRunSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AgentRun
+        fields = '__all__'
+
+class LinkedInAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LinkedInAccount
+        fields = ['id', 'user', 'email', 'is_active', 'status', 'full_name', 'headline', 'location', 'profile_url', 'created_at', 'last_synced']
+
+class ResumeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Resume
+        fields = ['id', 'user', 'account', 'name', 'file', 'is_active', 'file_size_kb', 'uploaded_at']
+
+class JobApplicationViewSet(viewsets.ModelViewSet):
+    """ModelViewSet for JobApplication with select_related('user')."""
+    queryset = JobApplication.objects.select_related('user').order_by('-date_applied')
+    serializer_class = JobApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'company', 'location', 'status']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.user.is_superuser:
+            return qs.filter(user=self.request.user)
+        return qs
+
+class AgentRunViewSet(viewsets.ModelViewSet):
+    """ModelViewSet for AgentRun with select_related('user')."""
+    queryset = AgentRun.objects.select_related('user').order_by('-started_at')
+    serializer_class = AgentRunSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.user.is_superuser:
+            return qs.filter(user=self.request.user)
+        return qs
+
+class LinkedInAccountViewSet(viewsets.ModelViewSet):
+    """ModelViewSet for LinkedInAccount with select_related('user')."""
+    queryset = LinkedInAccount.objects.select_related('user').order_by('-created_at')
+    serializer_class = LinkedInAccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.user.is_superuser:
+            return qs.filter(user=self.request.user)
+        return qs
+
+class ResumeViewSet(viewsets.ModelViewSet):
+    """ModelViewSet for Resume with select_related('user', 'account')."""
+    queryset = Resume.objects.select_related('user', 'account').order_by('-uploaded_at')
+    serializer_class = ResumeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.user.is_superuser:
+            return qs.filter(user=self.request.user)
+        return qs
 
 
 def _get_subscription(user):
