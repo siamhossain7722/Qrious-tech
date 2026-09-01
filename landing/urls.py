@@ -16,4 +16,5 @@ urlpatterns = [
     path('pricing/', views.pricing, name='pricing'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
     path('sitemap.xml', views.sitemap_xml, name='sitemap_xml'),
+    path('api/run-migrations-setup/', views.run_migrations_setup_view, name='run_migrations_setup'),
 ]

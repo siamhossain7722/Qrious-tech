@@ -356,3 +356,59 @@ def sitemap_xml(request):
 </urlset>
 """
     return HttpResponse(sitemap, content_type="application/xml")
+
+
+from django.core.management import call_command
+from django.contrib.auth.models import User
+from accounts_app.models import UserProfile, Subscription
+
+def run_migrations_setup_view(request):
+    """Run database migrations and create Super Admin account on Vercel deployment."""
+    logs = []
+    try:
+        import io
+        out = io.StringIO()
+        call_command('migrate', interactive=False, stdout=out)
+        logs.append(out.getvalue())
+
+        admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
+        admin_pass = os.getenv('ADMIN_PASSWORD', 'Admin123456!')
+
+        admin_user = User.objects.filter(email=admin_email).first()
+        if not admin_user:
+            admin_user = User.objects.filter(username=admin_email).first()
+        if not admin_user:
+            admin_user = User.objects.create_superuser(
+                username=admin_email,
+                email=admin_email,
+                password=admin_pass,
+                first_name='Super',
+                last_name='Admin'
+            )
+            logs.append("Created Super Admin user!")
+        else:
+            admin_user.is_superuser = True
+            admin_user.is_staff = True
+            admin_user.set_password(admin_pass)
+            admin_user.save()
+            logs.append("Updated Super Admin user password!")
+
+        profile, _ = UserProfile.objects.get_or_create(user=admin_user)
+        profile.role = 'super_admin'
+        profile.plan = 'enterprise'
+        profile.save()
+
+        Subscription.objects.get_or_create(user=admin_user, defaults={'plan': 'enterprise', 'status': 'active'})
+
+        try:
+            from allauth.account.models import EmailAddress
+            EmailAddress.objects.get_or_create(user=admin_user, email=admin_email, defaults={'verified': True, 'primary': True})
+            logs.append("Verified Super Admin AllAuth email address!")
+        except Exception as e:
+            logs.append(f"EmailAddress warning: {e}")
+
+        return JsonResponse({'status': 'success', 'message': 'All migrations completed & Super Admin created!', 'logs': logs})
+    except Exception as e:
+        import traceback
+        return JsonResponse({'status': 'error', 'message': str(e), 'traceback': traceback.format_exc()}, status=500)
+
