@@ -2440,51 +2440,109 @@ def create_notification(user, title, message, notification_type='system', catego
 
 
 def notify_students_new_lesson(lesson):
-    """Sends real-time notifications to enrolled students when a new class lesson is uploaded."""
+    """
+    Sends real-time bell notifications AND dispatches HTML email notifications
+    to all enrolled students in the target batch when a new recorded video class lesson is uploaded.
+    """
     try:
         from .models import StudentEnrollment
         from django.contrib.auth import get_user_model
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        from django.conf import settings
+
         User = get_user_model()
 
         if lesson.batch:
             enrollments = StudentEnrollment.objects.filter(batch=lesson.batch).select_related('user')
+            batch_name = lesson.batch.name
         else:
             enrollments = StudentEnrollment.objects.select_related('user').all()
+            batch_name = "All Enrolled Batches"
 
         target_users = set(e.user for e in enrollments if e.user)
         if not target_users:
             target_users = set(User.objects.filter(is_superuser=False))
 
+        sent_count = 0
         for user in target_users:
+            student_name = user.get_full_name() or user.username or user.email
+            classroom_url = f"https://qrious-tech.vercel.app/student/classroom/lesson/{lesson.id}/"
+            recording_url = lesson.video_url or classroom_url
+
+            # 1. Real-time Dashboard Bell Notification
             create_notification(
                 user=user,
-                title=f"🎬 New Class Uploaded: {lesson.title}",
+                title=f"🎬 New Recorded Class: {lesson.title}",
                 message=f"A new recorded video class '{lesson.title}' was published under Module {lesson.module.module_number}: {lesson.module.title}. Watch now!",
                 notification_type="course",
                 category="info",
                 link=f"/student/classroom/lesson/{lesson.id}/"
             )
+
+            # 2. HTML Email Notification to Target Batch Students
+            try:
+                email_subject = f"[New Recorded Class] 🎬 {lesson.title} — Module {lesson.module.module_number}"
+                
+                context = {
+                    'student_name': student_name,
+                    'batch_name': batch_name,
+                    'class_title': f"Module {lesson.module.module_number}: {lesson.title}",
+                    'instructor_name': "Qrious Tech Senior Mentor",
+                    'agenda': lesson.notes or f"Module: {lesson.module.title} | Duration: {lesson.duration}",
+                    'recording_url': recording_url,
+                }
+
+                html_content = render_to_string('account/email/class_recording_notification.html', context)
+                text_content = f"Dear {student_name},\n\nA new recorded video class '{lesson.title}' is now available for {batch_name}.\nModule: {lesson.module.title}\nWatch Video: {recording_url}\n\nQrious Tech Academy"
+
+                msg = EmailMultiAlternatives(
+                    subject=email_subject,
+                    body=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[user.email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=True)
+                sent_count += 1
+            except Exception as email_err:
+                print(f"Error sending recorded class email to {user.email}: {email_err}")
+
+        print(f"Dispatched {sent_count} HTML emails for new lesson '{lesson.title}'.")
+        return sent_count
     except Exception as ex:
         print(f"Error notifying students for new lesson: {ex}")
+        return 0
 
 
 def notify_students_updated_lesson(lesson):
-    """Sends real-time notifications to enrolled students when an existing class lesson is updated."""
+    """Sends real-time notifications & HTML emails to enrolled students when an existing class lesson is updated."""
     try:
         from .models import StudentEnrollment
         from django.contrib.auth import get_user_model
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        from django.conf import settings
+
         User = get_user_model()
 
         if lesson.batch:
             enrollments = StudentEnrollment.objects.filter(batch=lesson.batch).select_related('user')
+            batch_name = lesson.batch.name
         else:
             enrollments = StudentEnrollment.objects.select_related('user').all()
+            batch_name = "All Enrolled Batches"
 
         target_users = set(e.user for e in enrollments if e.user)
         if not target_users:
             target_users = set(User.objects.filter(is_superuser=False))
 
+        sent_count = 0
         for user in target_users:
+            student_name = user.get_full_name() or user.username or user.email
+            classroom_url = f"https://qrious-tech.vercel.app/student/classroom/lesson/{lesson.id}/"
+            recording_url = lesson.video_url or classroom_url
+
             create_notification(
                 user=user,
                 title=f"📝 Class Updated: {lesson.title}",
@@ -2493,9 +2551,36 @@ def notify_students_updated_lesson(lesson):
                 category="info",
                 link=f"/student/classroom/lesson/{lesson.id}/"
             )
+
+            try:
+                email_subject = f"[Class Updated] 📝 {lesson.title} — Module {lesson.module.module_number}"
+                context = {
+                    'student_name': student_name,
+                    'batch_name': batch_name,
+                    'class_title': f"Module {lesson.module.module_number}: {lesson.title} (Updated)",
+                    'instructor_name': "Qrious Tech Senior Mentor",
+                    'agenda': lesson.notes or f"Module: {lesson.module.title} | Duration: {lesson.duration}",
+                    'recording_url': recording_url,
+                }
+                html_content = render_to_string('account/email/class_recording_notification.html', context)
+                text_content = f"Dear {student_name},\n\nThe class '{lesson.title}' has been updated.\nWatch Video: {recording_url}\n\nQrious Tech Academy"
+
+                msg = EmailMultiAlternatives(
+                    subject=email_subject,
+                    body=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[user.email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=True)
+                sent_count += 1
+            except Exception as email_err:
+                print(f"Error sending updated lesson email to {user.email}: {email_err}")
+
+        return sent_count
     except Exception as ex:
         print(f"Error notifying students for updated lesson: {ex}")
-        return None
+        return 0
 
 
 @login_required
