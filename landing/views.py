@@ -358,6 +358,7 @@ def sitemap_xml(request):
     return HttpResponse(sitemap, content_type="application/xml")
 
 
+from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
 from django.contrib.auth.models import User
 from accounts_app.models import UserProfile, Subscription
@@ -368,7 +369,7 @@ def run_migrations_setup_view(request):
     try:
         import io
         out = io.StringIO()
-        call_command('migrate', interactive=False, stdout=out)
+        call_command('migrate', '--fake-initial', interactive=False, stdout=out)
         logs.append(out.getvalue())
 
         admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
