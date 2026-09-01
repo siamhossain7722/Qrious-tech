@@ -36,40 +36,38 @@ def ensure_db_and_admin():
         admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
         admin_pass = os.getenv('ADMIN_PASSWORD', 'Admin123456!')
 
-        admin_user = User.objects.filter(email=admin_email).first()
-        if not admin_user:
-            admin_user = User.objects.filter(username=admin_email).first()
-        if not admin_user:
-            admin_user = User.objects.create_superuser(
-                username=admin_email,
-                email=admin_email,
-                password=admin_pass,
-                first_name='Super',
-                last_name='Admin'
-            )
-        else:
-            admin_user.is_superuser = True
-            admin_user.is_staff = True
-            admin_user.set_password(admin_pass)
-            admin_user.save()
+        for uname in ['admin', admin_email]:
+            u = User.objects.filter(username=uname).first()
+            if not u:
+                u = User.objects.create_superuser(
+                    username=uname,
+                    email=admin_email,
+                    password=admin_pass,
+                    first_name='Super',
+                    last_name='Admin'
+                )
+            else:
+                u.is_superuser = True
+                u.is_staff = True
+                u.email = admin_email
+                u.set_password(admin_pass)
+                u.save()
 
-        # Ensure UserProfile & Subscription
-        profile, _ = UserProfile.objects.get_or_create(user=admin_user)
-        profile.role = 'super_admin'
-        profile.plan = 'enterprise'
-        profile.save()
+            profile, _ = UserProfile.objects.get_or_create(user=u)
+            profile.role = 'super_admin'
+            profile.plan = 'enterprise'
+            profile.save()
 
-        Subscription.objects.get_or_create(user=admin_user, defaults={'plan': 'enterprise', 'status': 'active'})
+            Subscription.objects.get_or_create(user=u, defaults={'plan': 'enterprise', 'status': 'active'})
 
-        # Ensure AllAuth EmailAddress verified
-        try:
-            from allauth.account.models import EmailAddress
-            ea, _ = EmailAddress.objects.get_or_create(user=admin_user, email=admin_email)
-            ea.verified = True
-            ea.primary = True
-            ea.save()
-        except Exception:
-            pass
+            try:
+                from allauth.account.models import EmailAddress
+                ea, _ = EmailAddress.objects.get_or_create(user=u, email=admin_email)
+                ea.verified = True
+                ea.primary = True
+                ea.save()
+            except Exception:
+                pass
 
     except Exception as e:
         print(f"Auto DB/Admin setup info: {e}")

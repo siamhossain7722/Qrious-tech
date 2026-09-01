@@ -375,41 +375,41 @@ def run_migrations_setup_view(request):
         admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
         admin_pass = os.getenv('ADMIN_PASSWORD', 'Admin123456!')
 
-        admin_user = User.objects.filter(email=admin_email).first()
-        if not admin_user:
-            admin_user = User.objects.filter(username=admin_email).first()
-        if not admin_user:
-            admin_user = User.objects.create_superuser(
-                username=admin_email,
-                email=admin_email,
-                password=admin_pass,
-                first_name='Super',
-                last_name='Admin'
-            )
-            logs.append("Created Super Admin user!")
-        else:
-            admin_user.is_superuser = True
-            admin_user.is_staff = True
-            admin_user.set_password(admin_pass)
-            admin_user.save()
-            logs.append("Updated Super Admin user password!")
+        # Create/Update both 'admin' and email-based usernames
+        for uname in ['admin', admin_email]:
+            u = User.objects.filter(username=uname).first()
+            if not u:
+                u = User.objects.create_superuser(
+                    username=uname,
+                    email=admin_email,
+                    password=admin_pass,
+                    first_name='Super',
+                    last_name='Admin'
+                )
+                logs.append(f"Created Super Admin ({uname})!")
+            else:
+                u.is_superuser = True
+                u.is_staff = True
+                u.email = admin_email
+                u.set_password(admin_pass)
+                u.save()
+                logs.append(f"Updated Super Admin ({uname}) password!")
 
-        profile, _ = UserProfile.objects.get_or_create(user=admin_user)
-        profile.role = 'super_admin'
-        profile.plan = 'enterprise'
-        profile.save()
+            profile, _ = UserProfile.objects.get_or_create(user=u)
+            profile.role = 'super_admin'
+            profile.plan = 'enterprise'
+            profile.save()
 
-        Subscription.objects.get_or_create(user=admin_user, defaults={'plan': 'enterprise', 'status': 'active'})
+            Subscription.objects.get_or_create(user=u, defaults={'plan': 'enterprise', 'status': 'active'})
 
-        try:
-            from allauth.account.models import EmailAddress
-            ea, _ = EmailAddress.objects.get_or_create(user=admin_user, email=admin_email)
-            ea.verified = True
-            ea.primary = True
-            ea.save()
-            logs.append("Verified Super Admin AllAuth email address!")
-        except Exception as e:
-            logs.append(f"EmailAddress warning: {e}")
+            try:
+                from allauth.account.models import EmailAddress
+                ea, _ = EmailAddress.objects.get_or_create(user=u, email=admin_email)
+                ea.verified = True
+                ea.primary = True
+                ea.save()
+            except Exception:
+                pass
 
         return JsonResponse({'status': 'success', 'message': 'All migrations completed & Super Admin created!', 'logs': logs})
     except Exception as e:
