@@ -81,13 +81,17 @@ DB_PORT = os.getenv('DB_PORT', '3306')
 
 if os.getenv('DATABASE_URL'):
     import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
+    db_config = dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    if 'OPTIONS' in db_config:
+        db_config['OPTIONS'].pop('ssl-mode', None)
+        db_config['OPTIONS'].pop('ssl_mode', None)
+        if 'aivencloud.com' in os.getenv('DATABASE_URL', '') and 'ssl' not in db_config['OPTIONS']:
+            db_config['OPTIONS']['ssl'] = {'ssl_mode': 'REQUIRED'}
+    DATABASES = {'default': db_config}
 elif os.getenv('DB_HOST') and os.getenv('DB_NAME'):
     db_opts = {'charset': 'utf8mb4'}
     if 'aivencloud.com' in os.getenv('DB_HOST', ''):

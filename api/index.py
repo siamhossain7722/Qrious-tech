@@ -19,6 +19,13 @@ if not os.path.exists(staticfiles_dir) and os.path.exists(static_dir):
         pass
 
 from django.core.wsgi import get_wsgi_application
+from django.core.management import call_command
+
+# Auto-migrate database tables on Vercel deployment startup
+try:
+    call_command('migrate', interactive=False)
+except Exception as e:
+    print(f"Auto-migration check: {e}")
 
 app = get_wsgi_application()
 application = app
