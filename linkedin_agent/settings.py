@@ -89,6 +89,9 @@ if os.getenv('DATABASE_URL'):
         )
     }
 elif os.getenv('DB_HOST') and os.getenv('DB_NAME'):
+    db_opts = {'charset': 'utf8mb4'}
+    if 'aivencloud.com' in os.getenv('DB_HOST', ''):
+        db_opts['ssl'] = {'ssl_mode': 'REQUIRED'}
     DATABASES = {
         'default': {
             'ENGINE': DB_ENGINE,
@@ -97,9 +100,7 @@ elif os.getenv('DB_HOST') and os.getenv('DB_NAME'):
             'PASSWORD': DB_PASSWORD,
             'HOST': DB_HOST,
             'PORT': DB_PORT,
-            'OPTIONS': {
-                'charset': 'utf8mb4',
-            },
+            'OPTIONS': db_opts,
         }
     }
 else:
@@ -210,7 +211,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
