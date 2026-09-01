@@ -1,0 +1,269 @@
+{% extends "landing/base.html" %}
+
+{% block title %}{% block account_title %}Auth — Qrious Tech Academy{% endblock %}{% endblock %}
+{% block reviews %}{% endblock %}
+
+{% block extra_head %}
+<style>
+
+
+    .auth-page-wrapper {
+        min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        padding: 90px 16px 60px; position: relative; z-index: 10;
+    }
+
+    .auth-container {
+        width: 100%; max-width: 440px; margin: 0 auto;
+        display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* Form Card (White Theme) */
+    .auth-card {
+        width: 100%; background: #FFFFFF; border: 1.5px solid #E4E4E7;
+        border-radius: 24px; padding: 36px 30px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.06), 0 0 35px rgba(212, 255, 0, 0.2);
+        animation: formFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes formFadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-header { margin-bottom: 26px; text-align: left; }
+    .auth-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 6px; color: #111827; }
+    .auth-sub { color: #6B7280; font-size: 13.5px; }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 18px; text-align: left; }
+    .form-label { display: block; font-size: 11px; font-weight: 800; color: #4B5563; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .form-input {
+        width: 100%; background: #FFFFFF; border: 1.5px solid #E4E4E7;
+        border-radius: 12px; padding: 13px 16px; color: #111827;
+        font-size: 14px; font-family: 'Inter'; transition: all 0.25s;
+    }
+    .form-input:focus {
+        outline: none; border-color: #111827; background: #FFFFFF;
+        box-shadow: 0 0 20px rgba(212, 255, 0, 0.4);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media(max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    .password-wrap { position: relative; display: flex; align-items: center; }
+    .password-wrap .form-input { padding-right: 44px; }
+    .password-toggle-btn {
+        position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+        background: transparent; border: none; color: #6B7280;
+        font-size: 18px; cursor: pointer; padding: 4px; display: flex;
+        align-items: center; justify-content: center; transition: color 0.2s;
+        user-select: none; z-index: 10;
+    }
+    .password-toggle-btn:hover { color: #111827; }
+
+    .btn-submit {
+        width: 100%; padding: 14px; border-radius: 999px; font-size: 15px; font-weight: 800;
+        background: #D4FF00; color: #111827; border: none; cursor: pointer; font-family: 'Inter';
+        transition: all 0.25s; box-shadow: 0 6px 25px rgba(212,255,0,0.4); margin-top: 8px;
+    }
+    .btn-submit:hover {
+        transform: translateY(-2px); background: #C4F600; box-shadow: 0 10px 30px rgba(212,255,0,0.6);
+    }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #6B7280; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #E4E4E7; }
+    
+    .btn-social {
+        width: 100%; padding: 12px; border-radius: 999px; font-size: 14px; font-weight: 700;
+        background: #FFFFFF; border: 1.5px solid #E4E4E7; color: #111827;
+        cursor: pointer; font-family: 'Inter'; display: flex; align-items: center; justify-content: center;
+        gap: 10px; text-decoration: none; transition: all 0.25s; margin-bottom: 10px;
+    }
+    .btn-social:hover { border-color: #111827; background: #F4F4F5; transform: translateY(-1px); }
+    .google-icon { width: 18px; }
+
+    .auth-link { text-align: center; margin-top: 20px; font-size: 13.5px; color: #6B7280; font-weight: 500; }
+    .auth-link a { color: #111827; text-decoration: none; font-weight: 800; border-bottom: 2px solid #D4FF00; }
+    .auth-link a:hover { color: #000000; text-decoration: none; background: rgba(212,255,0,0.3); }
+
+    .alert { padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; font-weight: 600; text-align: left; }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #059669; }
+    .alert-info { background: rgba(204,255,0,0.1); border: 1px solid rgba(204,255,0,0.3); color: #0d9488; }
+    .field-error { color: #dc2626; font-size: 12px; margin-top: 5px; text-align: left; font-weight: 600; }
+
+    /* Dark Theme Overrides for Auth Cards & Forms */
+    body.dark-theme .auth-card {
+        background: rgba(15, 23, 42, 0.94) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(212, 255, 0, 0.15) !important;
+    }
+    body.dark-theme .auth-title {
+        color: #FFFFFF !important;
+    }
+    body.dark-theme .auth-sub {
+        color: #CBD5E1 !important;
+    }
+    body.dark-theme .form-label {
+        color: #E2E8F0 !important;
+    }
+    body.dark-theme .form-input {
+        background: #0B0F19 !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+        color: #FFFFFF !important;
+    }
+    body.dark-theme .form-input::placeholder {
+        color: #94A3B8 !important;
+        opacity: 1 !important;
+    }
+    body.dark-theme .form-input:focus {
+        border-color: #D4FF00 !important;
+        box-shadow: 0 0 20px rgba(212, 255, 0, 0.4) !important;
+        background: #0F172A !important;
+    }
+    body.dark-theme .password-toggle-btn {
+        color: #CBD5E1 !important;
+    }
+    body.dark-theme .password-toggle-btn:hover {
+        color: #D4FF00 !important;
+    }
+    body.dark-theme .divider {
+        color: #94A3B8 !important;
+    }
+    body.dark-theme .divider::before, body.dark-theme .divider::after {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+    body.dark-theme .btn-social {
+        background: rgba(30, 41, 59, 0.8) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+        color: #FFFFFF !important;
+    }
+    body.dark-theme .btn-social:hover {
+        border-color: #D4FF00 !important;
+        background: rgba(30, 41, 59, 1) !important;
+        color: #D4FF00 !important;
+    }
+    body.dark-theme .auth-link {
+        color: #CBD5E1 !important;
+    }
+    body.dark-theme .auth-link a {
+        color: #D4FF00 !important;
+        border-bottom-color: #D4FF00 !important;
+        font-weight: 800 !important;
+    }
+    body.dark-theme .auth-link a:hover {
+        color: #FFFFFF !important;
+        background: rgba(212, 255, 0, 0.25) !important;
+    }
+    body.dark-theme form div[style*="background"] {
+        background: rgba(30, 41, 59, 0.8) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+        color: #E2E8F0 !important;
+    }
+    body.dark-theme form div[style*="background"] strong {
+        color: #FFFFFF !important;
+    }
+    body.dark-theme form div[style*="background"] li {
+        color: #CBD5E1 !important;
+    }
+
+    /* Light Theme Styling for Auth Page */
+    body.light-theme, html.light-theme {
+        --bg: #FAFDF2;
+        --bg2: #ffffff;
+        --card: rgba(255, 255, 255, 0.92);
+        --text: #0f172a;
+        --text2: #334155;
+        --text3: #64748b;
+        --border: #cbd5e1;
+        --border2: #94a3b8;
+    }
+
+    body.light-theme .auth-card {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1.5px solid rgba(203, 213, 225, 0.9) !important;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08), 0 0 35px rgba(212, 255, 0, 0.2) !important;
+    }
+
+    body.light-theme .auth-title {
+        color: #0f172a !important;
+    }
+
+    body.light-theme .auth-sub {
+        color: #475569 !important;
+    }
+
+    body.light-theme .form-label {
+        color: #475569 !important;
+    }
+
+    body.light-theme .form-input {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+
+    body.light-theme .form-input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    body.light-theme .form-input:focus {
+        border-color: #0f172a !important;
+        box-shadow: 0 0 20px rgba(212, 255, 0, 0.35) !important;
+    }
+
+    body.light-theme .divider {
+        color: #64748b !important;
+    }
+    body.light-theme .divider::before, body.light-theme .divider::after {
+        background: #e2e8f0 !important;
+    }
+
+    body.light-theme .btn-social {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+    body.light-theme .btn-social:hover {
+        background: #f8fafc !important;
+        border-color: #0f172a !important;
+    }
+
+    body.light-theme .auth-link {
+        color: #64748b !important;
+    }
+    body.light-theme .auth-link a {
+        color: #0f172a !important;
+        border-bottom: 2px solid #D4FF00 !important;
+    }
+    body.light-theme .password-toggle-btn {
+        color: #64748b !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+    <div class="auth-container">
+        <div class="auth-card">
+            {% block account_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(btn) {
+    const input = btn.previousElementSibling;
+    if (input) {
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerText = '🙈';
+            btn.title = 'Hide password';
+        } else {
+            input.type = 'password';
+            btn.innerText = '👁️';
+            btn.title = 'Show password';
+        }
+    }
+}
+</script>
+{% endblock %}
+

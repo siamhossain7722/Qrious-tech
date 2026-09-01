@@ -1,0 +1,179 @@
+{% extends "landing/base.html" %}
+{% load static %}
+
+{% block title %}Contact Us — Qrious Tech Academy{% endblock %}
+
+{% block content %}
+<style>
+    .contact-hero {
+        padding: 5px 28px 20px; text-align: center; max-width: 1000px; margin: 0 auto; position: relative; z-index: 2;
+    }
+    .contact-tag { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #111827; background: #D4FF00; padding: 4px 16px; border-radius: 999px; display: inline-block; margin-bottom: 10px; }
+    .contact-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 900; line-height: 1.18; margin-bottom: 12px; color: #111827; }
+    .contact-sub { font-size: 17px; color: var(--text2); max-width: 650px; margin: 0 auto; line-height: 1.6; }
+
+    .section { padding: 40px 28px 90px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; }
+    @media(max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 24px;
+        padding: 32px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .contact-item { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+    .c-icon {
+        width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #111827, #1F2937);
+        border: 1.5px solid rgba(212, 255, 0, 0.5); color: #D4FF00; font-size: 20px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(17,24,39,0.15);
+    }
+    .c-label { font-size: 12px; font-weight: 800; color: #4B5563; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .c-val { font-size: 16px; font-weight: 700; color: #111827; }
+    .c-val a { color: #111827; text-decoration: none; transition: color 0.2s; }
+    .c-val a:hover { color: #000000; border-bottom: 2px solid #D4FF00; }
+
+    .whatsapp-box {
+        background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1.5px solid #E4E4E7; border-radius: 20px; padding: 20px;
+        display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px;
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 24px;
+        padding: 36px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 12px; font-weight: 800; color: #4B5563; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .form-input {
+        width: 100%; background: #FFFFFF; border: 1.5px solid #E4E4E7;
+        border-radius: 12px; padding: 12px 16px; color: #111827;
+        font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: #111827; box-shadow: 0 0 20px rgba(212, 255, 0, 0.35); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .alert-success {
+        background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+        border-radius: 14px; padding: 16px 20px; color: #059669; font-size: 14px;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+</style>
+
+<div style="position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%, rgba(212,255,0,0.15) 0%, rgba(255,255,255,0) 75%);pointer-events:none;z-index:0"></div>
+
+<!-- Contact Hero -->
+<section class="contact-hero">
+    <div class="contact-tag">Get In Touch</div>
+    <h1 class="contact-title">Let's Build Something <br><span style="color:#111827;border-bottom:4px solid #D4FF00">Extraordinary Together</span></h1>
+    <p class="contact-sub">Have a custom software project in mind, need an autonomous AI agent, or want to join tech masterclasses? We'd love to connect.</p>
+</section>
+
+<div class="section">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert-success">
+        <span style="font-size:20px">🎉</span>
+        <div>{{ message }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="grid-2">
+        <!-- Contact Details Left -->
+        <div>
+            <div class="info-card">
+                <div>
+                    <h3 style="font-family:'Plus Jakarta Sans';font-size:24px;font-weight:800;margin-bottom:24px">Contact Information</h3>
+
+                    <!-- Email -->
+                    <div class="contact-item">
+                        <div class="c-icon">📧</div>
+                        <div>
+                            <div class="c-label">Official Email</div>
+                            <div class="c-val">
+                                <a href="mailto:mdsiamh77@gmail.com">mdsiamh77@gmail.com</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone / WhatsApp -->
+                    <div class="contact-item">
+                        <div class="c-icon" style="background:rgba(37,211,102,0.15);color:#25D366;border-color:rgba(37,211,102,0.3)">💬</div>
+                        <div>
+                            <div class="c-label">Phone & WhatsApp</div>
+                            <div class="c-val">
+                                <a href="https://wa.me/971566631501" target="_blank">+971 566631501</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Global Agency -->
+                    <div class="contact-item">
+                        <div class="c-icon" style="background:rgba(139,92,246,0.15);color:var(--purple);border-color:rgba(139,92,246,0.3)">🌐</div>
+                        <div>
+                            <div class="c-label">Global Offices</div>
+                            <div class="c-val">United Arab Emirates & Remote International</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Banner -->
+                <div class="whatsapp-box">
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:white;margin-bottom:2px">Instant WhatsApp Chat</div>
+                        <div style="font-size:12px;color:var(--text2)">Chat directly with our tech team on WhatsApp</div>
+                    </div>
+                    <a href="https://wa.me/971566631501" target="_blank" class="btn" style="background:#25D366;color:white;font-size:13px;padding:8px 14px;border-radius:10px;white-space:nowrap">
+                        Chat Now 💬
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form Right -->
+        <div>
+            <div class="form-card">
+                <h3 style="font-family:'Plus Jakarta Sans';font-size:24px;font-weight:800;margin-bottom:8px">Send Us A Message</h3>
+                <p style="font-size:14px;color:var(--text2);margin-bottom:24px">Fill out the form below and our team will get back to you within 2 hours.</p>
+
+                <form method="post" action="/contact/">
+                    {% csrf_token %}
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" name="name" class="form-input" placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your Email</label>
+                            <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Inquiry Subject</label>
+                        <select name="subject" class="form-input" style="cursor:pointer">
+                            <option value="Website Development">🌐 Website & Web App Development</option>
+                            <option value="Mobile App Development">📱 Mobile App Development (iOS/Android)</option>
+                            <option value="SaaS Product Building">🚀 SaaS Product Building</option>
+                            <option value="LinkedIn AI Job Agent">🤖 LinkedIn AI Job Agent Solution</option>
+                            <option value="Digital Marketing Course">📈 Digital Marketing Course Enrollment</option>
+                            <option value="Web Development Course">💻 Full-Stack Web Development Course</option>
+                            <option value="General Inquiry">💬 General Inquiry</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Message Details</label>
+                        <textarea name="message" class="form-input" rows="5" placeholder="Tell us about your project requirements, timeline, or questions..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px">
+                        Send Message 🚀
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

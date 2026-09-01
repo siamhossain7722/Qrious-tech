@@ -1,0 +1,528 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My User Profile & Subscription — Qrious Tech Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #161f33;
+            --card: #1a2235;
+            --card-hover: #1e2a40;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --cyan: #ccff00; --neon: #ccff00;
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+        }
+        body.light-theme .theme-toggle-btn { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
+        .brand-logo-dark { display: block !important; }
+        .brand-logo-light { display: none !important; }
+        body.light-theme .brand-logo-dark { display: none !important; }
+        body.light-theme .brand-logo-light { display: block !important; }
+        body.light-theme, html.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --bg3: #f1f5f9; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition: background 0.3s, color 0.3s; }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.25s; font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle-btn:hover { transform: translateY(-1px); }
+
+        /* Sidebar */
+        .sidebar { position:fixed; left:0; top:0; bottom:0; width:260px; background:#0d1322 !important; border-right:1px solid rgba(255,255,255,0.08) !important; display:flex; flex-direction:column; z-index:100; }
+        .logo { padding:28px 24px; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .logo-inner { display:flex; align-items:center; gap:12px; }
+        .logo-icon { width:40px; height:40px; background:linear-gradient(135deg,var(--blue),var(--purple)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; color:white; }
+        .logo-text { font-family:'Plus Jakarta Sans'; font-size:16px; font-weight:800; color:#ffffff !important; }
+        .logo-sub { font-size:11px; color:#64748b !important; }
+        .sidebar-nav { padding:20px 16px; flex:1; }
+        .nav-label { font-size:10px; font-weight:700; letter-spacing:0.1em; color:#64748b !important; text-transform:uppercase; padding:0 8px; margin-bottom:8px; margin-top:16px; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:#cbd5e1 !important; background:transparent !important; text-decoration:none; font-size:13.5px; font-weight:600; transition:all 0.2s; margin-bottom:4px; border:1px solid transparent; }
+        .nav-item:hover { background:rgba(255,255,255,0.08) !important; color:#ffffff !important; transform:translateX(3px); }
+        .nav-item.active { background:#2563eb !important; color:#ffffff !important; border:1px solid #3b82f6 !important; box-shadow:0 4px 15px rgba(37,99,235,0.35) !important; font-weight:700 !important; }
+        .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border); }
+        .user-pill { display:flex; align-items:center; gap:10px; padding:10px; border-radius:10px; background:var(--card); }
+        .user-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+        .user-name { font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .user-plan { font-size:11px; color:var(--text3); }
+
+        /* Main Content */
+        .main { margin-left:260px; min-height:100vh; }
+        .topbar { position:sticky; top:0; background:#0d1322 !important; border-bottom:1px solid rgba(255,255,255,0.08) !important; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; z-index:50; }
+        .page-title { font-size:20px; font-weight:800; color:#ffffff !important; }
+        .content { padding:32px; max-width:960px; margin:0 auto; }
+
+        /* Buttons */
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; font-family:'Inter',sans-serif; }
+        .btn-primary { background:linear-gradient(135deg,var(--blue),var(--purple)); color:white; box-shadow:0 4px 16px rgba(59,130,246,0.25); }
+        .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(59,130,246,0.35); }
+        .btn-outline { background:rgba(255,255,255,0.06) !important; color:#ffffff !important; border:1px solid rgba(255,255,255,0.15) !important; }
+        .btn-outline:hover { color:#ffffff !important; border-color:rgba(255,255,255,0.3) !important; background:rgba(255,255,255,0.12) !important; }
+        .btn-sm { padding:6px 14px; font-size:12px; }
+        .lang-toggle-btn { background:rgba(255,255,255,0.06) !important; color:#ffffff !important; border:1px solid rgba(255,255,255,0.15) !important; }
+
+        /* Profile Hero Header */
+        .profile-hero {
+            background: linear-gradient(135deg, var(--card), var(--bg3));
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            display: flex; align-items: center; justify-content: space-between; gap: 24px;
+            flex-wrap: wrap;
+            position: relative; overflow: hidden;
+        }
+        .profile-hero::before {
+            content: ''; position: absolute; top: -60px; right: -60px; width: 260px; height: 260px;
+            background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%);
+            pointer-events: none;
+        }
+        .hero-user-info { display: flex; align-items: center; gap: 20px; }
+        .hero-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 800; color: white;
+            box-shadow: 0 8px 24px rgba(59,130,246,0.3); border: 3px solid rgba(255,255,255,0.1);
+        }
+        .hero-details { min-width: 0; }
+        .hero-name { font-size: 24px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+        .hero-email { font-size: 14px; color: var(--text2); margin-bottom: 6px; }
+        .hero-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-pro { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+        .badge-free { background: rgba(100,116,139,0.15); color: var(--text2); border: 1px solid var(--border2); }
+        .badge-active { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+        .badge-admin { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+
+        /* Grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media(max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+        /* Cards */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 24px; }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .card-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 24px; }
+
+        /* Forms */
+        .form-group { margin-bottom: 18px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+        .form-input {
+            width: 100%; background: var(--bg2); border: 1px solid var(--border2);
+            border-radius: 10px; padding: 11px 15px; color: var(--text);
+            font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .form-input::placeholder { color: var(--text3); }
+        .form-input[disabled], .form-input[readonly] {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: rgba(255,255,255,0.06);
+            color: var(--text3);
+            cursor: not-allowed;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .readonly-note { font-size: 11px; color: var(--text3); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+
+        /* Alert */
+        .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 14px 18px; color: #6ee7b7; font-size: 14px; margin-bottom: 20px; }
+
+        /* Subscription info cards */
+        .sub-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+        .sub-box-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .sub-box-title { font-size: 13px; font-weight: 600; color: var(--text2); }
+        .sub-box-val { font-size: 15px; font-weight: 700; color: var(--text); }
+
+        /* Usage Bar */
+        .usage-bar-wrap { margin-top: 10px; }
+        .usage-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+        .usage-bar { height: 8px; background: var(--bg3); border-radius: 100px; overflow: hidden; }
+        .usage-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--purple)); border-radius: 100px; }
+        .usage-fill.danger { background: linear-gradient(90deg, var(--amber), var(--red)); }
+
+        /* Mobile Top Header & Sidebar Drawer Responsive Rules */
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: 100%;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .sidebar-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px); z-index: 999; opacity: 0; transition: opacity 0.3s;
+        }
+        .sidebar-backdrop.active { display: block; opacity: 1; }
+
+        .sidebar-close-btn { display: none; }
+        .topbar-user-controls { display: flex; align-items: center; gap: 12px; }
+
+        @media (max-width: 992px) {
+            body { display: block; }
+            .sidebar-close-btn { display: flex !important; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text2); font-size: 16px; cursor: pointer; }
+            .sidebar {
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1000; box-shadow: 0 0 50px rgba(0,0,0,0.8); width: 270px; position: fixed; top: 0; bottom: 0; left: 0;
+            }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main { margin-left: 0; min-height: 100vh; width: 100%; }
+            .mobile-top-header { display: flex; }
+            .topbar-user-controls { display: none !important; }
+            .topbar { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
+            .page-title { font-size: 20px; }
+            .content { padding: 20px 16px; width: 100%; }
+            .profile-hero { padding: 20px 16px; flex-direction: column; align-items: flex-start; gap: 16px; }
+            .hero-user-info { flex-direction: column; align-items: flex-start; gap: 14px; }
+            .form-row { grid-template-columns: 1fr; }
+            .two-col { grid-template-columns: 1fr; gap: 16px; }
+            .card-header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .card-body { padding: 16px; }
+        }
+
+        /* Stats Mini Row */
+        .stat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+        .stat-mini {
+            background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+            padding: 14px 6px; text-align: center; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .stat-mini:hover { border-color: var(--border2); transform: translateY(-2px); }
+        .stat-mini-val {
+            font-size: 22px; font-weight: 900; color: var(--cyan); line-height: 1.1;
+            font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 3px;
+        }
+        .stat-mini-lbl {
+            font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase;
+            letter-spacing: 0.05em; white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .stat-grid-mini { gap: 6px; }
+            .stat-mini { padding: 10px 4px; }
+            .stat-mini-val { font-size: 18px; }
+            .stat-mini-lbl { font-size: 9px; }
+            .btn { font-size: 13px; padding: 8px 14px; }
+            .payment-card-body { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Mobile Drawer Backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="logo" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:12px">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+        <button type="button" onclick="toggleMobileSidebar()" class="sidebar-close-btn">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+        {% if request.user.enrollments.exists %}
+        <div class="nav-label">Student Portal</div>
+        <a href="/student/dashboard/" class="nav-item">🎓 My Student Dashboard</a>
+        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal ↗</a>
+        <a href="/student/dashboard/#invoices" class="nav-item">📜 Tuition & Invoices</a>
+        <div class="nav-label">Account</div>
+        <a href="/settings/" class="nav-item active">⚙️ Profile Settings</a>
+        <a href="/student/dashboard/" class="nav-item">📊 Student Dashboard</a>
+        {% if request.user.is_superuser %}
+        <a href="/superadmin/" class="nav-item">👑 Super Admin Console</a>
+        {% endif %}
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+        {% else %}
+        <div class="nav-label">Portal</div>
+        <a href="/student/dashboard/" class="nav-item">🎓 Student Dashboard</a>
+        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal</a>
+        <div class="nav-label">Account</div>
+        <a href="/settings/" class="nav-item active">⚙️ Profile Settings</a>
+        {% if request.user.is_superuser %}
+        <a href="/superadmin/" class="nav-item">👑 Super Admin Console</a>
+        {% endif %}
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-pill">
+            <div class="user-avatar" style="overflow:hidden">
+                {% if request.user.profile.avatar %}
+                <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                {% else %}
+                {{ request.user.email|first|upper }}
+                {% endif %}
+            </div>
+            <div>
+                <div class="user-name">{{ request.user.email }}</div>
+                <div class="user-plan">{% if request.user.enrollments.exists %}Student Account{% else %}{{ subscription.plan|title }} Plan{% endif %}</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<main class="main">
+    <!-- Mobile Top Header Bar (Visible on Screens <992px) -->
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div class="logo-icon" style="width:30px;height:30px;font-size:15px">Q</div>
+                <span style="font-family:'Plus Jakarta Sans';font-weight:800;font-size:14px">Settings</span>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <div class="user-avatar" style="width:30px;height:30px;font-size:12px">
+                {% if request.user.profile.avatar %}
+                <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                {{ request.user.email|first|upper }}
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="topbar">
+        <h1 class="page-title">⚙️ User Profile & Settings</h1>
+        <div class="topbar-user-controls">
+            <button type="button" class="theme-toggle-btn lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
+                🇬🇧 English
+            </button>
+            {% if request.user.enrollments.exists %}
+            <a href="/student/dashboard/" class="btn btn-outline">← Back to Student Dashboard</a>
+            {% else %}
+            <a href="/student/dashboard/" class="btn btn-outline">← Back to Dashboard</a>
+            {% endif %}
+            <a href="/auth/password/change/" class="btn btn-primary">🔒 Change Password</a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-success"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> {{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Profile Hero Header -->
+        <div class="profile-hero">
+            <div class="hero-user-info">
+                <div class="hero-avatar" style="overflow:hidden;">
+                    {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                    {% else %}
+                    {{ request.user.email|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="hero-details">
+                    <div class="hero-name">
+                        {{ request.user.get_full_name|default:request.user.email }}
+                        {% if request.user.is_superuser %}
+                        <span class="badge badge-admin">👑 Super Admin</span>
+                        {% endif %}
+                    </div>
+                    <div class="hero-email">📧 {{ request.user.email }}</div>
+                    <div class="hero-badges">
+                        <span class="badge badge-active">
+                            <span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Active Member
+                        </span>
+                        <span style="font-size:11px;color:var(--text3);margin-left:4px">
+                            Member since {{ request.user.date_joined|date:"M Y" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a href="/auth/password/change/" class="btn btn-outline btn-sm">🔒 Change Password</a>
+            </div>
+        </div>
+
+        <!-- EDITABLE PROFILE FORM -->
+        <div class="card" style="max-width:850px;margin:0 auto">
+            <div class="card-header">
+                <div class="card-title">📝 Edit Personal Information</div>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/settings/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="remove_avatar" id="remove-avatar-input" value="false">
+
+                    <!-- Profile Picture Upload Field -->
+                    <div class="form-group" style="display:flex;align-items:center;gap:18px;margin-bottom:24px;background:var(--bg2);padding:16px;border-radius:14px;border:1px solid var(--border)">
+                        <div class="user-avatar" style="width:64px;height:64px;font-size:24px;overflow:hidden;flex-shrink:0;" id="avatar-preview-box">
+                            {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" id="avatar-preview-img" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                            {% else %}
+                            <span id="avatar-preview-initials">{{ request.user.email|first|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div style="flex:1">
+                            <div style="font-size:13px;font-weight:700;margin-bottom:4px">Profile Picture</div>
+                            <div style="font-size:11px;color:var(--text3);margin-bottom:10px">PNG, JPG, or WebP. Maximum size 5MB.</div>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                                <label for="avatar-file-input" class="btn btn-outline btn-sm" style="cursor:pointer;margin:0">
+                                    🖼️ Choose Picture
+                                </label>
+                                <input type="file" name="avatar" id="avatar-file-input" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+                                {% if profile.avatar %}
+                                <button type="button" class="btn btn-outline btn-sm" style="color:var(--red)" onclick="removeAvatar()">🗑️ Remove</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-input" value="{{ request.user.first_name }}" placeholder="e.g. Siam">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-input" value="{{ request.user.last_name }}" placeholder="e.g. Hossain">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+                            Email Address (Read-only)
+                            <span style="color:var(--amber);font-size:10px;">🔒 Locked</span>
+                        </label>
+                        <input type="email" class="form-input" value="{{ request.user.email }}" readonly disabled>
+                        <div class="readonly-note">
+                            <span>🔒 Your email address is your primary account identifier and cannot be modified.</span>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="phone" class="form-input" value="{{ profile.phone }}" placeholder="+880 1700 000000">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Company / Academy</label>
+                            <input type="text" name="company" class="form-input" value="{{ profile.company }}" placeholder="e.g. Qrious Tech Academy">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Bio / Notes</label>
+                        <textarea name="bio" class="form-input" rows="3" placeholder="Tell us about your learning goals or professional background...">{{ profile.bio }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;margin-top:8px">
+                        💾 Save Profile Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+</main>
+<script>
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!sidebar || !backdrop) return;
+    const isOpen = sidebar.classList.toggle('mobile-open');
+    if (isOpen) {
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else {
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewBox = document.getElementById('avatar-preview-box');
+            if (previewBox) {
+                previewBox.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+            }
+            const heroAvatar = document.querySelector('.hero-avatar');
+            if (heroAvatar) {
+                heroAvatar.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function removeAvatar() {
+    document.getElementById('remove-avatar-input').value = 'true';
+    const previewBox = document.getElementById('avatar-preview-box');
+    if (previewBox) {
+        previewBox.innerHTML = `<span>{{ request.user.email|first|upper }}</span>`;
+    }
+    const heroAvatar = document.querySelector('.hero-avatar');
+    if (heroAvatar) {
+        heroAvatar.innerHTML = `<span>{{ request.user.email|first|upper }}</span>`;
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme', isLight);
+    const newTheme = isLight ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleUI(newTheme);
+}
+
+function updateThemeToggleUI(theme) {
+    const btns = document.querySelectorAll('.theme-toggle-btn');
+    btns.forEach(btn => {
+        if (theme === 'light') {
+            btn.innerHTML = '☀️ Light';
+            btn.style.background = '#e2e8f0';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#cbd5e1';
+        } else {
+            btn.innerHTML = '🌙 Dark';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.style.color = '#f8fafc';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.documentElement.classList.add('light-theme');
+    }
+    updateThemeToggleUI(savedTheme);
+});
+</script>
+
+</body>
+</html>

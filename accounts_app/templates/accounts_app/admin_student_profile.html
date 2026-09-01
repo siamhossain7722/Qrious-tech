@@ -1,0 +1,442 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile & Billing — {{ student_user.get_full_name|default:student_user.email }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --bg2: #0d1222; --card: #131b2e;
+            --blue: #3b82f6; --purple: #8b5cf6; --cyan: #ccff00; --neon: #ccff00; --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+        body.light-theme, html.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { display: flex; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition: background 0.3s, color 0.3s; }
+
+        .sidebar { width: 260px; height: 100vh; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08); padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; position: fixed; top: 0; left: 0; z-index: 100; overflow-y: auto; }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 0 4px; }
+        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b !important; padding: 12px 8px 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; background: transparent !important; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08) !important; color: #ffffff !important; transform: translateX(3px); }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important; font-weight: 700 !important; }
+
+        .main { margin-left: 260px; flex: 1; min-height: 100vh; padding: 32px 40px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-size: 24px; font-weight: 900; }
+        
+        .btn-toggle-sidebar {
+            display: none; width: 38px; height: 38px; border-radius: 10px;
+            background: var(--card); border: 1px solid var(--border2); color: var(--text);
+            align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 18px;
+        }
+        .sidebar-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s;
+        }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        @media(max-width: 900px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .btn-toggle-sidebar { display: flex; }
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh;
+                background: #0d1322 !important; border-right: 1px solid var(--border);
+                padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+                z-index: 99999; overflow-y: auto;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; padding: 16px !important; flex: 1; overflow-x: hidden; }
+        }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.25s; font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle-btn:hover { transform: translateY(-1px); }
+
+        .page-header { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
+        .user-avatar { width: 64px; height: 64px; border-radius: 20px; background: linear-gradient(135deg, var(--cyan), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; color: white; }
+        
+        .student-id-pill { background: rgba(204,255,0,0.15); border: 1px solid rgba(204,255,0,0.3); color: var(--cyan); font-weight: 800; font-family: monospace; font-size: 13px; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+        .cert-id-pill { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #c084fc; font-weight: 800; font-family: monospace; font-size: 13px; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+
+        /* Metrics Financial Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        @media(max-width: 900px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+        .stat-val { font-size: 26px; font-weight: 900; margin-bottom: 4px; }
+        .stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); }
+
+        /* Card Sections */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 28px; margin-bottom: 32px; }
+        .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: end; }
+        @media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-input { width: 100%; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 14px; font-family: 'Inter'; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter'; text-decoration: none; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; }
+        .btn-cyan { background: linear-gradient(135deg, var(--cyan), var(--blue)); color: white; box-shadow: 0 4px 15px rgba(204,255,0,0.3); }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); }
+
+        .alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-radius: 14px; padding: 16px 20px; color: #fca5a5; font-size: 14px; margin-bottom: 24px; font-weight: 600; }
+        .alert-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 14px; padding: 16px 20px; color: #6ee7b7; font-size: 14px; margin-bottom: 24px; font-weight: 600; }
+
+        /* Table */
+        .table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
+        .table th { background: rgba(255,255,255,0.02); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+
+        <div class="nav-label">Master Controls</div>
+        <a href="/superadmin/" class="nav-item">📊 Dashboard & Courses</a>
+        <a href="/admin-users/" class="nav-item">👥 Users & Subscriptions</a>
+        <a href="/admin-payments/" class="nav-item">💳 Payment Verifications</a>
+        <a href="/admin-bookings/" class="nav-item">📅 Service Bookings</a>
+        <a href="/notifications/" class="nav-item">🔔 Notification Center</a>
+        <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+        <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+        <a href="/verify-certificate/" class="nav-item">🎓 Certificate Verification</a>
+
+        <div class="nav-label">Product Links</div>
+        <a href="/" class="nav-item">🌐 Main Landing Page</a>
+        <a href="/admin/" class="nav-item">🛠️ Django Admin</a>
+    </div>
+
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
+                ☰
+            </button>
+            <div>
+                <h1 class="page-title">🎓 Student Management & Billing</h1>
+                <div style="font-size:12px;color:var(--text2)">Student ID: <strong>{{ enrollment.student_id }}</strong> • Managed by Super Admin</div>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <a href="/superadmin/" class="btn btn-outline" style="font-size:12px;padding:8px 14px">← Back to Master Console</a>
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()">☀️ Theme Mode</button>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+        {% if '⛔' in message.message or '❌' in message.message or 'Error' in message.message %}
+        <div class="alert-error">{{ message }}</div>
+        {% else %}
+        <div class="alert-success">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <!-- Student Header Summary -->
+    <div class="page-header">
+        <div class="user-avatar" style="overflow:hidden">
+            {% if student_profile and student_profile.avatar %}
+            <img src="{{ student_profile.avatar.url }}" alt="{{ student_user.email }}" style="width:100%;height:100%;object-fit:cover;border-radius:20px;">
+            {% elif student_user.profile.avatar %}
+            <img src="{{ student_user.profile.avatar.url }}" alt="{{ student_user.email }}" style="width:100%;height:100%;object-fit:cover;border-radius:20px;">
+            {% else %}
+            {{ student_user.first_name|first|default:student_user.email|first|upper }}
+            {% endif %}
+        </div>
+        <div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <h1 style="font-family:'Plus Jakarta Sans';font-size:28px;font-weight:900">{{ student_user.get_full_name|default:student_user.email }}</h1>
+                <span class="student-id-badge">{{ enrollment.student_id }}</span>
+                {% if enrollment.is_completed %}
+                <a href="/certificate/{{ enrollment.certificate_id }}/" target="_blank" class="cert-id-pill" style="text-decoration:none">📜 {{ enrollment.certificate_id }} ↗</a>
+                {% endif %}
+            </div>
+            <div style="font-size:14px;color:var(--text2);margin-top:4px">
+                📧 {{ student_user.email }} • Enrolled in <strong>{{ enrollment.course_name }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Status Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--text)">৳{{ enrollment.total_fee|floatformat:2 }}</div>
+            <div class="stat-lbl">Total Tuition Fee</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--green)">৳{{ enrollment.total_paid|floatformat:2 }}</div>
+            <div class="stat-lbl">Total Paid to Date</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:{% if enrollment.due_amount > 0 %}var(--red){% else %}var(--green){% endif %}">
+                ৳{{ enrollment.due_amount|floatformat:2 }}
+            </div>
+            <div class="stat-lbl">Remaining Due Balance</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="font-size:20px;margin-top:4px">
+                {% if enrollment.payment_status == 'paid' %}
+                <span style="color:var(--green);font-size:18px">🟢 Paid in Full</span>
+                {% elif enrollment.payment_status == 'partial' %}
+                <span style="color:var(--amber);font-size:18px">🟡 Installments</span>
+                {% else %}
+                <span style="color:var(--red);font-size:18px">🔴 Unpaid</span>
+                {% endif %}
+            </div>
+            <div class="stat-lbl">Payment Status</div>
+        </div>
+    </div>
+
+    <!-- UPDATE TUITION FEE & COURSE PROGRESS FORM -->
+    <div class="card">
+        <div class="card-title">
+            <span>⚙️ Tuition Fee Setup & Completion Progress</span>
+            <span style="font-size:12px;font-weight:600;color:var(--text3)">Managed by Super Admin</span>
+        </div>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_enrollment">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Total Tuition Fee (BDT ৳)</label>
+                    <input type="number" step="0.01" name="total_fee" class="form-input" value="{{ enrollment.total_fee }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Course Progress % (0 - 100)</label>
+                    <input type="number" name="progress_percent" class="form-input" min="0" max="100" value="{{ enrollment.progress_percent }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Completion Status</label>
+                    <select name="is_completed" class="form-input" style="cursor:pointer">
+                        <option value="false" {% if not enrollment.is_completed %}selected{% endif %}>In Progress ⚡</option>
+                        <option value="true" {% if enrollment.is_completed %}selected{% endif %}>Completed (Issue Cert) 🎓</option>
+                    </select>
+                </div>
+            </div>
+
+            {% if enrollment.due_amount > 0 %}
+            <div style="font-size:12px;color:var(--amber);margin-bottom:16px;background:rgba(245,158,11,0.1);padding:10px 14px;border-radius:10px;border:1px solid rgba(245,158,11,0.25)">
+                ⚠️ <strong>Strict Rule Guard:</strong> Student currently has a remaining due balance of ৳{{ enrollment.due_amount|floatformat:2 }} BDT. The system will block course completion & certificate generation until due balance is ৳0.00 BDT.
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">Save Fee & Progress Updates</button>
+        </form>
+    </div>
+
+    <!-- RECORD INSTALLMENT PAYMENT & AUTO-SEND GMAIL INVOICE FORM -->
+    <div class="card" style="border-color:rgba(204,255,0,0.3);background:linear-gradient(135deg, var(--card), rgba(204,255,0,0.05))">
+        <div class="card-title" style="color:var(--cyan)">
+            <span>💳 Record Installment Payment & Send Gmail Invoice</span>
+            <span style="font-size:12px;color:var(--text3)">Auto-generates invoice & emails {{ student_user.email }}</span>
+        </div>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="record_payment">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Payment Amount (BDT ৳) *</label>
+                    <input type="number" step="0.01" name="amount" class="form-input" placeholder="e.g. 5000.00" value="{{ enrollment.due_amount }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Method *</label>
+                    <select name="payment_method" class="form-input" style="cursor:pointer">
+                        <option value="bKash">📱 bKash</option>
+                        <option value="Nagad">📱 Nagad</option>
+                        <option value="Bank Transfer">🏦 Bank Transfer</option>
+                        <option value="Cash">💵 Cash</option>
+                        <option value="Card">💳 Credit / Debit Card</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transaction ID / Reference (Optional)</label>
+                    <input type="text" name="transaction_ref" class="form-input" placeholder="e.g. TRX9482103">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Payment Notes (Optional)</label>
+                <input type="text" name="notes" class="form-input" placeholder="e.g. 1st Installment payment recorded by admin">
+            </div>
+
+            <button type="submit" class="btn btn-cyan">
+                💳 Record Payment & Send Gmail Invoice 🚀
+            </button>
+        </form>
+    </div>
+
+    <!-- PAYMENT HISTORY & INVOICES TABLE -->
+    <div class="card">
+        <div class="card-title">
+            <span>📜 Student Payment Receipts & Invoices</span>
+            <span style="font-size:12px;color:var(--text3)">{{ payments.count }} Transactions Recorded</span>
+        </div>
+
+        <div style="overflow-x:auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Date & Time</th>
+                        <th>Amount Paid</th>
+                        <th>Method & TrxID</th>
+                        <th>Uploaded Proof</th>
+                        <th>Status</th>
+                        <th>Admin Verification & Invoice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td><span style="font-weight:800;color:var(--cyan);font-family:monospace">{{ p.invoice_id }}</span></td>
+                        <td>{{ p.created_at|date:"F d, Y — h:i A" }}</td>
+                        <td><span style="font-weight:800;color:var(--green)">৳{{ p.amount|floatformat:2 }} BDT</span></td>
+                        <td>
+                            <div style="font-weight:600">{{ p.payment_method }}</div>
+                            <div style="font-family:monospace;font-size:11px;color:var(--text3)">{{ p.transaction_ref|default:"—" }}</div>
+                        </td>
+                        <td>
+                            {% if p.payment_proof %}
+                            <a href="{{ p.payment_proof.url }}" target="_blank" style="color:var(--cyan);font-weight:700;font-size:12px;text-decoration:none">🖼️ View Proof ↗</a>
+                            {% else %}
+                            <span style="color:var(--text3);font-size:11px">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status == 'pending' %}
+                            <span class="badge" style="background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3);font-size:11px">⏳ Pending Approval</span>
+                            {% elif p.status == 'approved' %}
+                            <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3);font-size:11px">✅ Approved</span>
+                            {% else %}
+                            <span class="badge" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);font-size:11px">❌ Declined</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status == 'pending' %}
+                            <form method="post" action="/superadmin/payment/{{ p.id }}/verify/" style="display:inline-block">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="btn btn-sm" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3);font-weight:700;padding:4px 8px;font-size:11px" onclick="return confirm('Approve payment of ৳{{ p.amount|floatformat:2 }} BDT and email official PDF invoice to student?')">
+                                    ✅ Approve & Email Invoice
+                                </button>
+                            </form>
+                            <form method="post" action="/superadmin/payment/{{ p.id }}/verify/" style="display:inline-block;margin-left:4px">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="btn btn-sm" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);font-weight:700;padding:4px 8px;font-size:11px" onclick="return confirm('Decline this payment submission?')">
+                                    ❌ Reject
+                                </button>
+                            </form>
+                            {% elif p.status == 'approved' %}
+                            <a href="/invoice/{{ p.invoice_id }}/" target="_blank" style="color:var(--cyan);font-weight:700;text-decoration:none;font-size:12px">📄 View</a>
+                            <a href="/invoice/{{ p.invoice_id }}/pdf/" style="color:var(--green);font-weight:700;text-decoration:none;font-size:12px;margin-left:8px">📥 PDF</a>
+                            {% else %}
+                            <span style="color:var(--text3);font-size:11px">Declined</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">
+                            No payment transactions recorded for this student yet. Use the form above to record payments.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar || !backdrop) return;
+    const isOpen = sidebar.classList.toggle('open');
+    if (isOpen) {
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else {
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme', isLight);
+    const newTheme = isLight ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleUI(newTheme);
+}
+
+function updateThemeToggleUI(theme) {
+    const btns = document.querySelectorAll('.theme-toggle-btn');
+    btns.forEach(btn => {
+        if (theme === 'light') {
+            btn.innerHTML = '☀️ Light';
+            btn.style.background = '#e2e8f0';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#cbd5e1';
+        } else {
+            btn.innerHTML = '🌙 Dark';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.style.color = '#f8fafc';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.documentElement.classList.add('light-theme');
+    }
+    updateThemeToggleUI(savedTheme);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Locked — Pending Tuition Due</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --bg2: #0d1222; --card: #131b2e;
+            --blue: #3b82f6; --cyan: #ccff00; --neon: #ccff00; --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --text: #f8fafc; --text2: #cbd5e1; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
+
+        .lock-card {
+            background: var(--card); border: 1px solid rgba(245,158,11,0.3); border-radius: 24px; padding: 40px 32px;
+            max-width: 580px; width: 100%; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+        }
+        .lock-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, var(--amber), var(--red));
+        }
+        .lock-icon {
+            width: 72px; height: 72px; border-radius: 20px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3);
+            color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px;
+        }
+        .lock-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 900; color: #ffffff; margin-bottom: 10px; }
+        .lock-msg { font-size: 14.5px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
+
+        .fee-breakdown {
+            background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 20px; margin-bottom: 28px; text-align: left;
+        }
+        .fee-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .fee-row:last-child { border-bottom: none; }
+        .fee-lbl { color: var(--text3); font-weight: 500; }
+        .fee-val { font-weight: 700; color: var(--text); }
+        .fee-val.due { color: var(--amber); font-size: 16px; font-weight: 900; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; width: 100%; margin-bottom: 10px; }
+        .btn-amber { background: linear-gradient(135deg, var(--amber), #d97706); color: white; box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body>
+
+<div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <h1 class="lock-title">Certificate Access Locked</h1>
+    <p class="lock-msg">
+        Congratulations on completing <strong>100% of your course video lectures</strong>! 🎉<br>
+        However, your official Verified Graduation Certificate cannot be viewed or downloaded because you have an <strong>outstanding tuition balance</strong>.
+    </p>
+
+    <div class="fee-breakdown">
+        <div class="fee-row">
+            <span class="fee-lbl">📚 Student ID & Name</span>
+            <span class="fee-val">{{ enrollment.user.get_full_name|default:enrollment.user.email }} ({{ enrollment.student_id }})</span>
+        </div>
+        <div class="fee-row">
+            <span class="fee-lbl">🎥 Video Course Progress</span>
+            <span class="fee-val" style="color:var(--green)">100% Completed <span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></span>
+        </div>
+        <div class="fee-row">
+            <span class="fee-lbl">💰 Total Negotiated Course Fee</span>
+            <span class="fee-val">৳{{ enrollment.total_fee|floatformat:2 }} BDT</span>
+        </div>
+        <div class="fee-row">
+            <span class="fee-lbl">💳 Total Paid Amount</span>
+            <span class="fee-val" style="color:var(--cyan)">৳{{ enrollment.total_paid|floatformat:2 }} BDT</span>
+        </div>
+        <div class="fee-row">
+            <span class="fee-lbl">⚠️ Outstanding Tuition Balance</span>
+            <span class="fee-val due">৳{{ locked_due|floatformat:2 }} BDT Due</span>
+        </div>
+    </div>
+
+    <a href="https://wa.me/971566631501?text=Hi%20Siam,%20I%20completed%20100%25%20of%20my%20course%20and%20want%20to%20clear%20my%20due%20amount%20to%20unlock%20my%20certificate." target="_blank" class="btn btn-amber">
+        💬 Contact Support to Clear Due & Unlock Certificate ↗
+    </a>
+    <a href="/student/dashboard/#invoices" class="btn btn-outline">
+        📜 View Tuition Invoices & Payment History
+    </a>
+    <a href="/student/dashboard/" class="btn btn-outline" style="border:none;color:var(--text3)">
+        ← Back to Student Dashboard
+    </a>
+</div>
+
+</body>
+</html>

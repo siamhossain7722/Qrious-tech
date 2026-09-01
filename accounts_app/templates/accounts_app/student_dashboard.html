@@ -1,0 +1,798 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal — Qrious Tech Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@1,600;1,800&family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19; --bg2: #111827; --card: #1f2937; --card-hover: #374151;
+            --brand-lime: #ccff00; --brand-dark: #111827;
+            --blue: #2563eb; --purple: #7c3aed; --cyan: #0284c7; --neon: #ccff00; --green: #059669; --amber: #d97706; --red: #dc2626;
+            --text: #f9fafb; --text2: #e5e7eb; --text3: #9ca3af;
+            --border: #374151; --border2: #4b5563;
+        }
+        body.light-theme, html.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+        body.light-theme .nav-item { color: #cbd5e1 !important; }
+        body.light-theme .nav-item:hover { color: #ffffff !important; background: rgba(255,255,255,0.08) !important; }
+        body.light-theme .nav-item.active { background: #2563eb !important; color: #ffffff !important; border-color: #3b82f6 !important; font-weight: 800 !important; }
+        body.light-theme .theme-toggle-btn { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
+        body.light-theme .btn-outline { color: #0f172a; border-color: #cbd5e1; }
+        body.light-theme .user-pill { background: #ffffff; border-color: #e2e8f0; }
+        body.light-theme .module-title { color: #0f172a; font-weight: 800; }
+        body.light-theme .module-desc { color: #334155; font-weight: 500; }
+        body.light-theme .module-item { background: #ffffff; border-color: #e2e8f0; }
+        body.light-theme .module-num { background: #e0f2fe; color: #0284c7; }
+        body.light-theme .stat-card { background: #ffffff; border-color: #e2e8f0; }
+        body.light-theme .stat-lbl { color: #334155; font-weight: 800; }
+        body.light-theme .card { background: #ffffff; border-color: #e2e8f0; }
+        body.light-theme .card-title { color: #0f172a; }
+        body.light-theme .page-title { color: #0f172a; }
+        body.light-theme .table th { color: #475569; background: #f8fafc; font-weight: 700; }
+        body.light-theme .table td { color: #0f172a; font-weight: 500; border-bottom-color: #e2e8f0; }
+        body.light-theme .student-id-badge { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+
+        .live-class-section { background: #FFFFFF; border: 1.5px solid #E2E8F0; border-top: 4px solid #7C3AED; }
+        body.dark-theme .live-class-section { background: rgba(15, 23, 42, 0.92) !important; border-color: rgba(124, 58, 237, 0.4) !important; }
+        body.dark-theme .live-session-item { background: rgba(30, 41, 59, 0.8) !important; border-color: rgba(124, 58, 237, 0.3) !important; }
+        body.dark-theme .live-title-text { color: #FFFFFF !important; }
+        body.dark-theme .live-sub-text { color: #CBD5E1 !important; }
+
+        .brand-logo-dark { display: block !important; }
+        .brand-logo-light { display: none !important; }
+        body.light-theme .brand-logo-dark { display: none !important; }
+        body.light-theme .brand-logo-light { display: block !important; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; transition: background 0.3s, color 0.3s; }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.25s; font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle-btn:hover { transform: translateY(-1px); }
+
+        /* Left Sidebar Layout */
+        .sidebar { width: 260px; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 0 8px; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--cyan), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: white; }
+        .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #ffffff !important; }
+
+        .nav-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b !important; margin: 16px 8px 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; background: transparent !important; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08) !important; color: #ffffff !important; transform: translateX(3px); }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important; font-weight: 700 !important; }
+
+        /* Main Content Layout */
+        .main { margin-left: 260px; flex: 1; min-height: 100vh; overflow-y: auto; padding: 32px 40px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; }
+
+        .user-pill { display: flex; align-items: center; gap: 12px; background: var(--card); padding: 8px 16px; border-radius: 30px; border: 1px solid var(--border); }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: white; overflow: hidden; }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s; border: none; font-family: 'Inter'; }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); }
+        .btn-green { background: #059669; color: white; font-weight:700; box-shadow: 0 4px 15px rgba(5,150,105,0.3); }
+        .btn-green:hover { transform: translateY(-1px); background: #047857; }
+        .btn-cyan { background: #0284c7; color: white; font-weight:700; }
+        .btn-cyan:hover { background: #0369a1; }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(2,132,199,0.1), rgba(124,58,237,0.1));
+            border: 1px solid var(--border2); border-radius: 24px; padding: 32px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+            margin-bottom: 32px;
+        }
+        .student-id-badge {
+            background: rgba(2,132,199,0.15); border: 1px solid rgba(2,132,199,0.3);
+            color: #0284c7; font-weight: 900; font-family: monospace; font-size: 13px;
+            padding: 5px 12px; border-radius: 20px; display: inline-block; margin-bottom: 8px;
+        }
+        body.light-theme .student-id-badge { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+
+        /* 4-Column Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        @media(max-width: 1000px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+        .stat-val { font-size: 26px; font-weight: 900; margin-bottom: 4px; }
+        .stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); }
+
+        /* Cards & Containers */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 28px; margin-bottom: 32px; }
+        .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+        /* Progress Bar */
+        .progress-bar-wrap { width: 100%; height: 12px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; margin: 12px 0 16px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #0284c7, #059669); border-radius: 100px; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        /* Curriculum Grid */
+        .modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        @media(max-width: 800px) { .modules-grid { grid-template-columns: 1fr; } }
+
+        .module-item {
+            background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; display: flex; align-items: flex-start; gap: 14px; transition: all 0.2s;
+        }
+        .module-item:hover { border-color: var(--border2); transform: translateY(-2px); }
+        .module-num { width: 34px; height: 34px; border-radius: 10px; background: #e0f2fe; color: #0284c7; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .module-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .module-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+        /* Table */
+        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; min-width: 550px; }
+        .table th { background: rgba(255,255,255,0.02); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+        /* Mobile Top Header & Sidebar Drawer Responsive Rules */
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .sidebar-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px); z-index: 999; opacity: 0; transition: opacity 0.3s;
+        }
+        .sidebar-backdrop.active { display: block; opacity: 1; }
+
+        .tuition-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .sidebar-close-btn { display: none; }
+        .topbar-user-controls { display: flex; align-items: center; gap: 14px; }
+
+        @media (max-width: 992px) {
+            body { display: block; }
+            .sidebar-close-btn { display: flex !important; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text2); font-size: 16px; cursor: pointer; }
+            .sidebar {
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1000; box-shadow: 0 0 50px rgba(0,0,0,0.8); width: 270px; position: fixed; top: 0; bottom: 0; left: 0;
+            }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 20px 16px; width: 100%; min-height: 100vh; }
+            .mobile-top-header { display: flex; }
+            .topbar-user-controls { display: none !important; }
+            .topbar { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+            .page-title { font-size: 22px; }
+            .hero-banner { padding: 24px 18px; }
+            .hero-banner h2 { font-size: 22px; }
+            .card { padding: 20px 16px; border-radius: 18px; }
+            .tuition-grid { grid-template-columns: 1fr; gap: 12px; }
+        }
+
+        /* Payment Cards for Mobile View */
+        .mobile-payment-cards { display: none; flex-direction: column; gap: 14px; }
+        .payment-card-mobile {
+            background: var(--bg2); border: 1px solid var(--border); border-radius: 18px; padding: 18px;
+            transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .payment-card-mobile:hover { border-color: var(--border2); }
+        .payment-card-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+        .payment-invoice-id { font-weight: 800; color: #2563eb; font-family: monospace; font-size: 14px; }
+        .payment-amount-paid { font-weight: 900; color: #059669; font-size: 16px; }
+
+        .payment-card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .payment-detail-item { display: flex; flex-direction: column; gap: 3px; }
+        .payment-detail-lbl { font-size: 11px; font-weight: 700; color: var(--text3); }
+        .payment-detail-val { font-size: 13px; color: var(--text2); }
+
+        .payment-card-actions { display: flex; align-items: center; gap: 10px; }
+
+        @media (max-width: 768px) {
+            .desktop-payment-table { display: none !important; }
+            .mobile-payment-cards { display: flex !important; }
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+            .modules-grid { grid-template-columns: 1fr; }
+            .user-pill { padding: 6px 12px; }
+            .btn { font-size: 12.5px; padding: 8px 14px; }
+            .payment-card-body { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Mobile Drawer Backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
+<!-- Left Sidebar Navigation -->
+<aside class="sidebar">
+    <div>
+        <div class="logo" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(2,132,199,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#38bdf8;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+            </div>
+            <button type="button" onclick="toggleMobileSidebar()" class="sidebar-close-btn">✕</button>
+        </div>
+
+        <div class="nav-label">Student Menu</div>
+        <a href="#overview" class="nav-item active" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Overview & Progress</a>
+        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal</a>
+        {% if upcoming_live_classes %}
+        <a href="#live-classes" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()" style="color:#a855f7 !important;background:rgba(168,85,247,0.1) !important;border:1px solid rgba(168,85,247,0.25) !important;">🎥 Live Classes <span style="font-size:11px;background:#a855f7;color:#fff;border-radius:10px;padding:1px 7px;margin-left:6px">{{ upcoming_live_classes|length }}</span></a>
+        {% else %}
+        <a href="#live-classes" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎥 Live Class Sessions</a>
+        {% endif %}
+        <a href="#invoices" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📜 Tuition & Invoices</a>
+        <a href="#curriculum" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Course Curriculum</a>
+        <a href="#certificate" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Verified Certificate</a>
+
+        <div class="nav-label">Services & Profile</div>
+        <a href="/notifications/" class="nav-item">🔔 Notification Hub</a>
+        <a href="/settings/" class="nav-item">⚙️ Profile Settings</a>
+        {% if request.user.is_superuser %}
+        <a href="/superadmin/" class="nav-item">👑 Super Admin Console</a>
+        {% endif %}
+    </div>
+
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<!-- Main Dashboard Body -->
+<main class="main">
+    <!-- Mobile Top Header Bar (Visible on Screens <992px) -->
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div class="logo-icon" style="width:30px;height:30px;font-size:15px">Q</div>
+                <span style="font-family:'Plus Jakarta Sans';font-weight:800;font-size:14px">Student Portal</span>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <div class="user-avatar" style="width:30px;height:30px;font-size:12px">
+                {% if request.user.profile.avatar %}
+                <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                {{ request.user.email|first|upper }}
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    {% for e in enrollments %}
+    <!-- Topbar Header -->
+    <div class="topbar">
+        <div>
+            <h1 class="page-title">🎓 Student Learning Dashboard</h1>
+            <div style="font-size:13px;color:var(--text2);margin-top:2px">Welcome back, {{ request.user.get_full_name|default:request.user.email }}</div>
+        </div>
+
+        <div class="topbar-user-controls">
+            {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme">
+                🌙 Dark
+            </button>
+            <button type="button" class="theme-toggle-btn lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
+                🇬🇧 English
+            </button>
+            <div class="user-pill">
+                <div class="user-avatar">
+                    {% if request.user.profile.avatar %}
+                    <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                    {% else %}
+                    {{ request.user.email|first|upper }}
+                    {% endif %}
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:700">{{ request.user.get_full_name|default:request.user.email }}</div>
+                    <div style="font-size:11px;color:#0284c7;font-family:monospace;font-weight:700">{{ e.student_id }}</div>
+                </div>
+            </div>
+            <a href="/settings/" class="btn btn-outline">⚙️ Settings</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div style="margin-bottom:24px">
+            {% for message in messages %}
+                <div style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;padding:14px 18px;border-radius:14px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
+                    <span>{{ message }}</span>
+                    <button type="button" onclick="this.parentElement.remove()" style="background:transparent;border:none;color:#6ee7b7;cursor:pointer;font-size:16px">✕</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- SECTION 1: HERO BANNER -->
+    <div class="hero-banner" id="overview">
+        <div>
+            <span class="student-id-badge">🆔 STUDENT ID: {{ e.student_id }}</span>
+            <h2 style="font-family:'Plus Jakarta Sans';font-size:26px;font-weight:900;margin-bottom:6px">
+                {{ e.course_name }}
+            </h2>
+            <p style="font-size:14.5px;color:var(--text2)">
+                Track your real-time learning progress, view payment receipts & invoices, and download verified certificates.
+            </p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+            <a href="/student/classroom/" class="btn btn-cyan" style="padding:12px 20px">
+                ▶ Start / Resume Learning Portal
+            </a>
+            {% if e.is_completed %}
+            <a href="/certificate/{{ e.certificate_id }}/" target="_blank" class="btn btn-green" style="padding:12px 20px">
+                🎓 View Verified Certificate →
+            </a>
+            {% else %}
+            <a href="https://wa.me/971566631501" target="_blank" class="btn btn-outline" style="padding:12px 20px">
+                💬 Contact Mentor Support
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SECTION 2: 4-COLUMN QUICK STATS GRID -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-val" style="color:#0284c7;font-weight:900">{{ e.progress_percent }}%</div>
+            <div class="stat-lbl">Course Progress Rate</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:#059669;font-weight:900">৳{{ e.total_paid|floatformat:2 }}</div>
+            <div class="stat-lbl">Tuition Paid to Date</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:{% if e.due_amount > 0 %}#dc2626{% else %}#059669{% endif %};font-weight:900">
+                ৳{{ e.due_amount|floatformat:2 }}
+            </div>
+            <div class="stat-lbl">Remaining Due Balance</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="font-size:20px;margin-top:4px">
+                {% if e.is_completed %}
+                <span style="color:#059669;font-weight:800">Completed 🎓</span>
+                {% else %}
+                <span style="color:#b45309;font-weight:800">Active Learning ⚡</span>
+                {% endif %}
+            </div>
+            <div class="stat-lbl">Certificate Status</div>
+        </div>
+    </div>
+
+    <!-- SECTION: UPCOMING LIVE CLASS SESSIONS -->
+    {% if upcoming_live_classes %}
+    <div class="card live-class-section" id="live-classes">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <span style="font-size:18px;font-weight:800;color:var(--text)">🎥 Upcoming Live Class Sessions</span>
+            <span style="font-size:12px;font-weight:800;color:#7c3aed;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);padding:5px 14px;border-radius:20px;">
+                {{ upcoming_live_classes|length }} Scheduled
+            </span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+            {% for lc in upcoming_live_classes %}
+            <div class="live-session-item" style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:18px;padding:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;transition:all 0.25s;box-shadow:0 4px 15px rgba(0,0,0,0.02)">
+                <div style="display:flex;align-items:center;gap:16px">
+                    <!-- Animated LIVE Pulse Icon -->
+                    <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:22px;color:#ffffff;flex-shrink:0;box-shadow:0 8px 20px rgba(124,58,237,0.3)">
+                        🎥
+                    </div>
+                    <div>
+                        <div style="font-size:16.5px;font-weight:800;color:#111827;margin-bottom:6px" class="live-title-text">{{ lc.title }}</div>
+                        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                            <span style="font-size:13px;color:#7c3aed;font-weight:800">📅 {{ lc.scheduled_at|date:"D, M d, Y" }} at {{ lc.scheduled_at|date:"h:i A" }}</span>
+                            <span style="font-size:12.5px;color:#4B5563;font-weight:600" class="live-sub-text">⏱️ {{ lc.duration }}</span>
+                            <span style="font-size:12.5px;color:#4B5563;font-weight:600" class="live-sub-text">👨‍🏫 {{ lc.instructor_name }}</span>
+                        </div>
+                        {% if lc.agenda %}
+                        <div style="margin-top:6px;font-size:12.5px;color:#6B7280;font-style:italic;max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" class="live-sub-text">📌 {{ lc.agenda|truncatechars:90 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{{ lc.meeting_link }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#ffffff;text-decoration:none;font-size:14px;font-weight:800;box-shadow:0 6px 18px rgba(124,58,237,0.35);white-space:nowrap;transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 25px rgba(124,58,237,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(124,58,237,0.35)'">
+                    📹 Join Live Class ↗
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- SECTION 3: TUITION & INVOICES BOX -->
+    <div class="card" id="invoices">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <span>📜 Tuition Fees & Payment Receipts</span>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <button type="button" class="btn btn-cyan btn-sm" onclick="openUploadPaymentModal()" style="font-weight:800;padding:8px 16px;background:#0284c7;color:#ffffff;border:none">
+                    💳 Submit Payment Proof ↗
+                </button>
+                <span style="font-size:12px;font-weight:700">
+                    Payment Status: {% if e.payment_status == 'paid' %}<span style="color:#059669;font-weight:800">🟢 Paid in Full</span>{% elif e.payment_status == 'partial' %}<span style="color:#b45309;font-weight:800">🟡 Installments</span>{% else %}<span style="color:#dc2626;font-weight:800">🔴 Unpaid</span>{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="tuition-grid">
+            <div style="background:var(--bg2);padding:16px;border-radius:14px;border:1px solid var(--border)">
+                <div style="font-size:11px;color:var(--text3);font-weight:700">TOTAL TUITION FEE</div>
+                <div style="font-size:22px;font-weight:900;color:var(--text);margin-top:2px">৳{{ e.total_fee|floatformat:2 }} BDT</div>
+            </div>
+            <div style="background:var(--bg2);padding:16px;border-radius:14px;border:1px solid var(--border)">
+                <div style="font-size:11px;color:var(--text3);font-weight:700">VERIFIED AMOUNT PAID</div>
+                <div style="font-size:22px;font-weight:900;color:#059669;margin-top:2px">৳{{ e.total_paid|floatformat:2 }} BDT</div>
+            </div>
+            <div style="background:var(--bg2);padding:16px;border-radius:14px;border:1px solid var(--border)">
+                <div style="font-size:11px;color:var(--text3);font-weight:700">REMAINING DUE BALANCE</div>
+                <div style="font-size:22px;font-weight:900;color:{% if e.due_amount > 0 %}#dc2626{% else %}#059669{% endif %};margin-top:2px">৳{{ e.due_amount|floatformat:2 }} BDT</div>
+            </div>
+        </div>
+
+        {% if e.payments.all %}
+        <!-- Desktop Table View -->
+        <div class="table-wrap desktop-payment-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="color:#475569;font-weight:700">Invoice ID</th>
+                        <th style="color:#475569;font-weight:700">Payment Date</th>
+                        <th style="color:#475569;font-weight:700">Amount Paid</th>
+                        <th style="color:#475569;font-weight:700">Method & TrxID</th>
+                        <th style="color:#475569;font-weight:700">Verification Status</th>
+                        <th style="color:#475569;font-weight:700">Proof Receipt</th>
+                        <th style="color:#475569;font-weight:700">Official Invoice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in e.payments.all %}
+                    <tr>
+                        <td><span style="font-weight:800;color:#2563eb;font-family:monospace">{{ p.invoice_id }}</span></td>
+                        <td style="color:var(--text);font-weight:600">{{ p.created_at|date:"M d, Y — h:i A" }}</td>
+                        <td><span style="font-weight:900;color:#059669">৳{{ p.amount|floatformat:2 }} BDT</span></td>
+                        <td>
+                            <div style="font-weight:700;color:var(--text)">{{ p.payment_method }}</div>
+                            <div style="font-family:monospace;font-size:11px;color:#0284c7;font-weight:700">{{ p.transaction_ref|default:"—" }}</div>
+                        </td>
+                        <td>
+                            {% if p.status == 'pending' %}
+                            <span class="badge" style="background:#fffbebf0;color:#b45309;border:1px solid #fde68a;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">⏳ Pending Approval</span>
+                            {% elif p.status == 'approved' %}
+                            <span class="badge" style="background:#ecfdf5f0;color:#047857;border:1px solid #a7f3d0;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">✅ Verified</span>
+                            {% else %}
+                            <span class="badge" style="background:#fef2f2f0;color:#b91c1c;border:1px solid #fecaca;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">❌ Declined</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.payment_proof %}
+                            <a href="{{ p.payment_proof.url }}" target="_blank" style="color:#0284c7;font-weight:800;font-size:12px;text-decoration:none">🖼️ View Proof ↗</a>
+                            {% else %}
+                            <span style="color:var(--text3);font-size:11px">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status == 'approved' %}
+                            <a href="/invoice/{{ p.invoice_id }}/" target="_blank" style="color:#2563eb;font-weight:800;text-decoration:none;font-size:12.5px">📄 View</a>
+                            <a href="/invoice/{{ p.invoice_id }}/pdf/" style="color:#059669;font-weight:800;text-decoration:none;font-size:12.5px;margin-left:10px">📥 Download PDF</a>
+                            {% else %}
+                            <span style="font-size:11px;color:var(--text3);font-weight:600">Emailed upon approval</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Sleek Cards View -->
+        <div class="mobile-payment-cards">
+            {% for p in e.payments.all %}
+            <div class="payment-card-mobile">
+                <div class="payment-card-header">
+                    <div>
+                        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">INVOICE ID</div>
+                        <span class="payment-invoice-id" style="font-weight:800;color:#2563eb;font-family:monospace">{{ p.invoice_id }}</span>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">AMOUNT PAID</div>
+                        <span class="payment-amount-paid" style="font-weight:900;color:#059669">৳{{ p.amount|floatformat:2 }} BDT</span>
+                    </div>
+                </div>
+
+                <div class="payment-card-body">
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">📅 Date & Time</span>
+                        <span class="payment-detail-val" style="color:var(--text);font-weight:600">{{ p.created_at|date:"M d, Y • h:i A" }}</span>
+                    </div>
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">💳 Payment Method</span>
+                        <span class="payment-detail-val" style="font-weight:700;color:var(--text)">{{ p.payment_method }}</span>
+                    </div>
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">⚡ Status</span>
+                        <span class="payment-detail-val">
+                            {% if p.status == 'pending' %}
+                            <span style="color:#b45309;font-weight:800">⏳ Pending Verification</span>
+                            {% elif p.status == 'approved' %}
+                            <span style="color:#047857;font-weight:800">✅ Verified</span>
+                            {% else %}
+                            <span style="color:#b91c1c;font-weight:800">❌ Declined</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if p.transaction_ref %}
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">🔖 Ref Transaction ID</span>
+                        <span class="payment-detail-val" style="font-family:monospace;color:#0284c7;font-weight:800">{{ p.transaction_ref }}</span>
+                    </div>
+                    {% endif %}
+                    {% if p.payment_proof %}
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">🖼️ Payment Proof</span>
+                        <span class="payment-detail-val"><a href="{{ p.payment_proof.url }}" target="_blank" style="color:#0284c7;font-weight:800">View File ↗</a></span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="payment-card-actions">
+                    {% if p.status == 'approved' %}
+                    <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="flex:1;justify-content:center;font-size:12.5px;padding:9px;color:#2563eb;font-weight:800">📄 View Invoice</a>
+                    <a href="/invoice/{{ p.invoice_id }}/pdf/" class="btn btn-cyan" style="flex:1;justify-content:center;font-size:12.5px;padding:9px;color:#059669;font-weight:800">📥 Download PDF</a>
+                    {% else %}
+                    <div style="font-size:12px;color:var(--text3);text-align:center;width:100%;padding:6px;font-weight:600">Verification Pending by Super Admin</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="font-size:13.5px;color:var(--text3);text-align:center;padding:28px;background:var(--bg2);border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div>No payment transactions submitted yet.</div>
+            <button type="button" class="btn btn-cyan btn-sm" onclick="openUploadPaymentModal()" style="font-weight:800;background:#0284c7;color:#ffffff">
+                💳 Upload Payment Proof & Submit Installment ↗
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- SECTION 4: 13-MODULE CURRICULUM ROADMAP -->
+    <div class="card" id="curriculum">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <span>📚 Course Curriculum Roadmap & Recorded Classes</span>
+            <a href="/student/classroom/" class="btn btn-cyan btn-sm">▶ Access Recorded Classes ↗</a>
+        </div>
+
+        <div class="modules-grid">
+            {% for m in dm_modules %}
+            <div class="module-item">
+                <div class="module-num">{{ m.num }}</div>
+                <div>
+                    <div class="module-title">{{ m.icon }} {{ m.title }}</div>
+                    <div class="module-desc">{{ m.desc }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- SECTION 5: VERIFIED CERTIFICATE CARD -->
+    <div class="card" id="certificate">
+        <div class="card-title">
+            <span>🎓 Verified Graduation Certificate</span>
+            <span style="font-size:12px;color:var(--text3)">Authentic QR Code Registry</span>
+        </div>
+
+        {% if e.is_completed %}
+            {% if e.due_amount > 0 %}
+            <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:18px;padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+                <div>
+                    <div style="font-size:18px;font-weight:900;color:var(--amber)">🔒 Certificate Locked — Outstanding Tuition Balance</div>
+                    <div style="font-size:13.5px;color:var(--text2);margin-top:4px">You have completed 100% of your course video lectures! Settle your remaining tuition balance (<strong>৳{{ e.due_amount|floatformat:2 }} BDT due</strong>) to view & download your verified certificate.</div>
+                </div>
+                <a href="https://wa.me/971566631501?text=Hi%20Siam,%20I%20completed%20100%25%20of%20my%20course%20and%20want%20to%20clear%20my%20due%20amount%20to%20unlock%20my%20certificate." target="_blank" class="btn btn-amber" style="padding:14px 24px;font-size:14.5px">
+                    💳 Settle Due Payment to Unlock ↗
+                </a>
+            </div>
+            {% else %}
+            <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:18px;padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+                <div>
+                    <div style="font-size:18px;font-weight:900;color:var(--text)">🎉 Congratulations! Your Certificate of Completion is Issued</div>
+                    <div style="font-size:13.5px;color:var(--text2);margin-top:4px">Certificate ID: <strong>{{ e.certificate_id }}</strong> • Scannable QR Code Included</div>
+                </div>
+                <a href="/certificate/{{ e.certificate_id }}/" target="_blank" class="btn btn-green" style="padding:14px 24px;font-size:14.5px">
+                    🎓 View & Print Certificate →
+                </a>
+            </div>
+            {% endif %}
+        {% else %}
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:24px">
+            <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">⚡ Certificate Status: In Progress</div>
+            <div style="font-size:13.5px;color:var(--text2);line-height:1.6">
+                Your official graduation certificate will unlock automatically once your course completion reaches 100% and your tuition balance (৳{{ e.due_amount|floatformat:2 }} BDT remaining) is fully settled.
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- SAMPLE CERTIFICATE PREVIEW CARD -->
+        <div style="background:radial-gradient(circle at center, #ffffff 60%, #fffbeb 100%);border:4px double #d97706;border-radius:18px;padding:32px 24px;color:#0f172a;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,0.1);position:relative;overflow:hidden;margin-top:20px">
+            
+            <!-- WATERMARK: SAMPLE OF CERTIFICATE -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);font-size:clamp(28px, 5.5vw, 64px);font-family:'Cinzel',serif;font-weight:900;color:rgba(217,119,6,0.12);letter-spacing:0.12em;text-transform:uppercase;pointer-events:none;user-select:none;white-space:nowrap;z-index:1">
+                SAMPLE OF CERTIFICATE
+            </div>
+
+            <div style="position:relative;z-index:2">
+                <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px">
+                    <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain">
+                    <div style="font-family:'Cinzel',serif;font-weight:800;font-size:18px;color:#0f172a;letter-spacing:0.05em">Qrious Tech Academy</div>
+                </div>
+
+                <div style="font-family:'Cinzel',serif;font-size:clamp(20px, 4vw, 30px);font-weight:900;color:#0f172a;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px">
+                    Certificate of Completion
+                </div>
+
+                <div style="font-size:12px;color:#64748b;font-style:italic;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">This is to certify that</div>
+
+                <div style="font-family:'Playfair Display',serif;font-size:clamp(22px, 5vw, 34px);font-weight:800;color:#1e3a8a;font-style:italic;margin-bottom:16px;border-bottom:2px solid #cbd5e1;display:inline-block;padding:0 24px 4px">
+                    {{ request.user.get_full_name|default:request.user.email }}
+                </div>
+
+                <div style="font-size:13.5px;color:#334155;line-height:1.6;max-width:640px;margin:0 auto 20px">
+                    has successfully fulfilled all curriculum requirements, practical assignments, and final capstone challenges for the professional masterclass:
+                    <div style="font-family:'Cinzel',serif;font-size:clamp(16px, 3.5vw, 20px);font-weight:900;color:#b45309;margin-top:6px;text-transform:uppercase">{{ e.course_name }}</div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:16px;margin-top:16px;flex-wrap:wrap;gap:12px">
+                    <div style="text-align:left">
+                        <div style="font-size:10px;color:#64748b;font-weight:700">CERTIFICATE ID (SAMPLE)</div>
+                        <div style="font-family:monospace;font-size:13px;font-weight:800;color:#b45309">QS-CERT-SAMPLE-{{ e.student_id|slice:"7:" }}</div>
+                    </div>
+                    <div style="text-align:center">
+                        <div style="font-family:'Playfair Display',serif;font-size:18px;color:#1e3a8a;font-style:italic">Siam Hossain</div>
+                        <div style="width:120px;height:1px;background:#0f172a;margin:2px auto 4px"></div>
+                        <div style="font-size:11px;font-weight:700;color:#0f172a">Siam Hossain</div>
+                        <div style="font-size:9.5px;color:#64748b">Lead Technical Instructor</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:10px;color:#64748b;font-weight:700">VERIFICATION</div>
+                        <div style="font-size:11.5px;color:#16a34a;font-weight:800">✅ Authentic Registry</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="hero-banner" style="text-align:center;justify-content:center;flex-direction:column;padding:60px">
+        <div style="font-size:56px;margin-bottom:16px">🎓</div>
+        <h2 style="font-family:'Plus Jakarta Sans';font-size:24px;font-weight:800;margin-bottom:8px">No Enrolled Courses Found</h2>
+        <p style="font-size:14px;color:var(--text2);max-width:500px;margin-bottom:24px">You are logged in as a student, but no active course enrollments were found under your account. Please contact Qrious Tech Academy support to enroll.</p>
+        <a href="/courses/" class="btn btn-outline">Explore Qrious Tech Academy Courses →</a>
+    </div>
+    {% endfor %}
+</main>
+
+<!-- UPLOAD PAYMENT PROOF MODAL -->
+<div class="modal-overlay" id="uploadPaymentModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;max-width:520px;width:100%;padding:28px;box-shadow:0 25px 50px rgba(0,0,0,0.5);color:var(--text)">
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:20px">
+            <div style="font-size:18px;font-weight:900;color:var(--text)">💳 Submit Payment Details</div>
+            <button type="button" onclick="closeUploadPaymentModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+        </div>
+
+        <form method="POST" action="/student/upload-payment/" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom:14px">
+                <label class="form-label" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Amount Paid (BDT) *</label>
+                <input type="number" step="0.01" name="amount" class="form-input" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:15px;font-weight:700" placeholder="e.g. 5000" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px">
+                <label class="form-label" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Payment Method *</label>
+                <select name="payment_method" class="form-input" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text)" required>
+                    <option value="bKash">bKash Personal / Merchant</option>
+                    <option value="Nagad">Nagad Personal / Merchant</option>
+                    <option value="Rocket">Rocket</option>
+                    <option value="Bank Transfer">Direct Bank Transfer</option>
+                    <option value="Cash / Manual">Cash Payment</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px">
+                <label class="form-label" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Transaction Reference ID / Sender Number *</label>
+                <input type="text" name="transaction_ref" class="form-input" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:monospace" placeholder="e.g. TRX98273614 / 017XXXXXXXX" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px">
+                <label class="form-label" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Upload Payment Receipt / Screenshot (Optional)</label>
+                <input type="file" name="payment_proof" accept="image/*,.pdf" class="form-input" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text)">
+            </div>
+
+            <div class="form-group" style="margin-bottom:20px">
+                <label class="form-label" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Notes / Remarks (Optional)</label>
+                <textarea name="notes" class="form-input" rows="2" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text)" placeholder="e.g. Sent 2nd installment for Digital Marketing masterclass."></textarea>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <button type="button" class="btn btn-outline" onclick="closeUploadPaymentModal()" style="padding:10px 20px">Cancel</button>
+                <button type="submit" class="btn btn-cyan" style="font-weight:800;padding:10px 20px">
+                    📤 Submit Payment for Verification
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openUploadPaymentModal() {
+    const modal = document.getElementById('uploadPaymentModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeUploadPaymentModal() {
+    const modal = document.getElementById('uploadPaymentModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!sidebar || !backdrop) return;
+    const isOpen = sidebar.classList.toggle('mobile-open');
+    if (isOpen) {
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else {
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme', isLight);
+    const newTheme = isLight ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleUI(newTheme);
+}
+
+function updateThemeToggleUI(theme) {
+    const btns = document.querySelectorAll('.theme-toggle-btn');
+    btns.forEach(btn => {
+        if (theme === 'light') {
+            btn.innerHTML = '☀️ Light';
+            btn.style.background = '#e2e8f0';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#cbd5e1';
+        } else {
+            btn.innerHTML = '🌙 Dark';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.style.color = '#f8fafc';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.documentElement.classList.add('light-theme');
+    }
+    updateThemeToggleUI(savedTheme);
+});
+</script>
+
+</body>
+</html>

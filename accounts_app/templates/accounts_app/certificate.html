@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion — {{ enrollment.user.get_full_name|default:enrollment.user.email }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,600;1,800&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: #0f172a; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+
+        .no-print-bar { margin-bottom: 24px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+        .btn-print { background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 10px 25px rgba(59,130,246,0.4); display: inline-flex; align-items: center; gap: 8px; }
+        .btn-verify { background: #1e293b; color: white; border: 1px solid #475569; padding: 12px 24px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+
+        /* Certificate Box */
+        .cert-border {
+            width: 100%; max-width: 1050px; background: #ffffff; color: #0f172a; padding: 30px;
+            border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); position: relative;
+        }
+        .cert-inner-border {
+            border: 6px double #d97706; padding: 45px 50px; text-align: center;
+            position: relative; background: radial-gradient(circle at center, #ffffff 60%, #fffbeb 100%);
+            overflow: hidden;
+        }
+
+        .cert-watermark {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: clamp(60px, 18vw, 220px); color: rgba(217,119,6,0.04); font-family: 'Cinzel', serif;
+            font-weight: 900; pointer-events: none; user-select: none; white-space: nowrap;
+        }
+
+        .cert-header-title { font-family: 'Cinzel', serif; font-size: clamp(14px, 2.5vw, 22px); font-weight: 700; color: #b45309; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; word-break: break-word; }
+        .cert-main-title { font-family: 'Cinzel', serif; font-size: clamp(20px, 4.2vw, 40px); font-weight: 900; color: #0f172a; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 24px; word-break: break-word; }
+        
+        .cert-presented-text { font-size: clamp(11px, 2vw, 15px); color: #64748b; font-style: italic; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; }
+        .cert-student-name { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5.5vw, 44px); font-weight: 800; color: #1e3a8a; font-style: italic; margin-bottom: 24px; border-bottom: 2px solid #cbd5e1; display: inline-block; padding: 0 30px 8px; word-break: break-word; max-width: 100%; }
+        
+        .cert-body-text { font-size: clamp(13px, 2.2vw, 16px); color: #334155; line-height: 1.7; max-width: 750px; margin: 0 auto 32px; word-break: break-word; }
+        .cert-course-name { font-family: 'Cinzel', serif; font-size: clamp(16px, 3.5vw, 24px); font-weight: 900; color: #b45309; margin-top: 6px; text-transform: uppercase; word-break: break-word; }
+
+        /* Footer Grid */
+        .cert-footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: flex-end; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 30px; gap: 20px; }
+        .sig-box { text-align: center; }
+        .sig-line { width: 140px; max-width: 100%; height: 1px; background: #0f172a; margin: 0 auto 8px; }
+        .sig-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+        .sig-sub { font-size: 11px; color: #64748b; }
+
+        .qr-box { text-align: center; }
+        .qr-img { width: 100px; height: 100px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px; background: white; margin-bottom: 4px; }
+
+        @media screen and (max-width: 768px) {
+            body { padding: 20px 12px; }
+            .no-print-bar { flex-direction: column; width: 100%; max-width: 400px; }
+            .btn-print, .btn-verify { width: 100%; justify-content: center; text-align: center; }
+            .cert-border { padding: 12px; border-radius: 8px; }
+            .cert-inner-border { padding: 24px 16px; border-width: 3px; }
+            .cert-footer-grid { grid-template-columns: 1fr; gap: 28px; justify-items: center; margin-top: 24px; padding-top: 20px; }
+        }
+
+        /* HARDENED LANDSCAPE PRINT STYLES (PDF Generation & Printing) */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            html, body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print-bar {
+                display: none !important;
+            }
+            .cert-border {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 24px !important;
+                height: 100vh !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            .cert-inner-border {
+                border: 6px double #d97706 !important;
+                padding: 35px 45px !important;
+                width: 100% !important;
+                text-align: center !important;
+                background: radial-gradient(circle at center, #ffffff 60%, #fffbeb 100%) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .cert-watermark {
+                font-size: 180px !important;
+                display: block !important;
+            }
+            .cert-header-title {
+                font-size: 22px !important;
+                letter-spacing: 0.25em !important;
+                margin-bottom: 8px !important;
+                color: #b45309 !important;
+            }
+            .cert-main-title {
+                font-size: 38px !important;
+                letter-spacing: 0.1em !important;
+                margin-bottom: 20px !important;
+                color: #0f172a !important;
+            }
+            .cert-presented-text {
+                font-size: 14px !important;
+                margin-bottom: 12px !important;
+            }
+            .cert-student-name {
+                font-size: 40px !important;
+                padding: 0 40px 6px !important;
+                margin-bottom: 20px !important;
+                display: inline-block !important;
+                color: #1e3a8a !important;
+            }
+            .cert-body-text {
+                font-size: 15px !important;
+                line-height: 1.7 !important;
+                margin: 0 auto 28px !important;
+                color: #334155 !important;
+            }
+            .cert-course-name {
+                font-size: 22px !important;
+                margin-top: 6px !important;
+                color: #b45309 !important;
+            }
+            .cert-footer-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr 1fr !important;
+                align-items: flex-end !important;
+                margin-top: 30px !important;
+                border-top: 1px solid #e2e8f0 !important;
+                padding-top: 24px !important;
+                gap: 20px !important;
+            }
+            .sig-box, .qr-box {
+                text-align: center !important;
+            }
+            .sig-line {
+                width: 160px !important;
+            }
+        }
+    </style>
+<style>
+            :root { --neon: #ccff00; }
+            .cert-border { border-color: #ccff00 !important; box-shadow: 0 0 30px rgba(204,255,0,0.2) !important; }
+            .cert-header { color: #ccff00 !important; }
+            .cert-title { color: #ffffff !important; text-shadow: 0 0 10px rgba(204,255,0,0.3); }
+            .cert-seal { background: linear-gradient(135deg, #ccff00, #84cc16) !important; color: #000000 !important; font-weight: 900 !important; }
+        </style></head>
+<body>
+
+<div class="no-print-bar">
+    <button type="button" class="btn-verify lang-toggle-btn" onclick="switchLanguage()">🇬🇧 English</button>
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <a href="{{ verify_url }}" target="_blank" class="btn-verify">🔍 Verify Online</a>
+</div>
+
+<div class="cert-border">
+    <div class="cert-inner-border">
+        <div class="cert-watermark">QRIOUS</div>
+
+        <div style="margin-bottom:12px;text-align:center">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" style="height:55px;width:auto;object-fit:contain">
+        </div>
+        <div class="cert-header-title">Qrious Tech Academy</div>
+        <div class="cert-main-title">Certificate of Completion</div>
+
+        <div class="cert-presented-text">This is to certify that</div>
+        <div class="cert-student-name">{{ enrollment.user.get_full_name|default:enrollment.user.email }}</div>
+
+        <div class="cert-body-text">
+            has successfully fulfilled all curriculum requirements, practical assignments, and final capstone challenges for the professional masterclass:
+            <div class="cert-course-name">{{ enrollment.course_name }}</div>
+        </div>
+
+        <div class="cert-footer-grid">
+            <div class="sig-box">
+                <div style="font-family:'Playfair Display';font-size:22px;color:#1e3a8a;margin-bottom:6px;font-style:italic">Siam Hossain</div>
+                <div class="sig-line"></div>
+                <div class="sig-title">Siam Hossain</div>
+                <div class="sig-sub">Lead Technical Instructor</div>
+            </div>
+
+            <!-- Dynamic Scannable QR Code -->
+            <div class="qr-box">
+                <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code Verification" class="qr-img">
+                <div style="font-size:10px;font-weight:700;color:#64748b;font-family:monospace">SCAN TO VERIFY</div>
+                <div style="font-size:10px;color:#0f172a;font-family:monospace;font-weight:800">{{ enrollment.certificate_id }}</div>
+            </div>
+
+            <div class="sig-box">
+                <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px">
+                    {{ enrollment.completed_at|date:"F d, Y"|default:"August 2026" }}
+                </div>
+                <div class="sig-line"></div>
+                <div class="sig-title">Date of Issuance</div>
+                <div class="sig-sub">Student ID: {{ enrollment.student_id }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

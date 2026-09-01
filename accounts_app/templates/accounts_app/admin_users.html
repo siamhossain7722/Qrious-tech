@@ -1,0 +1,441 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 Super Admin Console — Qrious Tech Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #161f33;
+            --card: #1a2235;
+            --card-hover: #1e2a40;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --cyan: #ccff00; --neon: #ccff00;
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        /* Sidebar */
+        .sidebar { position:fixed; left:0; top:0; bottom:0; width:260px; background:#0d1322 !important; border-right:1px solid rgba(255,255,255,0.08) !important; display:flex; flex-direction:column; z-index:100; }
+        .logo { padding:28px 24px; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .logo-inner { display:flex; align-items:center; gap:12px; }
+        .logo-icon { width:40px; height:40px; background:linear-gradient(135deg,var(--amber),var(--purple)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; color:white; }
+        .logo-text { font-family:'Plus Jakarta Sans'; font-size:16px; font-weight:800; color:#ffffff !important; }
+        .logo-sub { font-size:11px; color:#64748b !important; }
+        .sidebar-nav { padding:20px 16px; flex:1; }
+        .nav-label { font-size:10px; font-weight:700; letter-spacing:0.1em; color:#64748b !important; text-transform:uppercase; padding:0 8px; margin-bottom:8px; margin-top:16px; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:#cbd5e1 !important; background:transparent !important; text-decoration:none; font-size:13.5px; font-weight:600; transition:all 0.2s; margin-bottom:4px; border:1px solid transparent; }
+        .nav-item:hover { background:rgba(255,255,255,0.08) !important; color:#ffffff !important; transform:translateX(3px); }
+        .nav-item.active { background:#2563eb !important; color:#ffffff !important; border:1px solid #3b82f6 !important; box-shadow:0 4px 15px rgba(37,99,235,0.35) !important; font-weight:700 !important; }
+
+        /* Main Content */
+        .main { margin-left:260px; min-height:100vh; }
+        .topbar { position:sticky; top:0; background:rgba(10,14,26,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; z-index:50; }
+        .page-title { font-size:20px; font-weight:800; display:flex; align-items:center; gap:10px; }
+        .content { padding:32px; max-width:1240px; }
+
+        /* Buttons */
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; font-family:'Inter',sans-serif; }
+        .btn-amber { background:linear-gradient(135deg,var(--amber),var(--purple)); color:white; }
+        .btn-amber:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(245,158,11,0.3); }
+        .btn-outline { background:transparent; color:var(--text2); border:1px solid var(--border2); }
+        .btn-outline:hover { color:var(--text); border-color:rgba(255,255,255,0.2); background:var(--card); }
+        .btn-danger { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+        .btn-danger:hover { background:rgba(239,68,68,0.3); }
+        .btn-sm { padding:5px 12px; font-size:12px; }
+
+        /* Stats Cards */
+        .stat-row { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:28px; }
+        @media(max-width:1100px) { .stat-row { grid-template-columns:repeat(3,1fr); } }
+        @media(max-width:700px) { .stat-row { grid-template-columns:1fr 1fr; } }
+        .stat-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; text-align:left; }
+        .stat-val { font-size:26px; font-weight:800; margin-bottom:4px; }
+        .stat-val.gold { color:var(--amber); }
+        .stat-val.blue { color:var(--blue); }
+        .stat-val.purple { color:var(--purple); }
+        .stat-val.green { color:var(--green); }
+        .stat-val.cyan { color:var(--cyan); }
+        .stat-lbl { font-size:12px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+
+        /* Filter Controls */
+        .filter-bar { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px 20px; margin-bottom:24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+        .search-input { flex:1; min-width:220px; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:10px 14px; color:var(--text); font-size:14px; font-family:'Inter'; }
+        .search-input:focus { outline:none; border-color:var(--amber); }
+        .filter-select { background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:10px 14px; color:var(--text); font-size:13px; font-family:'Inter'; }
+
+        /* Table */
+        .table-card { background:var(--card); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
+        .table-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+        .users-table { width:100%; border-collapse:collapse; text-align:left; font-size:13px; }
+        .users-table th { background:rgba(255,255,255,0.02); color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-size:11px; padding:14px 20px; border-bottom:1px solid var(--border); }
+        .users-table td { padding:14px 20px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .users-table tr:last-child td { border-bottom:none; }
+        .users-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+        /* Badges */
+        .badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+        .badge-free { background:rgba(100,116,139,0.15); color:var(--text2); border:1px solid var(--border2); }
+        .badge-pro { background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3); }
+        .badge-business { background:rgba(139,92,246,0.15); color:var(--purple); border:1px solid rgba(139,92,246,0.3); }
+        .badge-admin { background:rgba(245,158,11,0.15); color:var(--amber); border:1px solid rgba(245,158,11,0.3); }
+        .badge-active { background:rgba(16,185,129,0.15); color:var(--green); border:1px solid rgba(16,185,129,0.3); }
+        .badge-disabled { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+
+        .plan-select-mini { background:var(--bg2); color:var(--text); border:1px solid var(--border2); border-radius:8px; padding:4px 8px; font-size:12px; font-family:'Inter'; cursor:pointer; }
+
+        /* Toast Notifications */
+        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast {
+            pointer-events: auto; min-width: 320px; max-width: 420px;
+            background: rgba(17, 24, 39, 0.95); border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(16px); border-radius: 14px; padding: 14px 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.15);
+            display: flex; align-items: center; gap: 12px;
+            animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: all 0.3s ease;
+        }
+        .toast.success { border-color: rgba(16,185,129,0.4); box-shadow: 0 10px 30px rgba(16,185,129,0.2); }
+        .toast.error { border-color: rgba(239,68,68,0.4); box-shadow: 0 10px 30px rgba(239,68,68,0.2); }
+        .toast-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .toast.success .toast-icon { background: rgba(16,185,129,0.15); color: #10b981; }
+        .toast.error .toast-icon { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .toast-body { flex: 1; font-size: 13px; color: #f1f5f9; font-weight: 500; line-height: 1.4; }
+        .toast-close { background: none; border: none; color: #64748b; font-size: 16px; cursor: pointer; padding: 2px; }
+
+        @keyframes toastSlideIn {
+            from { opacity: 0; transform: translateX(40px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        /* Cool Delete Modal Overlay */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(5, 7, 15, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.25s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .cool-modal {
+            background: #131b2e; border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px; padding: 32px; width: 90%; max-width: 440px;
+            text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(239,68,68,0.15);
+            transform: scale(0.9) translateY(20px); transition: all 0.25s ease;
+        }
+        .modal-overlay.active .cool-modal { transform: scale(1) translateY(0); }
+        .modal-icon-badge {
+            width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center; font-size: 28px;
+            background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444;
+        }
+        .modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+        .modal-desc { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
+        .user-email-pill { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; color: #f8fafc; font-weight: 600; font-size: 13px; word-break: break-all; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="logo">
+        <div style="display:flex;align-items:center;gap:12px">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-dark" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-light" style="height:48px;width:auto;object-fit:contain">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Management</div>
+        <a href="/billing/admin/users/" class="nav-item active">👥 All Users & Plans</a>
+        <a href="/admin/" class="nav-item">🛠 Django Admin</a>
+        <div class="nav-label">Product</div>
+        <a href="/dashboard/" class="nav-item">📊 Product Dashboard</a>
+        <a href="/billing/settings/" class="nav-item">⚙️ Profile Settings</a>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </nav>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <h1 class="page-title">👑 Super Admin User Management Suite</h1>
+        <div style="display:flex;gap:12px">
+            <a href="/admin/" class="btn btn-amber" target="_blank">🛠 Full Django Admin ↗</a>
+            <a href="/dashboard/" class="btn btn-outline">← Back to App</a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Global Platform Metrics -->
+        <div class="stat-row">
+            <div class="stat-card">
+                <div class="stat-val gold">{{ total_users }}</div>
+                <div class="stat-lbl">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val blue">{{ free_users }}</div>
+                <div class="stat-lbl">Free Plan</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val purple">{{ pro_users }}</div>
+                <div class="stat-lbl">Pro Plan ($9)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val green">{{ biz_users }}</div>
+                <div class="stat-lbl">Business Plan ($29)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val cyan">{{ total_applications }}</div>
+                <div class="stat-lbl">Applications Submitted</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <form method="get" action="/billing/admin/users/" class="filter-bar">
+            <input type="text" name="q" class="search-input" placeholder="Search by email, first name, or last name..." value="{{ query }}">
+            <select name="plan" class="filter-select" onchange="this.form.submit()">
+                <option value="">All Plans</option>
+                <option value="free" {% if plan_filter == 'free' %}selected{% endif %}>Free Tier</option>
+                <option value="pro" {% if plan_filter == 'pro' %}selected{% endif %}>Pro Tier</option>
+                <option value="business" {% if plan_filter == 'business' %}selected{% endif %}>Business Tier</option>
+            </select>
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Users</option>
+                <option value="disabled" {% if status_filter == 'disabled' %}selected{% endif %}>Disabled Users</option>
+                <option value="superuser" {% if status_filter == 'superuser' %}selected{% endif %}>Super Admins</option>
+            </select>
+            <button type="submit" class="btn btn-outline btn-sm">Filter</button>
+            {% if query or plan_filter or status_filter %}
+            <a href="/billing/admin/users/" class="btn btn-outline btn-sm" style="color:var(--red)">Reset</a>
+            {% endif %}
+        </form>
+
+        <!-- Users Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <div style="font-weight:700;font-size:16px">Registered Users ({{ users_data|length }})</div>
+                <span style="font-size:12px;color:var(--text3)">Super admins have full authorization to modify user plans and permissions.</span>
+            </div>
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>User / Email</th>
+                        <th>Joined</th>
+                        <th>Current Plan</th>
+                        <th>Quick Change Plan</th>
+                        <th>Metrics</th>
+                        <th>Role / Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in users_data %}
+                    <tr id="user-row-{{ item.user.id }}">
+                        <td>
+                            <div style="font-weight:700;font-size:14px;color:var(--text)">
+                                {{ item.user.get_full_name|default:item.user.email }}
+                            </div>
+                            <div style="font-size:12px;color:var(--text2)">{{ item.user.email }}</div>
+                        </td>
+                        <td style="color:var(--text3);font-size:12px">
+                            {{ item.user.date_joined|date:"M d, Y" }}
+                        </td>
+                        <td>
+                            <span class="badge {% if item.subscription.plan == 'business' %}badge-business{% elif item.subscription.plan == 'pro' %}badge-pro{% else %}badge-free{% endif %}" id="plan-badge-{{ item.user.id }}">
+                                {{ item.subscription.get_plan_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <select class="plan-select-mini" onchange="quickUpdatePlan({{ item.user.id }}, this.value)">
+                                <option value="free" {% if item.subscription.plan == 'free' %}selected{% endif %}>Free ($0)</option>
+                                <option value="pro" {% if item.subscription.plan == 'pro' %}selected{% endif %}>Pro ($9)</option>
+                                <option value="business" {% if item.subscription.plan == 'business' %}selected{% endif %}>Business ($29)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div style="font-size:12px">
+                                📤 <strong>{{ item.jobs_count }}</strong> jobs &nbsp;|&nbsp;
+                                🔗 <strong>{{ item.accounts_count }}</strong> LinkedIn &nbsp;|&nbsp;
+                                📄 <strong>{{ item.resumes_count }}</strong> CVs
+                            </div>
+                        </td>
+                        <td>
+                            {% if item.user.is_superuser %}
+                            <span class="badge badge-admin">👑 Super Admin</span>
+                            {% elif not item.user.is_active %}
+                            <span class="badge badge-disabled">⛔ Blocked</span>
+                            {% else %}
+                            <span class="badge badge-active"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Active User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <a href="/billing/admin/users/{{ item.user.id }}/" class="btn btn-outline btn-sm">⚙️ Edit / View</a>
+                                {% if item.user != request.user %}
+                                <button onclick="deleteUser({{ item.user.id }}, '{{ item.user.email }}')" class="btn btn-danger btn-sm">🗑️</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:40px;color:var(--text3)">
+                            No matching users found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</main>
+
+<!-- FLOATING TOAST CONTAINER -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- COOL DELETE CONFIRMATION MODAL -->
+<div class="modal-overlay" id="delete-modal-overlay">
+    <div class="cool-modal">
+        <div class="modal-icon-badge">🗑️</div>
+        <div class="modal-title">Delete User Account?</div>
+        <div class="modal-desc">
+            Are you sure you want to permanently delete user <br>
+            <span class="user-email-pill" id="delete-user-email-display">user@example.com</span>?<br>
+            This action will delete all their job applications, LinkedIn profiles, and CV files permanently.
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirm-delete-btn" onclick="executeUserDeletion()">
+                🗑️ Yes, Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let pendingDeleteUserId = null;
+
+// Toast Notification Function
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? '<span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>' : '❌';
+    
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-body">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(40px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+// Quick Plan Update via AJAX + Toast
+async function quickUpdatePlan(userId, newPlan) {
+    try {
+        const res = await fetch(`/billing/admin/users/${userId}/update-plan/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: newPlan })
+        });
+        const data = await res.json();
+        if (data.success) {
+            const badge = document.getElementById(`plan-badge-${userId}`);
+            if (badge) {
+                badge.textContent = newPlan.toUpperCase();
+                badge.className = `badge badge-${newPlan}`;
+            }
+            showToast(data.message, 'success');
+        } else {
+            showToast(data.error || 'Failed to update plan', 'error');
+        }
+    } catch(e) {
+        showToast(`Failed to update plan: ${e.message}`, 'error');
+    }
+}
+
+// Open Delete Modal
+function deleteUser(userId, email) {
+    pendingDeleteUserId = userId;
+    document.getElementById('delete-user-email-display').textContent = email;
+    document.getElementById('delete-modal-overlay').classList.add('active');
+}
+
+function closeDeleteModal() {
+    pendingDeleteUserId = null;
+    document.getElementById('delete-modal-overlay').classList.remove('active');
+}
+
+// Execute User Deletion
+async function executeUserDeletion() {
+    if (!pendingDeleteUserId) return;
+    const userId = pendingDeleteUserId;
+    const btn = document.getElementById('confirm-delete-btn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+    
+    try {
+        const res = await fetch(`/billing/admin/users/${userId}/delete/`, { method: 'POST' });
+        const data = await res.json();
+        closeDeleteModal();
+        
+        if (data.success) {
+            const row = document.getElementById(`user-row-${userId}`);
+            if (row) {
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-20px)';
+                setTimeout(() => row.remove(), 300);
+            }
+            showToast(data.message, 'success');
+        } else {
+            showToast(data.error || 'Deletion failed', 'error');
+        }
+    } catch(e) {
+        closeDeleteModal();
+        showToast(`Failed to delete user: ${e.message}`, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🗑️ Yes, Delete Account';
+    }
+}
+
+// Close modal on backdrop click or ESC key
+document.getElementById('delete-modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'delete-modal-overlay') closeDeleteModal();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
+
+</body>
+</html>

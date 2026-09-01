@@ -1,0 +1,324 @@
+{% extends "landing/base.html" %}
+{% load static %}
+
+{% block title %}Digital Marketing & Growth Mastery (12 Weeks) — Qrious Tech Academy{% endblock %}
+
+{% block content %}
+<style>
+    .course-hero {
+        padding: 5px 28px 20px; text-align: center; max-width: 1100px; margin: 0 auto; position: relative; z-index: 2;
+    }
+    .phase-badge {
+        display: inline-flex; align-items: center; gap: 8px; padding: 4px 16px;
+        border-radius: 999px; background: #D4FF00; border: none;
+        color: #111827; font-size: 12.5px; font-weight: 800; margin-bottom: 10px;
+    }
+    .hero-title {
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 900;
+        line-height: 1.15; margin-bottom: 12px; letter-spacing: -0.02em; color: #111827;
+    }
+    @media(max-width: 768px) { .hero-title { font-size: 32px; } }
+    .gradient-text {
+        color: #111827; border-bottom: 4px solid #D4FF00; display: inline-block;
+    }
+    .hero-sub { font-size: 18px; color: var(--text2); max-width: 780px; margin: 0 auto 36px; line-height: 1.6; }
+
+    /* Price Card Hero */
+    .price-box-hero {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 24px;
+        padding: 32px; max-width: 750px; margin: 0 auto 60px; display: flex; align-items: center;
+        justify-content: space-between; gap: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    @media(max-width: 768px) { .price-box-hero { flex-direction: column; text-align: center; } }
+    .old-price { font-size: 18px; color: #6B7280; text-decoration: line-through; margin-bottom: 4px; }
+    .new-price { font-size: 42px; font-weight: 900; color: #111827; display: flex; align-items: center; gap: 10px; }
+
+    .section { padding: 40px 28px 90px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+
+    /* Module Grid */
+    .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    @media(max-width: 900px) { .module-grid { grid-template-columns: 1fr; } }
+
+    .module-card {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 20px;
+        padding: 28px; transition: all 0.3s; position: relative; overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .module-card:hover { transform: translateY(-4px); border-color: #111827; box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+    .module-num {
+        font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+        color: #111827; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .module-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; color: #111827; }
+    .module-desc { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+    .topic-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .topic-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+
+    .support-badge {
+        background: #D4FF00; border: none;
+        color: #111827; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 999px;
+    }
+    .special-card {
+        grid-column: 1 / -1; background: #FFFFFF;
+        border: 1.5px solid #E4E4E7; border-radius: 24px; padding: 36px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+</style>
+
+<div style="position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%, rgba(212,255,0,0.15) 0%, rgba(255,255,255,0) 75%);pointer-events:none;z-index:0"></div>
+
+<!-- Hero Section -->
+<section class="course-hero">
+    <div class="phase-badge">
+        🚀 PHASE 1 FOUNDATION • 12 WEEKS FULL DURATION
+    </div>
+    <h1 class="hero-title">
+        Digital Marketing & <br>
+        <span class="gradient-text">Growth Mastery Masterclass</span>
+    </h1>
+    <p class="hero-sub">
+        A comprehensive 12-week hands-on training program covering Copywriting, Customer Psychology, AI Content & Video Creation, Facebook Ads, WordPress Development, Chatbots, SWOT Analysis, and High-Ticket Sales.
+    </p>
+
+    <!-- Pricing Box -->
+    <div class="price-box-hero">
+        <div style="text-align:left">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Special Limited Admission Fee</div>
+            <div class="old-price">Regular Fee: ৳20,000 BDT</div>
+            <div class="new-price">
+                ৳10,000 <span style="font-size:18px;color:var(--text2);font-weight:600">BDT</span>
+                <span style="font-size:12px;background:#10b981;color:white;padding:4px 10px;border-radius:20px;font-weight:700">50% DISCOUNT</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">⏱️ 12 Weeks Intensive Training • Live Mentorship</div>
+        </div>
+        <div>
+            <a href="/contact/?subject=Digital+Marketing+Enrollment" class="btn btn-primary" style="padding:14px 28px;font-size:16px;background:linear-gradient(135deg,#10b981,#3b82f6)">
+                Enroll Now (৳10,000 BDT) →
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Modules Overview Section -->
+<div class="section">
+    <div style="text-align:center;max-width:700px;margin:0 auto 50px">
+        <div style="font-size:12px;font-weight:700;color:var(--purple);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">12 Weeks Curriculum</div>
+        <h2 style="font-family:'Plus Jakarta Sans';font-size:36px;font-weight:900;margin-bottom:12px">Complete 13-Module Syllabus</h2>
+        <p style="font-size:15px;color:var(--text2)">Step-by-step practical modules designed for real-world agency work and freelancing.</p>
+    </div>
+
+    <div class="module-grid">
+
+        <!-- MODULE 1 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 01</span>
+                <span>WEEK 1</span>
+            </div>
+            <h3 class="module-title">Introduction to Digital Marketing</h3>
+            <p class="module-desc">Understand the digital marketing ecosystem, funnel architecture, audience segmentation, and channel strategies.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Digital Marketing Overview & Core Channels</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Inbound vs Outbound Marketing Funnels</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Target Audience Research & Market Mapping</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 2 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 02</span>
+                <span>WEEK 2</span>
+            </div>
+            <h3 class="module-title">Copywriting Mastery</h3>
+            <p class="module-desc">Master the art of high-converting sales copy, persuasive headlines, and psychological frameworks that sell.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> AIDA, PAS & BAB Copywriting Frameworks</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> High-Converting Ad Hooks & Headlines</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Crafting Irresistible Value Propositions</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 3 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 03</span>
+                <span>WEEK 3</span>
+            </div>
+            <h3 class="module-title">Content Creation & Customer Psychology</h3>
+            <p class="module-desc">Decode consumer behavior, emotional buying triggers, and build content calendars that engage audiences.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Customer Buying Triggers & Decision Cycles</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Viral Social Media Content Templates</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Content Strategy & Editorial Planning</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 4 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 04</span>
+                <span>WEEK 4</span>
+            </div>
+            <h3 class="module-title">Design & AI OVC Creation</h3>
+            <p class="module-desc">Create professional visual assets, graphics, and AI-generated Short Videos/OVC (Online Video Clips).</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Graphic Design for Ads (Canva / Figma)</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> AI Video Scripting & Avatar Generation</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Reels, Shorts & Video Ad Editing</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 5 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 05</span>
+                <span>WEEK 5</span>
+            </div>
+            <h3 class="module-title">Portfolio Development</h3>
+            <p class="module-desc">Build your personal brand portfolio showcase to attract high-paying international clients and local agencies.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Personal Branding & Freelance Profile</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Case Study Writing & Proof of Results</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Digital Agency Portfolio Setup</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 6 -->
+        <div class="module-card" style="border-color:rgba(16,185,129,0.3)">
+            <div class="module-num">
+                <span>MODULE 06</span>
+                <span class="support-badge">🤝 SUPPORT SESSION INCLUDED</span>
+            </div>
+            <h3 class="module-title">Marketing Strategy & Campaign Execution</h3>
+            <p class="module-desc">Plan end-to-end marketing campaigns, set KPIs, budget allocation, and execute under expert guidance.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Campaign Budgeting & ROI Forecasting</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Multi-Channel Marketing Blueprints</li>
+                <li class="topic-item"><span>🤝</span> <strong>Dedicated Live Mentor Support Session</strong></li>
+            </ul>
+        </div>
+
+        <!-- MODULE 7 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 07</span>
+                <span>WEEK 7</span>
+            </div>
+            <h3 class="module-title">AI Content Generation</h3>
+            <p class="module-desc">Leverage ChatGPT, Claude, and Gemini AI prompt engineering to write articles, emails, and ad copies 10x faster.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Advanced Prompt Engineering Tactics</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> AI Blog Articles & SEO Optimization</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Automated Email Copy Generation</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 8 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 08</span>
+                <span>WEEK 8</span>
+            </div>
+            <h3 class="module-title">AI Chatbot Automation</h3>
+            <p class="module-desc">Build automated lead-generation and customer support chatbots for websites, Facebook Messenger, and WhatsApp.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Messenger & WhatsApp Automation (ManyChat)</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Lead Capture & Automated Qualified Flow</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> AI Knowledge Base Support Bots</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 9 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 09</span>
+                <span>WEEK 9</span>
+            </div>
+            <h3 class="module-title">WordPress Website Development</h3>
+            <p class="module-desc">Design and launch high-converting sales landing pages and e-commerce websites with WordPress & Elementor.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> WordPress Installation & Domain/Hosting</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Elementor Pro Landing Page Design</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> WooCommerce Store Setup & Payment Gateways</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 10 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 10</span>
+                <span>WEEK 10</span>
+            </div>
+            <h3 class="module-title">SWOT Analysis & Market Research</h3>
+            <p class="module-desc">Analyze competitors, evaluate business Strengths, Weaknesses, Opportunities, and Threats to gain market share.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Competitor Ad Library Research</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> SWOT Matrix Framework Execution</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Market Gap Identification</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 11 -->
+        <div class="module-card" style="border-color:rgba(59,130,246,0.4)">
+            <div class="module-num">
+                <span>MODULE 11</span>
+                <span>WEEK 11</span>
+            </div>
+            <h3 class="module-title">FB Ads (Facebook & Meta Advertising)</h3>
+            <p class="module-desc">Master Meta Business Manager, Ads Manager, Pixel setup, Custom Audiences, Retargeting, and CBO campaigns.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Meta Pixel & Conversions API Setup</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Lookalike & Custom Audience Targeting</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> ABO & CBO Scaling Strategies</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 12 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>MODULE 12</span>
+                <span>WEEK 12</span>
+            </div>
+            <h3 class="module-title">Sales & Client Acquisition</h3>
+            <p class="module-desc">Learn how to pitch clients, handle objections, close high-ticket sales deals, and secure monthly retainer contracts.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Cold Outreach & LinkedIn Pitching</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Handling Sales Objections & Closing</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Monthly Agency Retainer Agreements</li>
+            </ul>
+        </div>
+
+        <!-- MODULE 13 MARATHON -->
+        <div class="module-card special-card">
+            <div class="module-num">
+                <span style="color:#60a5fa">MODULE 13 • CAPSTONE MARATHON</span>
+                <span style="background:rgba(59,130,246,0.2);color:#93c5fd;padding:4px 12px;border-radius:20px;font-weight:700">🏆 LIVE CHALLENGE</span>
+            </div>
+            <h3 class="module-title" style="font-size:24px">Marketing Marathon & Real Budget Campaign</h3>
+            <p class="module-desc" style="font-size:15px">
+                In this final intensive Marathon, students execute a live marketing campaign with real ad budgets, live audience targeting, and real-time sales optimization. Receive official Qrious Tech Academy Certification upon completion.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Enrollment & Support CTA -->
+<section class="section" style="padding-top:0">
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:28px;padding:48px;text-align:center">
+        <h2 style="font-family:'Plus Jakarta Sans';font-size:32px;font-weight:900;margin-bottom:12px">Ready to Become a Master Digital Marketer?</h2>
+        <p style="font-size:16px;color:var(--text2);max-width:600px;margin:0 auto 28px">
+            Admission is currently open for the 12-Week Phase 1 Foundation batch at 50% discount (৳10,000 BDT).
+        </p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+            <a href="/contact/?subject=Digital+Marketing+Enrollment" class="btn btn-primary" style="padding:14px 28px;font-size:16px;background:linear-gradient(135deg,#10b981,#3b82f6)">
+                Enroll Now (৳10,000 BDT) 🚀
+            </a>
+            <a href="https://wa.me/971566631501" target="_blank" class="btn btn-outline" style="padding:14px 28px;font-size:16px;color:#25D366;border-color:rgba(37,211,102,0.4)">
+                💬 WhatsApp Support (+971 566631501)
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

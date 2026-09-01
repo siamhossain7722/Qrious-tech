@@ -1,0 +1,473 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ active_lesson.title }} — Qrious Tech Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913;
+            --bg2: #0d1222;
+            --card: #131b2e;
+            --card-hover: #1c2742;
+            --cyan: #ccff00; --neon: #ccff00;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --text: #f8fafc;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --border: rgba(255,255,255,0.08);
+            --border2: rgba(255,255,255,0.15);
+        }
+
+        body.light-theme, html.light-theme {
+            --bg: #f8fafc;
+            --bg2: #ffffff;
+            --card: #ffffff;
+            --card-hover: #f1f5f9;
+            --cyan: #0284c7;
+            --blue: #ccff00;
+            --purple: #7c3aed;
+            --green: #059669;
+            --amber: #d97706;
+            --red: #dc2626;
+            --text: #0f172a;
+            --text2: #334155;
+            --text3: #475569;
+            --border: #e2e8f0;
+            --border2: #cbd5e1;
+        }
+
+        body.light-theme .lesson-item { color: #334155; font-weight: 500; }
+        body.light-theme .lesson-item:hover { color: #0f172a; background: #f1f5f9; }
+        body.light-theme .lesson-item.active { background: #e0f2fe; color: #0369a1; border-left-color: #0284c7; font-weight: 800; }
+        body.light-theme .btn-header-action { background: #ffffff; color: #1e293b; border-color: #cbd5e1; }
+        body.light-theme .theme-toggle-btn { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
+
+        .brand-logo-dark { display: block !important; }
+        .brand-logo-light { display: none !important; }
+        body.light-theme .brand-logo-dark { display: none !important; }
+        body.light-theme .brand-logo-light { display: block !important; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s;
+        }        /* Top Navigation Bar */
+        .top-navbar {
+            background: var(--bg2); border-bottom: 1px solid var(--border); min-height: 64px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 12px;
+        }
+        .top-nav-main-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .top-nav-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .top-nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .mobile-only-theme { display: none; }
+        
+        .back-btn {
+            width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border2); background: var(--card);
+            color: var(--text); display: flex; align-items: center; justify-content: center; text-decoration: none;
+            font-size: 16px; font-weight: 700; transition: all 0.2s; flex-shrink: 0;
+        }
+        .back-btn:hover { background: var(--card-hover); color: var(--cyan); border-color: var(--cyan); }
+
+        .brand-pill { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--cyan), var(--blue)); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; flex-shrink: 0; }
+        .course-title-header { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: var(--card); color: var(--text);
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle-btn:hover { border-color: var(--cyan); }
+
+        .btn-header-action {
+            background: var(--card); border: 1px solid var(--border2); color: var(--text2); padding: 7px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-header-action:hover { color: var(--text); background: var(--card-hover); }
+        .btn-header-action.done { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: var(--green); }
+        .btn-header-action.locked { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--amber); }
+
+        /* Mobile Drawer Backdrop */
+        .sidebar-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s;
+        }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        /* Classroom Layout */
+        .classroom-container { display: flex; flex: 1; min-height: calc(100vh - 64px); position: relative; }
+
+        /* Left Sidebar Modules Accordion */
+        .sidebar-modules {
+            width: 360px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column;
+            flex-shrink: 0; height: calc(100vh - 64px); position: sticky; top: 64px; overflow-y: auto; z-index: 90;
+        }
+
+        .sidebar-top-box { padding: 20px; border-bottom: 1px solid var(--border); }
+        .progress-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .progress-pct { font-size: 16px; font-weight: 900; color: var(--cyan); font-family: 'Plus Jakarta Sans', sans-serif; }
+        .progress-bar-track { height: 7px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 100px; transition: width 0.4s ease; }
+
+        /* Collapsible Accordion Modules */
+        .module-group { border-bottom: 1px solid var(--border); }
+        .module-header {
+            padding: 14px 18px; font-size: 12px; font-weight: 800; color: var(--cyan); text-transform: uppercase;
+            letter-spacing: 0.05em; background: var(--bg2); display: flex; align-items: center;
+            justify-content: space-between; user-select: none; cursor: pointer; transition: background 0.2s;
+        }
+        .module-header:hover { background: var(--card-hover); }
+        .accordion-arrow { font-size: 11px; transition: transform 0.3s; color: var(--text3); }
+        .module-group.expanded .accordion-arrow { transform: rotate(180deg); color: var(--cyan); }
+        
+        .lesson-list { display: none; flex-direction: column; }
+        .module-group.expanded .lesson-list { display: flex; }
+
+        .lesson-item {
+            padding: 12px 18px 12px 20px; text-decoration: none; color: var(--text2); display: flex; align-items: flex-start;
+            gap: 12px; transition: all 0.2s; border-left: 3px solid transparent; font-size: 13px;
+        }
+        .lesson-item:hover { background: var(--card); color: var(--text); }
+        .lesson-item.active { background: linear-gradient(135deg, rgba(204,255,0,0.15), rgba(59,130,246,0.08)); border-left-color: var(--cyan); color: var(--text); font-weight: 700; }
+
+        .status-circle {
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border2); display: flex;
+            align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; margin-top: 1px; color: transparent;
+        }
+        .lesson-item.completed .status-circle { background: var(--green); border-color: var(--green); color: white; }
+
+        .lesson-info { flex: 1; min-width: 0; }
+        .lesson-title { font-size: 13px; line-height: 1.4; color: var(--text); margin-bottom: 3px; word-break: break-word; }
+        .lesson-meta { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+        /* Main Content Player Area */
+        .player-main-area { flex: 1; padding: 28px 36px 40px; background: var(--bg); display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* Video Container */
+        .video-player-wrap {
+            position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+            background: #000000; border-radius: 20px; border: 1px solid var(--border2); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .video-player-wrap iframe, .video-player-wrap video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 20px;
+        }
+
+        /* Video Details Header */
+        .lesson-main-heading { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin-top: 4px; }
+        .lesson-module-tag { font-size: 12px; font-weight: 700; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Tabs Container */
+        .tabs-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+        .tabs-header { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .tab-btn {
+            background: var(--bg2); border: 1px solid var(--border); padding: 8px 18px; border-radius: 12px; font-size: 13px;
+            font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .tab-btn:hover { border-color: var(--cyan); color: var(--text); }
+        .tab-btn.active { background: linear-gradient(135deg, rgba(204,255,0,0.2), rgba(59,130,246,0.1)); border-color: rgba(204,255,0,0.4); color: var(--cyan); }
+
+        .tab-content { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+        /* Bottom Controls Bar */
+        .player-controls-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .btn-nav-control {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 25px;
+            font-size: 13.5px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.2s; border: none; font-family: 'Inter';
+        }
+        .btn-prev-next { background: var(--card); border: 1px solid var(--border2); color: var(--text); }
+        .btn-prev-next:hover { background: var(--card-hover); border-color: var(--cyan); }
+        .btn-mark-complete { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #ffffff; box-shadow: 0 4px 20px rgba(204,255,0,0.3); }
+        .btn-mark-complete.completed { background: linear-gradient(135deg, var(--green), #059669); color: #ffffff; box-shadow: 0 4px 20px rgba(16,185,129,0.3); }
+
+        /* Responsive Mobile Styling (< 992px & < 500px) */
+        .mobile-toggle-btn { display: none; }
+        .mobile-header-title { display: none; }
+
+        @media (min-width: 993px) {
+            .top-navbar {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                height: 64px;
+                padding: 0 24px;
+                flex-wrap: nowrap;
+            }
+            .top-nav-main-row { width: auto; }
+            .top-nav-right { width: auto; justify-content: flex-end; flex-wrap: nowrap; }
+        }
+
+        @media (max-width: 992px) {
+            .top-navbar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px 14px;
+                gap: 10px;
+                height: auto;
+            }
+            .top-nav-main-row { width: 100%; }
+            .top-nav-right {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px 8px;
+                justify-content: flex-start;
+            }
+            .sidebar-modules {
+                position: fixed; left: 0; top: 0; bottom: 0; height: 100vh; z-index: 9999;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                width: 320px; box-shadow: 10px 0 40px rgba(0,0,0,0.6);
+            }
+            .sidebar-modules.open { transform: translateX(0); }
+            .mobile-toggle-btn { display: inline-flex; }
+            .player-main-area { padding: 12px; gap: 14px; }
+            .lesson-main-heading { font-size: 17px; }
+            .player-controls-bar { flex-direction: column; gap: 10px; width: 100%; }
+            .btn-nav-control { width: 100%; justify-content: center; }
+            .brand-pill { display: none; }
+            .mobile-header-title { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 800; }
+            .btn-header-action, .theme-toggle-btn { padding: 6px 12px; font-size: 11.5px; }
+            .tabs-card { padding: 16px; }
+            .tab-btn { flex: 1; min-width: 130px; justify-content: center; font-size: 12px; padding: 8px 12px; }
+        }
+
+        @media (max-width: 500px) {
+            .top-navbar { padding: 8px 10px; gap: 8px; }
+            .top-nav-right { gap: 6px; }
+            .btn-header-action, .theme-toggle-btn { font-size: 11px; padding: 5px 10px; }
+            .back-btn { width: 34px; height: 34px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
+<!-- Top Navigation Bar -->
+<header class="top-navbar">
+    <div class="top-nav-main-row">
+        <div class="top-nav-left">
+            <button type="button" class="back-btn mobile-toggle-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Modules Menu">☰</button>
+            <a href="/student/dashboard/" class="back-btn" title="Back to Student Dashboard">←</a>
+            <div class="brand-pill">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-dark" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-light" style="height:44px;width:auto;object-fit:contain">
+                <div style="display:flex;flex-direction:column;line-height:1.2;margin-left:4px">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:10px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+                </div>
+            </div>
+            <div class="mobile-header-title">Academy</div>
+        </div>
+    </div>
+
+    <div class="top-nav-right">
+        <button type="button" class="theme-toggle-btn lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
+            🇬🇧 English
+        </button>
+        <span class="btn-header-action" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">
+            🏷️ {{ student_batch.name|default:"Batch 01" }}
+        </span>
+        <a href="/student/dashboard/" class="btn-header-action" title="Student Dashboard">
+            🎓 Dashboard
+        </a>
+        {% if request.user.is_superuser %}
+        <a href="/student/classroom/admin/" class="btn-header-action" style="color:var(--cyan);border-color:rgba(204,255,0,0.3)">
+            👑 Admin
+        </a>
+        {% endif %}
+        {% if progress_percent >= 100 %}
+            {% if has_pending_due %}
+            <a href="/certificate/{{ enrollment.certificate_id }}/" target="_blank" class="btn-header-action locked">
+                🔒 Certificate Locked
+            </a>
+            {% else %}
+            <a href="/certificate/{{ enrollment.certificate_id }}/" target="_blank" class="btn-header-action done">
+                ✓ Certificate
+            </a>
+            {% endif %}
+        {% else %}
+        <span class="btn-header-action">
+            🎯 {{ completed_modules_count }}/{{ total_modules }} Modules
+        </span>
+        {% endif %}
+    </div>
+</header>
+
+<div class="classroom-container">
+    <!-- Left Sidebar Modules Accordion & Mobile Drawer -->
+    <aside class="sidebar-modules" id="sidebarModules">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+            <div>
+                <div style="font-family:'Plus Jakarta Sans';font-weight:800;font-size:15px;color:var(--text)">📚 Course Modules</div>
+                <div style="font-size:11px;color:var(--amber);font-weight:700">🏷️ {{ student_batch.name|default:"Batch 01" }}</div>
+            </div>
+            <button type="button" onclick="toggleMobileSidebar()" class="back-btn mobile-toggle-btn" style="width:30px;height:30px;font-size:14px">✕</button>
+        </div>
+
+        <div class="sidebar-top-box">
+            <div class="progress-title-row">
+                <span class="progress-pct">{{ progress_percent }}% Completed</span>
+                <span style="font-size:11.5px;font-weight:700;color:var(--text3)">{{ completed_modules_count }} / {{ total_modules }} Modules</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: {{ progress_percent }}%;"></div>
+            </div>
+        </div>
+
+        <div class="module-accordion">
+            {% for m in modules %}
+            <div class="module-group {% if active_lesson and active_lesson.module.id == m.id %}expanded{% endif %}">
+                <div class="module-header" onclick="toggleModuleGroup(this)">
+                    <span>{{ m.title }}</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="lesson-list">
+                    {% for l in m.lessons.all %}
+                    <a href="/student/classroom/lesson/{{ l.id }}/" class="lesson-item {% if l.id == active_lesson.id %}active{% endif %} {% if l.id in completed_lesson_ids %}completed{% endif %}" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">
+                        <div class="status-circle">
+                            {% if l.id in completed_lesson_ids %}✓{% endif %}
+                        </div>
+                        <div class="lesson-info">
+                            <div class="lesson-title">{{ l.title }}</div>
+                            <div class="lesson-meta">Video • {{ l.duration }} mins</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <!-- Main Content: HD Video Player & Controls -->
+    <main class="player-main-area">
+        <!-- Video Player -->
+        <div class="video-player-wrap">
+            {% if active_lesson.is_mp4_video %}
+            <video controls src="{{ active_lesson.video_url }}" style="position:absolute;inset:0;width:100%;height:100%;border-radius:20px"></video>
+            {% elif active_lesson.embed_video_url %}
+            <iframe src="{{ active_lesson.embed_video_url }}" title="{{ active_lesson.title }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+            {% else %}
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;background:var(--bg2)">
+                No video URL provided for this lesson.
+            </div>
+            {% endif %}
+        </div>
+
+        {% if active_lesson.video_url %}
+        <div style="display:flex;justify-content:flex-end">
+            <a href="{{ active_lesson.video_url }}" target="_blank" class="btn-header-action" style="font-size:12px;color:var(--cyan);border-color:rgba(204,255,0,0.3)">
+                🔗 Open Video Link in New Window (YouTube / Drive) ↗
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Video Title Header -->
+        <div>
+            <div class="lesson-module-tag">{{ active_lesson.module.title }}</div>
+            <h1 class="lesson-main-heading">{{ active_lesson.title }}</h1>
+        </div>
+
+        <!-- Tabs Card (Notes & Discussion) -->
+        <div class="tabs-card">
+            <div class="tabs-header">
+                <button type="button" class="tab-btn active" id="btn-notes" onclick="switchTab('notes')">📑 Class Notes & Summary</button>
+                <button type="button" class="tab-btn" id="btn-discussion" onclick="switchTab('discussion')">💬 Discussion & Help</button>
+            </div>
+            
+            <div id="tab-notes" class="tab-content">
+                {% if active_lesson.notes %}
+                <p>{{ active_lesson.notes }}</p>
+                {% else %}
+                <p>Welcome to <strong>{{ active_lesson.title }}</strong>! Watch the full video lecture, complete the practical assignments, and mark this lesson as complete to track your overall course progress.</p>
+                {% endif %}
+
+                {% if active_lesson.resources_url %}
+                <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+                    <strong style="color:var(--text)">📎 Class Attachments & Resources:</strong><br>
+                    <a href="{{ active_lesson.resources_url }}" target="_blank" style="color:var(--cyan);font-weight:700;font-size:13px;text-decoration:none;display:inline-block;margin-top:6px">Download Resource Files ↗</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div id="tab-discussion" class="tab-content" style="display:none">
+                <p style="color:var(--text3);font-style:italic">Need help with this recorded class? Reach out to lead instructor <strong>Siam Hossain</strong> or post your question in our student WhatsApp community group.</p>
+            </div>
+        </div>
+
+        <!-- Bottom Controls Bar -->
+        <div class="player-controls-bar">
+            {% if prev_lesson %}
+            <a href="/student/classroom/lesson/{{ prev_lesson.id }}/" class="btn-nav-control btn-prev-next">
+                ‹ Previous
+            </a>
+            {% else %}
+            <div></div>
+            {% endif %}
+
+            <a href="/student/classroom/toggle/{{ active_lesson.id }}/?next=/student/classroom/lesson/{% if next_lesson %}{{ next_lesson.id }}{% else %}{{ active_lesson.id }}{% endif %}/" class="btn-nav-control btn-mark-complete {% if is_active_completed %}completed{% endif %}">
+                {% if is_active_completed %}✓ Completed Lesson{% else %}Mark as Complete ✓{% endif %}
+            </a>
+
+            {% if next_lesson %}
+            <a href="/student/classroom/lesson/{{ next_lesson.id }}/" class="btn-nav-control btn-prev-next">
+                Next ›
+            </a>
+            {% else %}
+            <a href="/student/dashboard/" class="btn-nav-control btn-prev-next">
+                Back to Dashboard 🎓
+            </a>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script>
+function toggleModuleGroup(headerEl) {
+    const group = headerEl.parentElement;
+    group.classList.toggle('expanded');
+}
+
+function toggleMobileSidebar() {
+    const sidebar = document.getElementById('sidebarModules');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    sidebar.classList.toggle('open');
+    backdrop.classList.toggle('active');
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme');
+    const btn = document.getElementById('theme-toggle-btn');
+    const isLight = document.body.classList.contains('light-theme');
+    if (btn) btn.innerHTML = isLight ? '☀️ Light' : '🌙 Dark';
+}
+
+function switchTab(tabName) {
+    document.getElementById('btn-notes').classList.remove('active');
+    document.getElementById('btn-discussion').classList.remove('active');
+    document.getElementById('tab-notes').style.display = 'none';
+    document.getElementById('tab-discussion').style.display = 'none';
+    
+    if (tabName === 'notes') {
+        document.getElementById('tab-notes').style.display = 'block';
+        document.getElementById('btn-notes').classList.add('active');
+    } else {
+        document.getElementById('tab-discussion').style.display = 'block';
+        document.getElementById('btn-discussion').classList.add('active');
+    }
+}
+</script>
+
+</body>
+</html>

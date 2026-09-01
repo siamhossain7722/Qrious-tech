@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Applications Report — Siam Hossain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #0f172a;
+            line-height: 1.4;
+            font-size: 10pt;
+            padding: 16px 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Screen toolbar */
+        .no-print-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .btn-print {
+            background: #3b82f6;
+            color: #ffffff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn-print:hover { background: #ccff00; }
+
+        .btn-back {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .btn-back:hover { color: #ffffff; text-decoration: underline; }
+
+        @media print {
+            .no-print-toolbar { display: none !important; }
+            body { padding: 0 !important; }
+        }
+
+        /* Report Header */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+
+        .report-title {
+            font-size: 18pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .candidate-meta {
+            font-size: 9.5pt;
+            color: #334155;
+            margin-top: 3px;
+        }
+
+        .report-stats {
+            text-align: right;
+            font-size: 9pt;
+            color: #475569;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #15803d;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-top: 4px;
+            font-size: 9.5pt;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin-top: 8px;
+        }
+
+        thead th {
+            background: #0f172a;
+            color: #ffffff;
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 8.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid #0f172a;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            page-break-inside: avoid;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        td {
+            padding: 7px 10px;
+            vertical-align: middle;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .col-num {
+            width: 35px;
+            text-align: center;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .job-title {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 9.5pt;
+        }
+
+        .job-company {
+            font-size: 8.5pt;
+            color: #475569;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .match-notes {
+            font-size: 7.5pt;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 8pt;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-applied { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .badge-dry_run { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .badge-skipped { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-failed { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .badge-interview { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .badge-offer { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-easy { background: #cffafe; color: #155e75; border: 1px solid #a5f3fc; }
+
+        .score-badge {
+            font-weight: 800;
+            color: #047857;
+            background: #ecfdf5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #a7f3d0;
+            font-size: 8.5pt;
+        }
+
+        /* Footer */
+        .report-footer {
+            margin-top: 16px;
+            padding-top: 8px;
+            border-top: 1px solid #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- On-screen Toolbar -->
+    <div class="no-print-toolbar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 20px;">📄</span>
+            <div>
+                <strong style="font-size: 14px;">A4 PDF Export Preview</strong>
+                <div style="font-size: 11px; color: #94a3b8;">Showing {{ jobs|length }} applications matching your active filter</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button type="button" onclick="window.location.href='/'" class="btn-print" style="background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid #475569;">← Return to Dashboard</button>
+            <button type="button" onclick="window.print()" class="btn-print">🖨️ Save as PDF / Print</button>
+        </div>
+    </div>
+
+    <!-- Printable Header -->
+    <div class="report-header">
+        <div>
+            <div class="report-title">🤖 JobAgent AI — Applications Report</div>
+            <div class="candidate-meta">
+                Candidate: <strong>Siam Hossain</strong> &bull; Location: <strong>Dhaka, Bangladesh</strong> &bull; Role: <strong>Full Stack Developer</strong>
+            </div>
+        </div>
+        <div class="report-stats">
+            <div>Report Date: <strong>{% now "F j, Y, g:i A" %}</strong></div>
+            <div class="stat-badge">Total Applications: {{ jobs|length }}</div>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 35px; text-align: center;">#</th>
+                <th>Job Title & Company</th>
+                <th style="width: 85px; text-align: center;">CV Match</th>
+                <th>Location & Workplace</th>
+                <th style="width: 110px; text-align: center;">Apply Type</th>
+                <th style="width: 95px; text-align: center;">Status</th>
+                <th style="width: 100px; text-align: center;">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td class="col-num">{{ forloop.counter }}</td>
+                <td>
+                    <div class="job-title">{{ job.title }}</div>
+                    <div class="job-company">{{ job.company }}</div>
+                    {% if job.match_reasons %}
+                    <div class="match-notes">💡 {{ job.match_reasons|truncatechars:90 }}</div>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <span class="score-badge">🌟 {{ job.match_score }}%</span>
+                </td>
+                <td>
+                    <div>{{ job.location|default:"Worldwide / Remote" }}</div>
+                    {% if job.workplace_type %}
+                    <div style="font-size: 7.5pt; color: #0284c7; margin-top: 1px;">🏠 {{ job.workplace_type|title }}</div>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if job.is_easy_apply %}
+                    <span class="badge-pill badge-easy">⚡ Easy Apply</span>
+                    {% else %}
+                    <span class="badge-pill badge-skipped">🌐 Direct Apply</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge-pill badge-{{ job.status }}">
+                        {{ job.get_status_display }}
+                    </span>
+                </td>
+                <td style="text-align: center; font-size: 8pt; color: #475569;">
+                    {{ job.date_applied|date:"M j, Y" }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">
+                    No job applications recorded for the selected criteria.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="report-footer">
+        <span>Confidential &bull; Generated by JobAgent AI</span>
+        <span>Page 1 of 1</span>
+    </div>
+
+</body>
+</html>

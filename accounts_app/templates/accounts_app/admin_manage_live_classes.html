@@ -1,0 +1,586 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Live Class Schedule Manager — Qrious Tech Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --card: #0d1222; --card-border: rgba(255,255,255,0.08);
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --lime: #ccff00; --cyan: #38bdf8; --purple: #a855f7;
+            --red: #ef4444; --green: #10b981;
+        }
+        body.light-theme {
+            --bg: #f1f5f9; --card: #ffffff; --card-border: #cbd5e1;
+            --text: #0f172a; --text2: #475569; --text3: #64748b;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+        /* ─────────────────────────────────────────────────────
+           LAYOUT SHELL  (sidebar + wrapper side by side)
+        ───────────────────────────────────────────────────── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ─── SIDEBAR ───────────────────────────────────────── */
+        .sidebar {
+            width: 260px; flex-shrink: 0;
+            background: var(--card); border-right: 1px solid var(--card-border);
+            padding: 24px 14px; display: flex; flex-direction: column;
+            justify-content: space-between;
+            position: sticky; top: 0; height: 100vh; overflow-y: auto;
+            z-index: 200; transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+        }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 0 6px; text-decoration: none; }
+        .nav-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--text3); letter-spacing: 0.09em; margin: 18px 8px 7px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 13px; border-radius: 11px; color: var(--text2); text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.18s; margin-bottom: 3px; border: 1px solid transparent; }
+        .nav-item:hover  { background: rgba(56,189,248,0.1);  color: var(--cyan); }
+        .nav-item.active { background: rgba(56,189,248,0.15); color: var(--cyan); border-color: rgba(56,189,248,0.25); }
+
+        /* dim overlay when sidebar is open on mobile */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 199; backdrop-filter: blur(2px); }
+
+        /* ─── WRAPPER (everything right of sidebar) ────────── */
+        .page-wrapper { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+        /* ─── MOBILE TOPBAR (hidden on desktop) ─────────────── */
+        .mobile-topbar {
+            display: none; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: var(--card);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky; top: 0; z-index: 150;
+        }
+        .hamburger-btn {
+            background: rgba(255,255,255,0.07); border: 1px solid var(--card-border);
+            border-radius: 10px; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text); font-size: 20px; flex-shrink: 0;
+        }
+
+        /* ─── MAIN CONTENT ──────────────────────────────────── */
+        .main-content { flex: 1; padding: 32px 36px; }
+
+        /* Desktop page header */
+        .desktop-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+        .header-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 900; line-height: 1.2; }
+        .header-sub { font-size: 13.5px; color: var(--text2); margin-top: 5px; max-width: 640px; line-height: 1.55; }
+        .topbar-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+
+        /* ─── CARDS ─────────────────────────────────────────── */
+        .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 26px; margin-bottom: 26px; box-shadow: 0 16px 40px -12px rgba(0,0,0,0.45); }
+        .card-title { font-size: 17px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        /* ─── FORM ──────────────────────────────────────────── */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { font-size: 11.5px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+        input, select, textarea {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--card-border);
+            border-radius: 11px; padding: 11px 14px; color: var(--text);
+            font-size: 14px; font-family: inherit; transition: border-color 0.2s; width: 100%;
+        }
+        body.light-theme input, body.light-theme select, body.light-theme textarea { background: #f8fafc; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(56,189,248,0.18); }
+        .form-submit-row { display: flex; justify-content: flex-end; }
+
+        /* ─── BUTTONS ───────────────────────────────────────── */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 22px; border-radius: 11px; font-size: 13.5px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; white-space: nowrap; }
+        .btn-cyan { background: linear-gradient(135deg,#0284c7,#38bdf8); color:#fff; box-shadow:0 8px 20px -4px rgba(2,132,199,0.5); }
+        .btn-cyan:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -4px rgba(2,132,199,0.65); }
+        .btn-danger { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--card-border); color: var(--text2); }
+        .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        /* ─── ALERTS ────────────────────────────────────────── */
+        .alert-messages { margin-bottom: 20px; }
+        .alert { padding: 13px 18px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
+        .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+        .alert-error   { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
+        .alert-info    { background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; }
+        .alert-warning { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+
+        /* ─── BADGES ────────────────────────────────────────── */
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; white-space: nowrap; }
+        .badge-active    { background: rgba(16,185,129,0.14); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+        .badge-cancelled { background: rgba(239,68,68,0.14);  color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
+
+        /* ─── DESKTOP TABLE ─────────────────────────────────── */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .sessions-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .sessions-table th { padding: 12px 16px; color: var(--text3); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; border-bottom: 1px solid var(--card-border); white-space: nowrap; text-align: left; }
+        .sessions-table td { padding: 15px 16px; border-bottom: 1px solid var(--card-border); color: var(--text2); vertical-align: middle; }
+        .sessions-table tbody tr:last-child td { border-bottom: none; }
+        .sessions-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+        .action-group { display: flex; gap: 7px; justify-content: flex-end; flex-wrap: wrap; }
+
+        /* ─── MOBILE SESSION CARDS ──────────────────────────── */
+        .session-cards { display: none; flex-direction: column; gap: 14px; }
+        .session-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px 16px; transition: border-color 0.2s; }
+        .session-card:hover { border-color: rgba(56,189,248,0.3); }
+        .sc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        .sc-title { font-size: 15px; font-weight: 800; color: #fff; line-height: 1.35; }
+        .sc-batch { font-size: 12px; color: var(--cyan); font-weight: 700; margin-top: 3px; }
+        .sc-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-bottom: 12px; }
+        .sc-meta-item { display: flex; flex-direction: column; gap: 2px; }
+        .sc-meta-label { font-size: 10px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+        .sc-meta-value { font-size: 13px; color: var(--text); font-weight: 600; }
+        .sc-link { font-size: 12px; color: var(--lime); word-break: break-all; font-weight: 700; text-decoration: none; display: block; margin-bottom: 14px; line-height: 1.5; }
+        .sc-link:hover { color: #e0ff6a; }
+        .sc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .sc-actions form { flex: 1; min-width: 100px; }
+
+        /* ─── WHATSAPP MODAL ────────────────────────────────── */
+        .wa-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(6px); z-index: 9999; align-items: center; justify-content: center; padding: 14px; }
+        .wa-overlay.active { display: flex; }
+        .wa-modal {
+            background: #0d1222; border: 1px solid rgba(37,211,102,0.4); border-radius: 22px;
+            padding: 26px 24px; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto;
+            box-shadow: 0 30px 60px -10px rgba(0,0,0,0.8), 0 0 50px rgba(37,211,102,0.1);
+            position: relative; animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+        .wa-close { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.07); border: none; color: #94a3b8; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .wa-header { display: flex; align-items: center; gap: 13px; margin-bottom: 18px; }
+        .wa-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg,#25D366,#128C7E); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 8px 18px rgba(37,211,102,0.35); }
+        .wa-strip { background: rgba(37,211,102,0.07); border: 1px solid rgba(37,211,102,0.2); border-radius: 12px; padding: 12px 15px; margin-bottom: 16px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+        .wa-textarea { width: 100%; background: #070913; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.72; resize: none; }
+        .wa-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .wa-copy-btn { flex: 1; min-width: 130px; padding: 12px 16px; border-radius: 12px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); color: #38bdf8; font-size: 13.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.2s; }
+        .wa-share-btn { flex: 1; min-width: 130px; padding: 12px 16px; border-radius: 12px; background: linear-gradient(135deg,#25D366,#128C7E); color: #fff; font-size: 13.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 6px 18px rgba(37,211,102,0.32); transition: transform 0.2s; }
+        .wa-share-btn:hover { transform: translateY(-2px); }
+        .wa-dismiss-btn { padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #64748b; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+        .wa-feedback { display: none; margin-top: 12px; text-align: center; font-size: 13px; font-weight: 700; color: #25D366; background: rgba(37,211,102,0.09); border: 1px solid rgba(37,211,102,0.25); border-radius: 10px; padding: 8px; }
+
+        /* ─────────────────────────────────────────────────────
+           RESPONSIVE BREAKPOINTS
+        ───────────────────────────────────────────────────── */
+
+        /* Tablet & below — slide-out sidebar */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed; top: 0; left: 0; height: 100vh;
+                transform: translateX(-260px);   /* hidden by default */
+                z-index: 200;
+            }
+            .sidebar.open { transform: translateX(0); box-shadow: 8px 0 40px rgba(0,0,0,0.5); }
+            .sidebar-overlay.visible { display: block; }
+            .mobile-topbar  { display: flex; }
+            .desktop-topbar { display: none; }
+            .main-content   { padding: 18px 16px; }
+        }
+
+        /* Mobile — single-column form, card list instead of table */
+        @media (max-width: 720px) {
+            .card { padding: 16px; border-radius: 16px; margin-bottom: 18px; }
+            .card-title { font-size: 15px; margin-bottom: 16px; }
+            .form-grid { grid-template-columns: 1fr; gap: 13px; }
+            .form-group.full { grid-column: auto; }
+            .form-submit-row { justify-content: stretch; }
+            .form-submit-row .btn { width: 100%; justify-content: center; }
+
+            /* hide table, show cards */
+            .table-responsive { display: none; }
+            .session-cards   { display: flex; }
+        }
+
+        /* Small phones */
+        @media (max-width: 420px) {
+            .main-content { padding: 12px 10px; }
+            .mobile-topbar { padding: 10px 12px; }
+            .wa-modal { padding: 18px 14px; border-radius: 18px; }
+            .wa-actions { flex-direction: column; }
+            .wa-copy-btn, .wa-share-btn, .wa-dismiss-btn { width: 100%; }
+            .sc-meta { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar dim overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+    <!-- ─── SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+        <div>
+            <a href="/superadmin/" class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" style="height:42px;width:auto;object-fit:contain">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:-0.02em">Qrious Tech</span>
+                    <span style="font-weight:700;font-size:10px;color:#ccff00;text-transform:uppercase;letter-spacing:0.09em">Academy</span>
+                </div>
+            </a>
+
+            <div class="nav-label">Master Controls</div>
+            <a href="/superadmin/"        class="nav-item">📊 Dashboard & Courses</a>
+            <a href="/admin-users/"       class="nav-item">👥 Users & Subscriptions</a>
+            <a href="/admin-payments/"    class="nav-item">💳 Payment Verifications</a>
+            <a href="/superadmin/bookings/" class="nav-item">📅 Service Bookings</a>
+            <a href="/notifications/"     class="nav-item">🔔 Notification Center</a>
+
+            <div class="nav-label">LMS Management</div>
+            <a href="/superadmin/modules/"      class="nav-item">📚 Course Modules</a>
+            <a href="/superadmin/live-classes/" class="nav-item active">🎥 Live Class Meetings</a>
+            <a href="/student/classroom/"       class="nav-item">🎓 Student Classroom</a>
+        </div>
+        <div>
+            <a href="/logout/" class="nav-item" style="color:var(--red)">🚪 Sign Out</a>
+        </div>
+    </aside>
+
+    <!-- ─── PAGE WRAPPER ─────────────────────────────────── -->
+    <div class="page-wrapper">
+
+        <!-- Mobile sticky topbar -->
+        <header class="mobile-topbar">
+            <button class="hamburger-btn" onclick="openSidebar()" aria-label="Open menu">☰</button>
+            <a href="/superadmin/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" style="height:30px;width:auto;object-fit:contain">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff">Qrious Tech</span>
+            </a>
+            <div style="display:flex;align-items:center;gap:8px">
+                {% include "accounts_app/notification_bell.html" %}
+                <button id="themeBtnMobile" onclick="toggleTheme()" class="hamburger-btn" style="font-size:15px">🌙</button>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="main-content">
+
+            <!-- Desktop page header -->
+            <div class="desktop-topbar">
+                <div>
+                    <h1 class="header-title">🎥 Live Class Schedule & Meeting Manager</h1>
+                    <p class="header-sub">Schedule live video sessions, Google Meet/Zoom links, and automatically send dashboard alerts & email invitations to batch students.</p>
+                </div>
+                <div class="topbar-controls">
+                    {% include "accounts_app/notification_bell.html" %}
+                    <button id="themeBtn" onclick="toggleTheme()" class="btn btn-outline" style="padding:8px 14px">🌙 Dark</button>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="alert-messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <span>{{ message }}</span>
+                    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:16px;flex-shrink:0;margin-left:8px">✕</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ─── SCHEDULE FORM ─────────────────────────── -->
+            <div class="card">
+                <h2 class="card-title">📅 Schedule New Live Class & Send Batch Invitations</h2>
+                <form method="POST" action="/superadmin/live-classes/">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_live_class">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Target Student Batch *</label>
+                            <select name="batch_id" required>
+                                <option value="">-- Select Batch --</option>
+                                {% for b in batches %}
+                                <option value="{{ b.id }}">{{ b.name }}{% if b.course %} ({{ b.course.title }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Live Class Title *</label>
+                            <input type="text" name="title" placeholder="e.g. FB Ads Mastery — 5th Class" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Meeting Link (Google Meet / Zoom / Teams) *</label>
+                            <input type="url" name="meeting_link" placeholder="https://meet.google.com/abc-def-ghi" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Scheduled Date *</label>
+                            <input type="date" name="scheduled_date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Scheduled Time *</label>
+                            <input type="time" name="scheduled_time" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Session Duration</label>
+                            <input type="text" name="duration" value="1 Hour 30 Mins" placeholder="e.g. 1 Hour 30 Mins">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Instructor / Lead Mentor</label>
+                            <input type="text" name="instructor_name" value="Qrious Tech Senior Mentor">
+                        </div>
+
+                        <div class="form-group full">
+                            <label>Session Agenda & Mentorship Outline</label>
+                            <textarea name="agenda" rows="3" placeholder="Enter session outline, homework review, or Q&A topics covered..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-submit-row">
+                        <button type="submit" class="btn btn-cyan">
+                            🚀 Schedule Live Class & Send Batch Email Invitations ↗
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ─── SESSIONS LIST ─────────────────────────── -->
+            <div class="card">
+                <h2 class="card-title">
+                    🎥 Scheduled Live Class Sessions
+                    <span style="font-size:13px;font-weight:700;color:var(--cyan);background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.25);padding:3px 12px;border-radius:20px;line-height:1.6">{{ live_classes|length }}</span>
+                </h2>
+
+                {% if live_classes %}
+
+                <!-- Desktop table (hidden on mobile via CSS) -->
+                <div class="table-responsive">
+                    <table class="sessions-table">
+                        <thead>
+                            <tr>
+                                <th>Batch</th>
+                                <th>Class Title & Meeting Link</th>
+                                <th>Date & Time</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lc in live_classes %}
+                            <tr>
+                                <td><strong style="color:var(--cyan)">{{ lc.batch.name }}</strong></td>
+                                <td style="max-width:280px">
+                                    <strong style="color:#fff;font-size:14px;display:block;margin-bottom:4px">{{ lc.title }}</strong>
+                                    <a href="{{ lc.meeting_link }}" target="_blank" style="color:var(--lime);font-size:12px;text-decoration:none;font-weight:700;word-break:break-all">🔗 {{ lc.meeting_link }} ↗</a>
+                                </td>
+                                <td style="white-space:nowrap">
+                                    <strong style="color:#fff;display:block">{{ lc.scheduled_at|date:"D, M d, Y" }}</strong>
+                                    <span style="font-size:12px;color:var(--text3)">at {{ lc.scheduled_at|date:"h:i A" }}</span>
+                                </td>
+                                <td style="white-space:nowrap">{{ lc.duration }}</td>
+                                <td>
+                                    {% if lc.is_active %}<span class="badge badge-active">🟢 Active</span>
+                                    {% else %}<span class="badge badge-cancelled">🔴 Cancelled</span>{% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-group">
+                                        <form method="POST" action="/superadmin/live-classes/" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="resend_invitation"><input type="hidden" name="class_id" value="{{ lc.id }}"><button type="submit" class="btn btn-outline btn-sm">📢 Resend</button></form>
+                                        <form method="POST" action="/superadmin/live-classes/" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="toggle_status"><input type="hidden" name="class_id" value="{{ lc.id }}"><button type="submit" class="btn btn-outline btn-sm">{% if lc.is_active %}⏸ Cancel{% else %}▶ Activate{% endif %}</button></form>
+                                        <form method="POST" action="/superadmin/live-classes/" style="display:inline" onsubmit="return confirm('Delete \'{{ lc.title }}\'?')">{% csrf_token %}<input type="hidden" name="action" value="delete_live_class"><input type="hidden" name="class_id" value="{{ lc.id }}"><button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button></form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile cards (hidden on desktop via CSS) -->
+                <div class="session-cards">
+                    {% for lc in live_classes %}
+                    <div class="session-card">
+                        <!-- Card header -->
+                        <div class="sc-head">
+                            <div>
+                                <div class="sc-title">{{ lc.title }}</div>
+                                <div class="sc-batch">📡 {{ lc.batch.name }}</div>
+                            </div>
+                            {% if lc.is_active %}
+                            <span class="badge badge-active" style="flex-shrink:0">🟢 Active</span>
+                            {% else %}
+                            <span class="badge badge-cancelled" style="flex-shrink:0">🔴 Cancelled</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Meta info grid -->
+                        <div class="sc-meta">
+                            <div class="sc-meta-item">
+                                <span class="sc-meta-label">📅 Date</span>
+                                <span class="sc-meta-value">{{ lc.scheduled_at|date:"D, M d, Y" }}</span>
+                            </div>
+                            <div class="sc-meta-item">
+                                <span class="sc-meta-label">🕐 Time</span>
+                                <span class="sc-meta-value">{{ lc.scheduled_at|date:"h:i A" }}</span>
+                            </div>
+                            <div class="sc-meta-item">
+                                <span class="sc-meta-label">⏱ Duration</span>
+                                <span class="sc-meta-value">{{ lc.duration }}</span>
+                            </div>
+                            <div class="sc-meta-item">
+                                <span class="sc-meta-label">👨‍🏫 Mentor</span>
+                                <span class="sc-meta-value">{{ lc.instructor_name }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Meeting link -->
+                        <a href="{{ lc.meeting_link }}" target="_blank" class="sc-link">🔗 {{ lc.meeting_link }} ↗</a>
+
+                        <!-- Action buttons -->
+                        <div class="sc-actions">
+                            <form method="POST" action="/superadmin/live-classes/" style="flex:1">
+                                {% csrf_token %}<input type="hidden" name="action" value="resend_invitation"><input type="hidden" name="class_id" value="{{ lc.id }}">
+                                <button type="submit" class="btn btn-outline btn-sm btn-block">📢 Resend Invites</button>
+                            </form>
+                            <form method="POST" action="/superadmin/live-classes/" style="flex:1">
+                                {% csrf_token %}<input type="hidden" name="action" value="toggle_status"><input type="hidden" name="class_id" value="{{ lc.id }}">
+                                <button type="submit" class="btn btn-outline btn-sm btn-block">{% if lc.is_active %}⏸ Cancel{% else %}▶ Activate{% endif %}</button>
+                            </form>
+                            <form method="POST" action="/superadmin/live-classes/" onsubmit="return confirm('Delete this session?')">
+                                {% csrf_token %}<input type="hidden" name="action" value="delete_live_class"><input type="hidden" name="class_id" value="{{ lc.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% else %}
+                <div style="text-align:center;padding:44px 20px;color:var(--text3);font-size:14px">
+                    <div style="font-size:40px;margin-bottom:12px">📭</div>
+                    No live sessions scheduled yet.<br>Use the form above to schedule your first class!
+                </div>
+                {% endif %}
+            </div>
+
+        </main>
+    </div><!-- /.page-wrapper -->
+
+</div><!-- /.layout -->
+
+{% if whatsapp_text %}
+<!-- ─── WHATSAPP SHARE MODAL ───────────────────────────── -->
+<div class="wa-overlay" id="waOverlay" onclick="if(event.target===this)closeWaModal()">
+    <div class="wa-modal">
+        <button onclick="closeWaModal()" class="wa-close" aria-label="Close">✕</button>
+
+        <div class="wa-header">
+            <div class="wa-icon">💬</div>
+            <div>
+                <div style="font-size:17px;font-weight:900;color:#fff;line-height:1.2">WhatsApp Message Ready! 🎉</div>
+                <div style="font-size:12px;color:#94a3b8;margin-top:3px">Copy and paste into your batch group</div>
+            </div>
+        </div>
+
+        {% if whatsapp_created_class %}
+        <div class="wa-strip">
+            <span style="font-size:12.5px;font-weight:800;color:#25D366">📡 {{ whatsapp_created_class.batch.name }}</span>
+            <span style="color:#475569">•</span>
+            <span style="font-size:12.5px;color:#cbd5e1">{{ whatsapp_created_class.title }}</span>
+            <span style="color:#475569">•</span>
+            <span style="font-size:12px;color:var(--purple);font-weight:700">{{ whatsapp_created_class.scheduled_at|date:"D, M d @ h:i A" }}</span>
+        </div>
+        {% endif %}
+
+        <label style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);display:block;margin-bottom:8px">WhatsApp Message Text:</label>
+        <textarea id="waTextBox" class="wa-textarea" readonly rows="10">{{ whatsapp_text }}</textarea>
+
+        <div class="wa-actions">
+            <button id="copyBtn" onclick="copyWaText()" class="wa-copy-btn">📋 Copy to Clipboard</button>
+            {% if whatsapp_created_class %}
+            <a href="https://wa.me/?text={{ whatsapp_text|urlencode }}" target="_blank" rel="noopener noreferrer" class="wa-share-btn">💬 Open WhatsApp ↗</a>
+            {% endif %}
+            <button onclick="closeWaModal()" class="wa-dismiss-btn">Close</button>
+        </div>
+
+        <div id="copyFeedback" class="wa-feedback">✅ Copied! Now paste it into your WhatsApp group.</div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    /* ─── THEME ─────────────────────────────── */
+    function toggleTheme() {
+        const light = document.body.classList.toggle('light-theme');
+        localStorage.setItem('theme', light ? 'light' : 'dark');
+        const lbl = light ? '☀️ Light' : '🌙 Dark';
+        const lbl2 = light ? '☀️' : '🌙';
+        const b1 = document.getElementById('themeBtn');
+        const b2 = document.getElementById('themeBtnMobile');
+        if (b1) b1.textContent = lbl;
+        if (b2) b2.textContent = lbl2;
+    }
+
+    /* ─── SIDEBAR ───────────────────────────── */
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+
+    /* ─── WHATSAPP MODAL ────────────────────── */
+    function closeWaModal() {
+        const o = document.getElementById('waOverlay');
+        if (o) { o.classList.remove('active'); }
+        if (window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+    function copyWaText() {
+        const box = document.getElementById('waTextBox');
+        box.select(); box.setSelectionRange(0, 99999);
+        const text = box.value;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(showCopied).catch(() => { document.execCommand('copy'); showCopied(); });
+        } else { document.execCommand('copy'); showCopied(); }
+    }
+    function showCopied() {
+        const fb = document.getElementById('copyFeedback');
+        const btn = document.getElementById('copyBtn');
+        if (!fb || !btn) return;
+        fb.style.display = 'block';
+        btn.innerHTML = '✅ Copied!';
+        btn.style.background = 'rgba(37,211,102,0.16)';
+        btn.style.borderColor = 'rgba(37,211,102,0.4)';
+        btn.style.color = '#25D366';
+        setTimeout(() => {
+            fb.style.display = 'none';
+            btn.innerHTML = '📋 Copy to Clipboard';
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+        }, 3500);
+    }
+
+    /* ─── INIT ──────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Restore theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            const b1 = document.getElementById('themeBtn');
+            const b2 = document.getElementById('themeBtnMobile');
+            if (b1) b1.textContent = '☀️ Light';
+            if (b2) b2.textContent = '☀️';
+        }
+        {% if whatsapp_text %}
+        // Auto-show WhatsApp modal after scheduling
+        const o = document.getElementById('waOverlay');
+        if (o) o.classList.add('active');
+        {% endif %}
+    });
+</script>
+</body>
+</html>

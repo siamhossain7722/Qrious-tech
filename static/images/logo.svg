@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="500" height="120">
+  <defs>
+    <linearGradient id="limeGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4FF00"/>
+      <stop offset="100%" stop-color="#B2E600"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#D4FF00" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect x="10" y="15" width="90" height="90" rx="28" fill="url(#limeGlow)" filter="url(#shadow)" />
+  <path d="M 55 35 C 42 35 32 45 32 60 C 32 75 42 85 55 85 C 62 85 68 82 72 77 L 80 85 L 85 80 L 77 72 C 82 68 85 62 85 55 C 85 45 75 35 55 35 Z M 55 47 C 62 47 68 53 68 60 C 68 67 62 73 55 73 C 48 73 42 67 42 60 C 42 53 48 47 55 47 Z" fill="#111827" />
+  <text x="120" y="66" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="900" fill="#111827" letter-spacing="-1.5">Qrious</text>
+  <text x="252" y="66" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="900" fill="#111827" letter-spacing="-1.5">Solution</text>
+  <circle cx="435" cy="60" r="7" fill="#D4FF00" />
+  <text x="120" y="90" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#6B7280" letter-spacing="2">AI &amp; SOFTWARE AGENCY</text>
+</svg>

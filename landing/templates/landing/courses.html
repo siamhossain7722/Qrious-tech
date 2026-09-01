@@ -1,0 +1,125 @@
+{% extends "landing/base.html" %}
+{% load static %}
+
+{% block title %}Courses & Academy — Qrious Tech Academy{% endblock %}
+
+{% block content %}
+<style>
+    .hero-sec { padding: 5px 28px 20px; text-align: center; max-width: 1000px; margin: 0 auto; position: relative; z-index: 2; }
+    .hero-tag { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #111827; background: #D4FF00; padding: 4px 16px; border-radius: 999px; display: inline-block; margin-bottom: 10px; }
+    .hero-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 900; line-height: 1.18; margin-bottom: 12px; color: #111827; }
+    .hero-sub { font-size: 17px; color: var(--text2); max-width: 700px; margin: 0 auto; line-height: 1.6; }
+
+    .section { padding: 40px 28px 90px; max-width: 1240px; margin: 0 auto; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+    @media(max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .course-card {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 28px;
+        overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .course-card:hover { transform: translateY(-6px); border-color: #111827; box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+    .course-img { width: 100%; height: 240px; object-fit: cover; }
+    .course-body { padding: 32px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .course-badge { padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #D4FF00; color: #111827; border: none; display: inline-block; margin-bottom: 14px; }
+    .course-title { font-size: 24px; font-weight: 800; margin-bottom: 12px; color: #111827; }
+    .course-desc { font-size: 15px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
+    .module-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+    .module-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text); }
+</style>
+
+<div style="position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%, rgba(212,255,0,0.15) 0%, rgba(255,255,255,0) 75%);pointer-events:none;z-index:0"></div>
+
+<section class="hero-sec">
+    <div class="hero-tag">Qrious Academy</div>
+    <h1 class="hero-title">Learn Real-World Tech Skills <br><span style="color:#111827;border-bottom:4px solid #D4FF00">From Industry Leaders</span></h1>
+    <p class="hero-sub">Hands-on masterclasses designed to transform students into production-ready Web Developers and Digital Growth Marketers.</p>
+</section>
+
+<div class="section">
+    <div class="grid-2">
+
+        <!-- Digital Marketing -->
+        <div class="course-card" id="digital-marketing">
+            <img src="{% static 'images/courses_tech.jpg' %}" alt="Digital Marketing Course" class="course-img">
+            <div class="course-body">
+                <div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <span class="course-badge" style="margin-bottom:0">PHASE 1 FOUNDATION • 12 WEEKS</span>
+                        <span style="font-size:12px;background:#10b981;color:white;padding:3px 8px;border-radius:12px;font-weight:700">50% OFF</span>
+                    </div>
+                    <h2 class="course-title">Digital Marketing & Growth Mastery</h2>
+                    <p class="course-desc">A complete 12-week intensive masterclass covering Copywriting, Customer Psychology, AI Content, OVC Design, FB Ads, WordPress, AI Chatbots, SWOT Analysis & Sales.</p>
+                    
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+                        <div>
+                            <div style="font-size:11px;color:var(--text3);text-decoration:line-through">Regular Fee: ৳20,000 BDT</div>
+                            <div style="font-size:22px;font-weight:900;color:#34d399">৳10,000 <span style="font-size:14px;color:var(--text2)">BDT</span></div>
+                        </div>
+                        <div style="font-size:12px;color:var(--purple);font-weight:700">13 Modules Included</div>
+                    </div>
+
+                    <div style="font-weight:700;font-size:12px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Course Highlights:</div>
+                    <ul class="module-list" style="margin-bottom:24px">
+                        <li class="module-item"><span>✍️</span> Copywriting, Content & Customer Psychology</li>
+                        <li class="module-item"><span>🎨</span> Design, AI OVC Video & Portfolio Setup</li>
+                        <li class="module-item"><span>🤖</span> AI Content, Chatbots & WordPress Websites</li>
+                        <li class="module-item"><span>🚀</span> FB Ads, Sales & Capstone Marathon Challenge</li>
+                    </ul>
+                </div>
+                <div style="display:flex;gap:10px">
+                    <a href="/courses/digital-marketing/" class="btn btn-primary" style="flex:1;justify-content:center;padding:12px;font-size:14px;background:linear-gradient(135deg,var(--purple),var(--blue))">
+                        View Syllabus (13 Modules) →
+                    </a>
+                    <a href="/contact/?subject=Digital+Marketing+Enrollment" class="btn btn-outline" style="padding:12px 16px;font-size:14px;border-color:rgba(16,185,129,0.4);color:#34d399">
+                        Enroll (৳10,000)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Development -->
+        <div class="course-card" id="web-development">
+            <img src="{% static 'images/courses_tech.jpg' %}" alt="Web Development Course" class="course-img">
+            <div class="course-body">
+                <div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <span class="course-badge" style="background:rgba(59,130,246,0.2);color:#93c5fd;border-color:rgba(59,130,246,0.3);margin-bottom:0">FULL STACK BOOTCAMP • 12 WEEKS</span>
+                        <span style="font-size:12px;background:#10b981;color:white;padding:3px 8px;border-radius:12px;font-weight:700">50% OFF</span>
+                    </div>
+                    <h2 class="course-title">Full-Stack Web Development (Python & React)</h2>
+                    <p class="course-desc">Build and deploy production-ready web apps. Master HTML, CSS, JavaScript, React, Python, Django framework, REST APIs, and Cloud Hosting.</p>
+                    
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+                        <div>
+                            <div style="font-size:11px;color:var(--text3);text-decoration:line-through">Regular Fee: ৳20,000 BDT</div>
+                            <div style="font-size:22px;font-weight:900;color:#34d399">৳10,000 <span style="font-size:14px;color:var(--text2)">BDT</span></div>
+                        </div>
+                        <div style="font-size:12px;color:var(--cyan);font-weight:800;background:rgba(204,255,0,0.12);padding:4px 10px;border-radius:12px;border:1px solid rgba(204,255,0,0.3)">
+                            🔥 10 Seats / Batch Only
+                        </div>
+                    </div>
+
+                    <div style="font-weight:700;font-size:12px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Key Curriculum Modules:</div>
+                    <ul class="module-list" style="margin-bottom:24px">
+                        <li class="module-item"><span>💻</span> Modern HTML5, CSS Grid, JavaScript ES6+ & React</li>
+                        <li class="module-item"><span>🐍</span> Python Programming & Django Web Framework</li>
+                        <li class="module-item"><span>⚡</span> REST APIs, JWT Auth, PostgreSQL & Stripe</li>
+                        <li class="module-item"><span>☁️</span> Git, Docker Containerization & AWS Deployment</li>
+                    </ul>
+                </div>
+                <div style="display:flex;gap:10px">
+                    <a href="/courses/full-stack-web/" class="btn btn-primary" style="flex:1;justify-content:center;padding:12px;font-size:14px;background:linear-gradient(135deg,var(--blue),var(--cyan))">
+                        View Syllabus (12 Modules) →
+                    </a>
+                    <a href="/contact/?subject=Web+Development+Enrollment" class="btn btn-outline" style="padding:12px 16px;font-size:14px;border-color:rgba(16,185,129,0.4);color:#34d399">
+                        Enroll (৳10,000)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

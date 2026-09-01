@@ -1,0 +1,480 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Service Bookings | Super Admin Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            const btn = document.querySelector('.theme-toggle-btn');
+            if (btn) btn.innerText = next === 'dark' ? '🌙 Dark' : '☀️ Light';
+        }
+    </script>
+    <style>
+        :root[data-theme="dark"] {
+            --bg: #0b0f19;
+            --bg2: #111827;
+            --bg3: #1f2937;
+            --card: #141c2e;
+            --border: #1e293b;
+            --border2: #334155;
+            --text: #f8fafc;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --cyan: #ccff00; --neon: #ccff00;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --amber: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+        }
+        :root[data-theme="light"] {
+            --bg: #f8fafc;
+            --bg2: #ffffff;
+            --bg3: #f1f5f9;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --text2: #475569;
+            --text3: #94a3b8;
+            --cyan: #0891b2;
+            --blue: #ccff00;
+            --purple: #7c3aed;
+            --amber: #d97706;
+            --green: #059669;
+            --red: #dc2626;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
+            background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08) !important;
+            padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 999; overflow-y: auto;
+        }
+        .logo { display: flex; align-items: center; gap: 12px; padding: 0 8px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .logo-icon { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, var(--cyan), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; font-weight: 800; }
+        .logo-text { font-weight: 800; font-size: 16px; letter-spacing: -0.02em; color: #ffffff !important; }
+        .nav-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b !important; letter-spacing: 0.08em; margin: 20px 8px 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; background: transparent !important; text-decoration: none; font-size: 13.5px; font-weight: 600; margin-bottom: 2px; transition: all 0.2s; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08) !important; color: #ffffff !important; transform: translateX(3px); }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important; font-weight: 700 !important; }
+
+        /* Main Content Layout */
+        .main { margin-left: 260px; padding: 32px; width: calc(100% - 260px); flex: 1; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+        .page-title { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; }
+
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; }
+        .btn-cyan { background: var(--cyan); color: #000; }
+        .btn-cyan:hover { opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+        .btn-outline:hover { background: var(--bg3); }
+        .theme-toggle-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 12.5px; font-weight: 700; }
+        .btn-toggle-sidebar { display: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .stat-val { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
+        .stat-lbl { font-size: 12px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+        /* Table Card & Form Controls */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .form-input { background: var(--bg2); border: 1px solid var(--border2); color: var(--text); padding: 8px 14px; border-radius: 10px; font-size: 13px; outline: none; }
+        .form-input:focus { border-color: var(--cyan); }
+
+        .table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        .table th { background: var(--bg2); padding: 14px 20px; color: var(--text3); font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+        .table td { padding: 16px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .table tbody tr:hover { background: var(--bg3); }
+
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; }
+        .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-confirmed { background: rgba(59, 130, 246, 0.15); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-completed { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-cancelled { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .sidebar-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 998; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        /* Responsive Views: Desktop Fixed Table vs Mobile Cards */
+        .desktop-table-view { display: block; width: 100%; }
+        .mobile-cards-view { display: none; }
+
+        @media(max-width: 900px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .btn-toggle-sidebar { display: flex; }
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh;
+                background: var(--bg2); border-right: 1px solid var(--border);
+                padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+                z-index: 99999; overflow-y: auto;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; padding: 16px !important; flex: 1; overflow-x: hidden; }
+            .desktop-table-view { display: none !important; }
+            .mobile-cards-view { display: flex !important; flex-direction: column; gap: 14px; width: 100%; }
+        }
+
+        @media(max-width: 600px) {
+            .topbar { flex-direction: column; align-items: stretch; gap: 14px; }
+            .topbar-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; width: 100% !important; }
+            .topbar-actions .btn, .topbar-actions .theme-toggle-btn { width: 100% !important; justify-content: center !important; text-align: center !important; font-size: 11px !important; padding: 8px 6px !important; }
+            .page-title { font-size: 18px !important; }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .stat-card { padding: 12px 10px !important; border-radius: 12px !important; }
+            .stat-val { font-size: 20px !important; }
+            .stat-lbl { font-size: 9px !important; letter-spacing: 0.02em !important; }
+
+            .card-header { padding: 14px !important; flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
+            .card-header form { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 8px !important; }
+            .form-input { width: 100% !important; min-width: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- CUSTOM DELETE BOOKING CONFIRMATION MODAL -->
+<div id="deleteBookingModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1.5px solid var(--red);border-radius:24px;max-width:440px;width:100%;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(239,68,68,0.3);position:relative">
+        <button type="button" onclick="closeDeleteBookingModal()" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px">✕</button>
+
+        <div style="text-align:center;margin-bottom:22px">
+            <div style="width:60px;height:60px;border-radius:20px;background:rgba(239,68,68,0.15);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px auto;border:1px solid rgba(239,68,68,0.3)">⚠️</div>
+            <h3 style="font-weight:900;font-size:20px;color:var(--text);margin-bottom:6px">Delete Service Booking?</h3>
+            <p style="font-size:13px;color:var(--text2);margin:0">Are you sure you want to permanently delete service booking request <strong id="delete-booking-name-text" style="color:var(--red);font-family:monospace"></strong>? This action cannot be undone.</p>
+        </div>
+
+        <form id="delete-booking-form" method="post" action="">
+            {% csrf_token %}
+            <div style="display:flex;gap:10px">
+                <button type="button" class="btn btn-outline" onclick="closeDeleteBookingModal()" style="flex:1;justify-content:center;padding:12px;border-radius:12px">Cancel</button>
+                <button type="submit" class="btn" style="flex:1;justify-content:center;padding:12px;border-radius:12px;background:var(--red);color:white;border:none;font-weight:800">🗑️ Delete Booking</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+
+        <div class="nav-label">Master Controls</div>
+        <a href="/superadmin/" class="nav-item">📊 Dashboard & Courses</a>
+        <a href="/admin-users/" class="nav-item">👥 Users & Subscriptions</a>
+        <a href="/admin-payments/" class="nav-item">💳 Payment Verifications</a>
+        <a href="/admin-bookings/" class="nav-item active">📅 Service Bookings</a>
+        <a href="/notifications/" class="nav-item">🔔 Notification Center</a>
+        <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+        <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+        <a href="/verify-certificate/" class="nav-item">🎓 Certificate Verification</a>
+
+        <div class="nav-label">Product Links</div>
+        <a href="/" class="nav-item">🌐 Main Landing Page</a>
+        <a href="/admin/" class="nav-item">🛠️ Django Admin</a>
+    </div>
+
+    <div style="font-size:11px;color:var(--text3);padding:8px">
+        Logged in as <strong>{{ request.user.email }}</strong>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button type="button" class="btn-toggle-sidebar" onclick="toggleSidebar()">☰</button>
+            <div>
+                <h1 class="page-title">📅 Client Service Booking Requests</h1>
+                <div style="font-size:13px;color:var(--text2);margin-top:2px">Manage service consultation requests from website widget & booking page</div>
+            </div>
+        </div>
+
+        <div class="topbar-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            {% include 'accounts_app/notification_bell.html' %}
+            
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme">
+                🌙 Dark
+            </button>
+
+            <a href="/admin-bookings/export/pdf/?q={{ q_search }}&status={{ status_filter }}" target="_blank" class="btn btn-outline" style="font-size:12px;padding:8px 14px;border-color:var(--cyan);color:var(--cyan)">
+                📄 Download PDF Report
+            </a>
+            <a href="/admin-bookings/export/csv/?q={{ q_search }}&status={{ status_filter }}" class="btn btn-cyan" style="font-size:12px;padding:8px 14px">
+                📊 Export Excel / CSV
+            </a>
+            <a href="/superadmin/" class="btn btn-outline" style="font-size:12px;padding:8px 14px">← Master Console</a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div style="margin-bottom:20px">
+        {% for message in messages %}
+        <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:transparent;border:none;color:var(--green);cursor:pointer;font-size:14px">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- STATS GRID -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-val">{{ total_bookings_count }}</div>
+            <div class="stat-lbl">Total Booking Requests</div>
+        </div>
+        <div class="stat-card" style="border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.05)">
+            <div class="stat-val" style="color:var(--amber)">{{ pending_bookings_count }}</div>
+            <div class="stat-lbl" style="color:var(--amber)">⏳ Pending Review</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--blue)">{{ confirmed_bookings_count }}</div>
+            <div class="stat-lbl">Confirmed Bookings</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--green)">{{ completed_bookings_count }}</div>
+            <div class="stat-lbl">Completed Projects</div>
+        </div>
+    </div>
+
+    <!-- BOOKINGS TABLE CARD -->
+    <div class="card">
+        <div class="card-header">
+            <div style="font-weight:800;font-size:16px">All Service Booking Requests</div>
+            <form method="get" action="/admin-bookings/" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                <input type="text" name="q" value="{{ q_search }}" class="form-input" placeholder="🔍 Search client, email, phone, service..." style="min-width:220px">
+                
+                <select name="status" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>🔵 Confirmed</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>🟢 Completed</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>🔴 Cancelled</option>
+                </select>
+
+                <button type="submit" class="btn btn-cyan btn-sm">Filter</button>
+                {% if q_search or status_filter %}
+                <a href="/admin-bookings/" class="btn btn-outline btn-sm">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- DESKTOP TABLE VIEW -->
+        <div class="desktop-table-view">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>ID</th>
+                        <th>Client Name & Email</th>
+                        <th>Phone / WhatsApp</th>
+                        <th>Service Category & Type</th>
+                        <th>Client Notes</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings_page %}
+                    <tr>
+                        <td style="font-size:11px;color:var(--text3);font-weight:700">{{ forloop.counter }}</td>
+                        <td style="font-family:monospace;font-weight:700;color:var(--cyan)">#{{ b.id }}</td>
+                        <td>
+                            <div style="font-weight:700;color:var(--text)">{{ b.name }}</div>
+                            <div style="font-size:12px;color:var(--text2)">{{ b.email|default:"No email provided" }}</div>
+                        </td>
+                        <td>
+                            {% if b.phone %}
+                            <a href="https://api.whatsapp.com/send?phone={{ b.phone }}" target="_blank" style="font-family:monospace;font-weight:700;color:var(--green);text-decoration:none;font-size:12px">
+                                📱 {{ b.phone }} ↗
+                            </a>
+                            {% else %}
+                            <span style="color:var(--text3);font-size:12px">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-weight:700;color:var(--purple);font-size:13px">{{ b.service_category }}</div>
+                            <div style="font-size:12px;color:var(--text2)">{{ b.service_type|default:"General Consultation" }}</div>
+                        </td>
+                        <td style="max-width:200px;font-size:12px;color:var(--text2)">
+                            <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ b.notes }}">
+                                {{ b.notes|default:"No additional notes" }}
+                            </div>
+                        </td>
+                        <td>
+                            <form method="post" action="/superadmin/booking/{{ b.id }}/status/" style="display:inline">
+                                {% csrf_token %}
+                                <select name="status" class="form-input" style="font-size:11px;padding:4px 6px;font-weight:800;border-radius:6px" onchange="this.form.submit()">
+                                    <option value="pending" {% if b.status == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                                    <option value="confirmed" {% if b.status == 'confirmed' %}selected{% endif %}>🔵 Confirmed</option>
+                                    <option value="completed" {% if b.status == 'completed' %}selected{% endif %}>🟢 Completed</option>
+                                    <option value="cancelled" {% if b.status == 'cancelled' %}selected{% endif %}>🔴 Cancelled</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td style="font-size:12px;color:var(--text2)">{{ b.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <div style="display:flex;gap:6px;align-items:center">
+                                {% if b.phone %}
+                                <a href="https://api.whatsapp.com/send?phone={{ b.phone }}&text=Hello%20{{ b.name|urlencode }},%20thank%20you%20for%20booking%20{{ b.service_category|urlencode }}%20with%20Qrious%20Solution." target="_blank" class="btn btn-sm" style="background:#25D366;color:#ffffff;padding:4px 8px;font-size:11px" title="Chat on WhatsApp">
+                                    💬 WhatsApp
+                                </a>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm" onclick="openDeleteBookingModal('{{ b.id }}', '{{ b.name|escapejs }}')" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:4px 8px;font-weight:700">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align:center;padding:30px;color:var(--text2)">No service booking requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARDS VIEW (For Mobile & Small Devices) -->
+        <div class="mobile-cards-view">
+            {% for b in bookings_page %}
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-family:monospace;font-weight:800;color:var(--cyan);font-size:13px">
+                        #{{ forloop.counter }} · Booking ID #{{ b.id }}
+                    </span>
+                    {% if b.status == 'pending' %}
+                    <span class="badge badge-pending">⏳ Pending</span>
+                    {% elif b.status == 'confirmed' %}
+                    <span class="badge badge-confirmed">🔵 Confirmed</span>
+                    {% elif b.status == 'completed' %}
+                    <span class="badge badge-completed">🟢 Completed</span>
+                    {% else %}
+                    <span class="badge badge-cancelled">🔴 Cancelled</span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div style="font-weight:800;font-size:16px;color:var(--text)">{{ b.name }}</div>
+                    <div style="font-size:12px;color:var(--text2);font-family:monospace">{{ b.email|default:"No email provided" }}</div>
+                    {% if b.phone %}
+                    <a href="https://api.whatsapp.com/send?phone={{ b.phone }}" target="_blank" style="font-size:12.5px;color:var(--green);font-weight:700;text-decoration:none;display:inline-block;margin-top:2px">
+                        📱 {{ b.phone }} ↗
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div style="background:var(--bg3);padding:10px 12px;border-radius:10px;font-size:12px">
+                    <div style="color:var(--purple);font-weight:800">{{ b.service_category }}</div>
+                    <div style="color:var(--text2);margin-top:2px">{{ b.service_type|default:"General Consultation" }}</div>
+                    {% if b.notes %}
+                    <div style="color:var(--text3);font-size:11px;margin-top:6px;font-style:italic">"{{ b.notes }}"</div>
+                    {% endif %}
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px">
+                    <form method="post" action="/superadmin/booking/{{ b.id }}/status/" style="flex:1">
+                        {% csrf_token %}
+                        <select name="status" class="form-input" style="width:100%;font-size:12px;font-weight:800" onchange="this.form.submit()">
+                            <option value="pending" {% if b.status == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                            <option value="confirmed" {% if b.status == 'confirmed' %}selected{% endif %}>🔵 Confirmed</option>
+                            <option value="completed" {% if b.status == 'completed' %}selected{% endif %}>🟢 Completed</option>
+                            <option value="cancelled" {% if b.status == 'cancelled' %}selected{% endif %}>🔴 Cancelled</option>
+                        </select>
+                    </form>
+
+                    {% if b.phone %}
+                    <a href="https://api.whatsapp.com/send?phone={{ b.phone }}&text=Hello%20{{ b.name|urlencode }},%20thank%20you%20for%20booking%20{{ b.service_category|urlencode }}%20with%20Qrious%20Solution." target="_blank" class="btn btn-sm" style="background:#25D366;color:#ffffff;padding:8px 12px;font-size:12px" title="Chat on WhatsApp">
+                        💬 WhatsApp
+                    </a>
+                    {% endif %}
+
+                    <button type="button" class="btn btn-sm" onclick="openDeleteBookingModal('{{ b.id }}', '{{ b.name|escapejs }}')" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:8px 12px;font-weight:700">
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:24px;color:var(--text3)">
+                No service booking requests found.
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION CONTROLS -->
+        {% if bookings_page.has_other_pages %}
+        <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2)">
+            <div style="font-size:13px;color:var(--text2)">
+                Showing <strong>{{ bookings_page.start_index }}</strong> - <strong>{{ bookings_page.end_index }}</strong> of <strong>{{ bookings_page.paginator.count }}</strong> bookings
+            </div>
+            <div style="display:flex;gap:6px">
+                {% if bookings_page.has_previous %}
+                <a href="?page={{ bookings_page.previous_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn btn-outline btn-sm">« Prev</a>
+                {% endif %}
+
+                {% for num in bookings_page.paginator.page_range %}
+                    {% if bookings_page.number == num %}
+                    <span class="btn btn-cyan btn-sm">{{ num }}</span>
+                    {% else %}
+                    <a href="?page={{ num }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn btn-outline btn-sm">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if bookings_page.has_next %}
+                <a href="?page={{ bookings_page.next_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn btn-outline btn-sm">Next »</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+function openDeleteBookingModal(bookingId, bookingName) {
+    document.getElementById('delete-booking-name-text').innerText = bookingName;
+    document.getElementById('delete-booking-form').action = '/admin-bookings/' + bookingId + '/delete/';
+    const modal = document.getElementById('deleteBookingModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeDeleteBookingModal() {
+    const modal = document.getElementById('deleteBookingModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('active');
+    }
+}
+</script>
+</body>
+</html>

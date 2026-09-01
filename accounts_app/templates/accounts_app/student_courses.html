@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses & Certificates — Qrious Tech Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --card: #131b2e; --card-hover: #1a253d;
+            --blue: #3b82f6; --purple: #8b5cf6; --cyan: #ccff00; --neon: #ccff00; --green: #10b981;
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:40px 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; }
+        .title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 900; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s; border: none; font-family: 'Inter'; }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-primary { background: linear-gradient(135deg, var(--green), var(--cyan)); color: white; box-shadow: 0 4px 20px rgba(16,185,129,0.3); }
+
+        .course-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 32px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 20px; }
+        .student-id-pill { background: rgba(204,255,0,0.15); border: 1px solid rgba(204,255,0,0.3); color: var(--cyan); font-weight: 800; font-family: monospace; font-size: 13px; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+
+        .progress-bar { width: 100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 100px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1 class="title">🎓 My Enrolled Courses</h1>
+            <div style="font-size:14px;color:var(--text2);margin-top:4px">Logged in as {{ request.user.get_full_name|default:request.user.email }}</div>
+        </div>
+        <div style="display:flex;gap:12px">
+            <a href="/dashboard/" class="btn btn-outline">📊 Agent Dashboard</a>
+            <a href="/billing/settings/" class="btn btn-outline">⚙️ User Profile</a>
+        </div>
+    </div>
+
+    {% for e in enrollments %}
+    <div class="course-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div>
+                <span class="student-id-pill">STUDENT ID: {{ e.student_id }}</span>
+                <h2 style="font-family:'Plus Jakarta Sans';font-size:24px;font-weight:800;margin-top:10px">{{ e.course_name }}</h2>
+            </div>
+            <div>
+                {% if e.is_completed %}
+                <span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700">
+                    🎓 Course Completed
+                </span>
+                {% else %}
+                <span style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700">
+                    ⚡ Active Learning
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:6px">
+                <span>Course Completion Progress</span>
+                <span style="font-weight:800;color:white">{{ e.progress_percent }}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ e.progress_percent }}%"></div>
+            </div>
+        </div>
+
+        {% if e.is_completed %}
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+            <div>
+                <div style="font-size:15px;font-weight:800;color:white">🎉 Congratulations! Your Official Certificate is Ready</div>
+                <div style="font-size:12px;color:var(--text2);margin-top:2px">Certificate ID: {{ e.certificate_id }} • Includes QR Code Verification</div>
+            </div>
+            <a href="/certificate/{{ e.certificate_id }}/" target="_blank" class="btn btn-primary">
+                🎓 View & Download Certificate →
+            </a>
+        </div>
+        {% else %}
+        <div style="font-size:13px;color:var(--text3);font-style:italic">
+            💡 Certificate will become downloadable automatically once your course completion is marked by Super Admin.
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:24px;padding:60px;text-align:center;color:var(--text3)">
+        <div style="font-size:48px;margin-bottom:16px">🎓</div>
+        <div style="font-size:18px;font-weight:700;color:white;margin-bottom:8px">No Enrolled Courses Found</div>
+        <p style="font-size:14px;max-width:450px;margin:0 auto 24px">You are not currently enrolled in any courses. Browse Qrious Tech Academy courses or contact support to enroll.</p>
+        <a href="/courses/" class="btn btn-outline">Explore Courses Academy →</a>
+    </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

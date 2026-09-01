@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ account.full_name|default:account.email }} — Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-primary:#FAFAFA; --bg-secondary:#FFFFFF; --bg-card:#FFFFFF; --accent-blue:#111827; --accent-purple:#111827; --accent-green:#059669; --accent-amber:#D97706; --text-primary:#111827; --text-secondary:#4B5563; --text-muted:#6B7280; --border:#E4E4E7; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg-primary); color:var(--text-primary); min-height:100vh; }
+        body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(59,130,246,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.03) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+
+        .sidebar { position:fixed; left:0; top:0; bottom:0; width:260px; background:var(--bg-secondary); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:100; }
+        .logo { padding:28px 24px; border-bottom:1px solid var(--border); }
+        .logo-inner { display:flex; align-items:center; gap:12px; }
+        .logo-icon { width:40px; height:40px; background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+        .logo-text { font-size:16px; font-weight:700; background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .logo-sub { font-size:11px; color:var(--text-muted); }
+        .sidebar-nav { padding:20px 16px; flex:1; }
+        .nav-label { font-size:10px; font-weight:600; letter-spacing:0.1em; color:var(--text-muted); text-transform:uppercase; padding:0 8px; margin-bottom:8px; margin-top:16px; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--text-secondary); text-decoration:none; font-size:14px; font-weight:500; transition:all 0.2s; margin-bottom:4px; }
+        .nav-item:hover { background:var(--bg-card); color:var(--text-primary); }
+        .nav-item.active { background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.1)); color:var(--accent-blue); border:1px solid rgba(59,130,246,0.2); }
+
+        .main { margin-left:260px; min-height:100vh; position:relative; z-index:1; }
+        .topbar { position:sticky; top:0; background:rgba(10,14,26,0.8); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; z-index:50; }
+        .content { padding:32px; max-width:900px; }
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; font-family:'Inter',sans-serif; }
+        .btn-outline { background:transparent; color:var(--text-secondary); border:1px solid var(--border); }
+        .btn-outline:hover { border-color:rgba(255,255,255,0.12); color:var(--text-primary); background:var(--bg-card); }
+        .btn-primary { background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); color:white; }
+        .btn-sm { padding:6px 14px; font-size:12px; }
+
+        /* Profile hero */
+        .profile-hero { background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:32px; margin-bottom:24px; position:relative; overflow:hidden; }
+        .profile-hero::before { content:''; position:absolute; top:-80px; right:-80px; width:300px; height:300px; background:radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%); pointer-events:none; }
+        .hero-top { display:flex; align-items:flex-start; gap:24px; margin-bottom:20px; }
+        .avatar { width:90px; height:90px; border-radius:50%; background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:white; flex-shrink:0; overflow:hidden; border:3px solid rgba(139,92,246,0.3); }
+        .avatar img { width:100%; height:100%; object-fit:cover; }
+        .hero-info { flex:1; }
+        .hero-name { font-size:28px; font-weight:800; margin-bottom:6px; }
+        .hero-headline { font-size:15px; color:var(--text-secondary); margin-bottom:6px; }
+        .hero-location { font-size:13px; color:var(--text-muted); }
+        .hero-stats { display:flex; gap:24px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border); flex-wrap:wrap; }
+        .hstat { text-align:center; }
+        .hstat-val { font-size:22px; font-weight:700; color:var(--accent-blue); }
+        .hstat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; }
+
+        /* Section card */
+        .section-card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+        .section-title { font-size:15px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+
+        /* About */
+        .about-text { font-size:14px; color:var(--text-secondary); line-height:1.7; }
+
+        /* Skills */
+        .skills-grid { display:flex; flex-wrap:wrap; gap:8px; }
+        .skill-chip { background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); color:var(--accent-blue); border-radius:20px; padding:5px 14px; font-size:13px; font-weight:500; }
+
+        /* Experience / Education items */
+        .timeline-item { display:flex; gap:16px; padding-bottom:20px; margin-bottom:20px; border-bottom:1px solid var(--border); }
+        .timeline-item:last-child { border-bottom:none; padding-bottom:0; margin-bottom:0; }
+        .timeline-icon { width:42px; height:42px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+        .timeline-content { flex:1; }
+        .timeline-title { font-size:15px; font-weight:600; margin-bottom:3px; }
+        .timeline-sub { font-size:13px; color:var(--text-secondary); margin-bottom:3px; }
+        .timeline-meta { font-size:12px; color:var(--text-muted); }
+        .timeline-desc { font-size:13px; color:var(--text-secondary); margin-top:6px; line-height:1.6; }
+
+        /* Empty */
+        .empty-section { text-align:center; padding:24px; color:var(--text-muted); font-size:14px; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-inner">
+            <div class="logo-icon">🤖</div>
+            <div>
+                <div class="logo-text">JobAgent AI</div>
+                <div class="logo-sub">LinkedIn Automation</div>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="/" class="nav-item">📊 Dashboard</a>
+        <a href="/?status=applied" class="nav-item">✅ Applied Jobs</a>
+        {% if request.user.is_superuser %}
+        <a href="/admin/" class="nav-item">⚙️ Admin Panel</a>
+        {% endif %}
+    </nav>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <h1 style="font-size:18px;font-weight:700">{{ account.full_name|default:account.email }}</h1>
+        <div style="display:flex;gap:12px">
+            <a href="/dashboard/accounts/" class="btn btn-outline">← Back</a>
+            <button class="btn btn-primary btn-sm" onclick="syncProfile()">🔄 Re-sync Profile</button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Profile Hero -->
+        <div class="profile-hero">
+            <div class="hero-top">
+                <div class="avatar">
+                    {% if account.profile_photo_url %}
+                    <img src="{{ account.profile_photo_url }}" alt="photo" onerror="this.parentElement.textContent='{{ account.full_name|first|default:'?' }}'">
+                    {% else %}
+                    {{ account.full_name|first|default:"?" }}
+                    {% endif %}
+                </div>
+                <div class="hero-info">
+                    <div class="hero-name">{{ account.full_name|default:"Profile not synced" }}</div>
+                    {% if account.headline %}<div class="hero-headline">{{ account.headline }}</div>{% endif %}
+                    {% if account.location %}<div class="hero-location">📍 {{ account.location }}</div>{% endif %}
+                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+                        <span style="font-size:12px;color:var(--text-muted)">📧 {{ account.email }}</span>
+                        {% if account.connections %}
+                        <span style="font-size:12px;color:var(--text-muted)">🤝 {{ account.connections }} connections</span>
+                        {% endif %}
+                        {% if account.profile_url %}
+                        <a href="{{ account.profile_url }}" target="_blank" style="font-size:12px;color:var(--accent-blue);text-decoration:none">🔗 LinkedIn Profile ↗</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hstat">
+                    <div class="hstat-val">{{ account.get_skills_list|length }}</div>
+                    <div class="hstat-label">Skills</div>
+                </div>
+                <div class="hstat">
+                    <div class="hstat-val">{{ account.get_experience_list|length }}</div>
+                    <div class="hstat-label">Experience</div>
+                </div>
+                <div class="hstat">
+                    <div class="hstat-val">{{ account.get_education_list|length }}</div>
+                    <div class="hstat-label">Education</div>
+                </div>
+                <div class="hstat">
+                    <div class="hstat-val">
+                        <span style="font-size:14px" class="{% if account.status == 'active' %}status-active{% endif %}">
+                            {% if account.status == "active" %}✅{% elif account.status == "syncing" %}🔄{% else %}⚠️{% endif %}
+                            {{ account.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="hstat-label">Account Status</div>
+                </div>
+                {% if account.last_synced %}
+                <div class="hstat" style="text-align:left">
+                    <div class="hstat-val" style="font-size:14px">{{ account.last_synced|date:"M d, Y H:i" }}</div>
+                    <div class="hstat-label">Last Synced</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- About -->
+        {% if account.about %}
+        <div class="section-card">
+            <div class="section-title">📝 About</div>
+            <div class="about-text">{{ account.about }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Skills -->
+        <div class="section-card">
+            <div class="section-title">🎯 Skills ({{ account.get_skills_list|length }})</div>
+            {% if account.get_skills_list %}
+            <div class="skills-grid">
+                {% for skill in account.get_skills_list %}
+                <span class="skill-chip">{{ skill }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-section">No skills synced yet. Click Re-sync Profile to load skills.</div>
+            {% endif %}
+        </div>
+
+        <!-- Experience -->
+        <div class="section-card">
+            <div class="section-title">💼 Work Experience ({{ account.get_experience_list|length }})</div>
+            {% if account.get_experience_list %}
+            {% for exp in account.get_experience_list %}
+            <div class="timeline-item">
+                <div class="timeline-icon">🏢</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">{{ exp.title }}</div>
+                    <div class="timeline-sub">{{ exp.company }}</div>
+                    <div class="timeline-meta">{{ exp.duration }}</div>
+                    {% if exp.description %}
+                    <div class="timeline-desc">{{ exp.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-section">No experience data. Re-sync profile to load.</div>
+            {% endif %}
+        </div>
+
+        <!-- Education -->
+        <div class="section-card">
+            <div class="section-title">🎓 Education ({{ account.get_education_list|length }})</div>
+            {% if account.get_education_list %}
+            {% for edu in account.get_education_list %}
+            <div class="timeline-item">
+                <div class="timeline-icon">🏛️</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">{{ edu.school }}</div>
+                    <div class="timeline-sub">{{ edu.degree }}{% if edu.field %} · {{ edu.field }}{% endif %}</div>
+                    {% if edu.years %}<div class="timeline-meta">{{ edu.years }}</div>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-section">No education data. Re-sync profile to load.</div>
+            {% endif %}
+        </div>
+
+    </div>
+</main>
+
+<script>
+    async function syncProfile() {
+        if (!confirm('Re-sync this profile from LinkedIn? A browser window will open.')) return;
+        const res = await fetch('/dashboard/accounts/{{ account.id }}/sync/', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message);
+        }
+    }
+</script>
+</body>
+</html>

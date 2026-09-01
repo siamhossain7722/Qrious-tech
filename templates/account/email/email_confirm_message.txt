@@ -1,0 +1,12 @@
+Dear {{ user_display }},
+
+Welcome to Qrious Tech Academy!
+
+Please confirm your email address by clicking the link below:
+{{ activate_url }}
+
+Thank you for choosing Qrious Tech Academy!
+
+Warm regards,
+Qrious Tech Academy Engineering & Student Support
+Email: mdsiamh77@gmail.com | Phone / WhatsApp: +971 566631501

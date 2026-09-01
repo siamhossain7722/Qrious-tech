@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User: {{ target_user.email }} — Qrious Super Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #161f33;
+            --card: #1a2235;
+            --card-hover: #1e2a40;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        .sidebar { position:fixed; left:0; top:0; bottom:0; width:260px; background:#0d1322 !important; border-right:1px solid rgba(255,255,255,0.08) !important; display:flex; flex-direction:column; z-index:100; }
+        .logo { padding:28px 24px; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .logo-inner { display:flex; align-items:center; gap:12px; }
+        .logo-icon { width:40px; height:40px; background:linear-gradient(135deg,var(--amber),var(--purple)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; color:white; }
+        .logo-text { font-family:'Plus Jakarta Sans'; font-size:16px; font-weight:800; color:#ffffff !important; }
+        .logo-sub { font-size:11px; color:#64748b !important; }
+        .sidebar-nav { padding:20px 16px; flex:1; }
+        .nav-label { font-size:10px; font-weight:700; letter-spacing:0.1em; color:#64748b !important; text-transform:uppercase; padding:0 8px; margin-bottom:8px; margin-top:16px; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:#cbd5e1 !important; background:transparent !important; text-decoration:none; font-size:13.5px; font-weight:600; transition:all 0.2s; margin-bottom:4px; border:1px solid transparent; }
+        .nav-item:hover { background:rgba(255,255,255,0.08) !important; color:#ffffff !important; transform:translateX(3px); }
+        .nav-item.active { background:#2563eb !important; color:#ffffff !important; border:1px solid #3b82f6 !important; box-shadow:0 4px 15px rgba(37,99,235,0.35) !important; font-weight:700 !important; }
+
+        .main { margin-left:260px; min-height:100vh; }
+        .topbar { position:sticky; top:0; background:rgba(10,14,26,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; z-index:50; }
+        .page-title { font-size:20px; font-weight:800; display:flex; align-items:center; gap:10px; }
+        .content { padding:32px; max-width:1100px; }
+
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; font-family:'Inter',sans-serif; }
+        .btn-amber { background:linear-gradient(135deg,var(--amber),var(--purple)); color:white; }
+        .btn-amber:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(245,158,11,0.3); }
+        .btn-outline { background:transparent; color:var(--text2); border:1px solid var(--border2); }
+        .btn-outline:hover { color:var(--text); border-color:rgba(255,255,255,0.2); background:var(--card); }
+        .btn-danger { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+        .btn-danger:hover { background:rgba(239,68,68,0.3); }
+
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+        @media(max-width:900px) { .two-col { grid-template-columns:1fr; } }
+
+        .card { background:var(--card); border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:24px; }
+        .card-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+        .card-title { font-size:16px; font-weight:700; display:flex; align-items:center; gap:10px; }
+        .card-body { padding:24px; }
+
+        .form-group { margin-bottom:18px; }
+        .form-label { display:block; font-size:12px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+        .form-input { width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:11px 15px; color:var(--text); font-size:14px; font-family:'Inter'; }
+        .form-input:focus { outline:none; border-color:var(--amber); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+        .checkbox-label { display:flex; align-items:center; gap:10px; font-size:14px; cursor:pointer; margin-bottom:10px; }
+        .alert-success { background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:14px 18px; color:#6ee7b7; font-size:14px; margin-bottom:20px; }
+
+        .item-list-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); font-size:13px; }
+        .item-list-row:last-child { border-bottom:none; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo">
+        <div style="display:flex;align-items:center;gap:12px">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-dark" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-light" style="height:48px;width:auto;object-fit:contain">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Management</div>
+        <a href="/billing/admin/users/" class="nav-item active">👥 All Users & Plans</a>
+        <a href="/admin/" class="nav-item">🛠 Django Admin</a>
+        <div class="nav-label">Product</div>
+        <a href="/dashboard/" class="nav-item">📊 Product Dashboard</a>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </nav>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <h1 class="page-title">⚙️ Manage User: {{ target_user.email }}</h1>
+        <div style="display:flex;gap:12px">
+            <a href="/billing/admin/users/" class="btn btn-outline">← Back to User List</a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-success"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> {{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="two-col">
+
+            <!-- EDIT USER PROFILE & PERMISSIONS -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">👤 Edit User Account & Permissions</div>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_profile">
+
+                            <div class="form-group">
+                                <label class="form-label">Email Address (Super Admin Can Edit)</label>
+                                <input type="email" name="email" class="form-input" value="{{ target_user.email }}" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" name="first_name" class="form-input" value="{{ target_user.first_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" name="last_name" class="form-input" value="{{ target_user.last_name }}">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <input type="text" name="phone" class="form-input" value="{{ profile.phone }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Company</label>
+                                <input type="text" name="company" class="form-input" value="{{ profile.company }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Bio / Notes</label>
+                                <textarea name="bio" class="form-input" rows="2">{{ profile.bio }}</textarea>
+                            </div>
+
+                            <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+
+                            <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:var(--amber)">🛡️ Account Permissions</div>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_active" {% if target_user.is_active %}checked{% endif %}>
+                                <span>Active Account (Uncheck to block user)</span>
+                            </label>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_staff" {% if target_user.is_staff %}checked{% endif %}>
+                                <span>Staff Access (Can log into Django admin)</span>
+                            </label>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_superuser" {% if target_user.is_superuser %}checked{% endif %}>
+                                <span>Super Admin Privileges</span>
+                            </label>
+
+                            <button type="submit" class="btn btn-amber" style="width:100%;justify-content:center;margin-top:16px">
+                                💾 Save User Permissions & Info
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVERRIDE SUBSCRIPTION & VIEW USER DATA -->
+            <div>
+                <!-- Subscription Override Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">💳 Override Subscription Plan</div>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_subscription">
+
+                            <div class="form-group">
+                                <label class="form-label">Subscription Tier</label>
+                                <select name="plan" class="form-input">
+                                    {% for plan_key, plan_data in plans.items %}
+                                    <option value="{{ plan_key }}" {% if subscription.plan == plan_key %}selected{% endif %}>
+                                        {{ plan_data.label }} (${{ plan_data.price }}/mo — {{ plan_data.applications_per_month }} apps/mo)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Subscription Status</label>
+                                <select name="status" class="form-input">
+                                    <option value="active" {% if subscription.status == 'active' %}selected{% endif %}>Active</option>
+                                    <option value="trialing" {% if subscription.status == 'trialing' %}selected{% endif %}>Trialing</option>
+                                    <option value="cancelled" {% if subscription.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                    <option value="past_due" {% if subscription.status == 'past_due' %}selected{% endif %}>Past Due</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-amber" style="width:100%;justify-content:center">
+                                ⚡ Override Plan Instantly
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- User Linked Accounts & Resumes -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📂 Linked Data Overview</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="item-list-row">
+                            <span>Connected LinkedIn Accounts</span>
+                            <strong style="color:var(--blue)">{{ accounts|length }} account(s)</strong>
+                        </div>
+                        {% for acc in accounts %}
+                        <div style="font-size:12px;color:var(--text2);padding:4px 0 4px 12px">
+                            ● {{ acc.email }} ({{ acc.status }})
+                        </div>
+                        {% endfor %}
+
+                        <div class="item-list-row" style="margin-top:10px">
+                            <span>Uploaded Resumes</span>
+                            <strong style="color:var(--purple)">{{ resumes|length }} file(s)</strong>
+                        </div>
+                        {% for r in resumes %}
+                        <div style="font-size:12px;color:var(--text2);padding:4px 0 4px 12px">
+                            📄 {{ r.name }} {% if r.is_active %}<span style="color:var(--green)">[ACTIVE]</span>{% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="item-list-row" style="margin-top:10px">
+                            <span>Submitted Applications</span>
+                            <strong style="color:var(--green)">{{ jobs|length }} job(s)</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+</body>
+</html>

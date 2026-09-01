@@ -1,0 +1,959 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Verifications & Financial Records — Super Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --bg2: #0d1222; --card: #131b2e;
+            --blue: #3b82f6; --purple: #8b5cf6; --cyan: #0284c7; --neon: #0284c7; --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+
+        body.light-theme, html.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Sidebar Navigation Drawer */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: #0d1322 !important;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b !important;
+            padding: 12px 8px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #cbd5e1 !important;
+            background: transparent !important;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+            transform: translateX(3px);
+        }
+
+        .nav-item.active {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: 1px solid #3b82f6 !important;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important;
+            font-weight: 700 !important;
+        }
+
+        /* Main Content Container */
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+            padding: 32px 40px;
+            width: calc(100% - 260px);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-toggle-sidebar {
+            display: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        @media(max-width: 900px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .btn-toggle-sidebar { display: flex; }
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh;
+                background: #0d1322 !important; border-right: 1px solid var(--border);
+                padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+                z-index: 99999; overflow-y: auto;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; padding: 16px !important; flex: 1; overflow-x: hidden; }
+        }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.25s; font-family: 'Inter', sans-serif;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        @media(max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: #2563eb;
+            box-shadow: 0 12px 25px -5px rgba(37, 99, 235, 0.25);
+        }
+        .stat-card.active-stat-card {
+            border: 2px solid #2563eb !important;
+            background: rgba(37, 99, 235, 0.12) !important;
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.3) !important;
+        }
+
+        .stat-lbl-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .active-pill {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #059669;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .pill-warning { background: #d97706; }
+        .pill-danger { background: #dc2626; }
+
+        .stat-val { font-size: 24px; font-weight: 900; }
+        .stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); }
+
+        /* Filter Controls Card */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-input {
+            flex: 1;
+            min-width: 220px;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .filter-select {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); }
+        .btn-success { background: #059669; color: white; }
+        .btn-success:hover { background: #047857; }
+
+        /* Datatable */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            text-align: left;
+        }
+        .table th {
+            background: rgba(255,255,255,0.02);
+            color: var(--text3);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 11px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .status-badge {
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 0.02em;
+        }
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+        .status-approved {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        body.light-theme .status-pending { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+        body.light-theme .status-approved { background: #d1fae5; color: #047857; border-color: #a7f3d0; }
+        body.light-theme .status-rejected { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            z-index: 10;
+        }
+        .modal-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: rotate(90deg);
+        }
+
+        /* Mobile Payment Cards Layout */
+        .mobile-payment-cards {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive { display: none !important; }
+            .mobile-payment-cards { display: flex !important; }
+        }
+
+        .mobile-p-card {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .mobile-p-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        .page-link {
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .page-link.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fde68a;
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Modal Overlay */
+        .custom-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .custom-modal-card {
+            background: #0d1322;
+            border: 1px solid var(--border2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border-radius: 24px;
+            width: 100%;
+            position: relative;
+            color: #f8fafc;
+            padding: 28px;
+        }
+        body.light-theme .custom-modal-card {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- Side Navbar Drawer -->
+<aside class="sidebar" id="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#0284c7;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+
+        <div class="nav-label">Master Controls</div>
+        <a href="/superadmin/" class="nav-item">📊 Dashboard & Courses</a>
+        <a href="/admin-users/" class="nav-item">👥 Users & Subscriptions</a>
+        <a href="/admin-payments/" class="nav-item active">💳 Payment Verifications</a>
+        <a href="/admin-bookings/" class="nav-item">📅 Service Bookings</a>
+        <a href="/notifications/" class="nav-item">🔔 Notification Center</a>
+        <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+        <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+        <a href="/verify-certificate/" class="nav-item">🎓 Certificate Verification</a>
+
+        <div class="nav-label">Quick Links</div>
+        <a href="/" class="nav-item">🌐 Main Landing Page</a>
+        <a href="/admin/" class="nav-item">🛠️ Django Admin</a>
+    </div>
+
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<!-- Main Workspace -->
+<main class="main">
+    <!-- Topbar Header -->
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:14px">
+            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
+                ☰
+            </button>
+            <div>
+                <h1 class="page-title">💳 All Payments & Verification Console</h1>
+                <div style="font-size:12px;color:var(--text2);margin-top:2px">Manage student fee payment proofs, approve verification submissions, and issue PDF invoices</div>
+            </div>
+        </div>
+
+        <!-- Topbar Controls -->
+        <div style="display:flex;align-items:center;gap:12px">
+            {% include 'accounts_app/notification_bell.html' %}
+
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn">
+                🌙 Dark
+            </button>
+
+            <a href="/admin-payments/export/csv/{% if q_search or status_filter %}?q={{ q_search }}&status={{ status_filter }}{% endif %}" class="btn btn-outline" style="font-size:12px">
+                📥 Export CSV
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if '❌' in message.message or 'declined' in message.message %}
+                <div class="alert-warning">{{ message }}</div>
+            {% else %}
+                <div class="alert-success">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Metrics Stats Grid (Clickable Dynamic Filters) -->
+    <div class="stats-grid">
+        <a href="?status=approved{% if q_search %}&q={{ q_search }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" 
+           class="stat-card {% if status_filter == 'approved' %}active-stat-card{% endif %}" 
+           title="Click to view only Verified & Approved collections">
+            <div class="stat-lbl-row">
+                <span class="stat-lbl">Total Verified Collections</span>
+                {% if status_filter == 'approved' %}<span class="active-pill">Filter Active</span>{% endif %}
+            </div>
+            <div class="stat-val" style="color:#059669">৳{{ total_approved_amount|floatformat:2 }} BDT</div>
+            <div style="font-size:11px;color:var(--text3)">Approved & Issued Invoices</div>
+        </a>
+
+        <a href="?status=pending{% if q_search %}&q={{ q_search }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" 
+           class="stat-card {% if status_filter == 'pending' %}active-stat-card{% endif %}" 
+           title="Click to view only Pending Proof Verifications">
+            <div class="stat-lbl-row">
+                <span class="stat-lbl">Pending Proof Verifications</span>
+                {% if status_filter == 'pending' %}<span class="active-pill pill-warning">Filter Active</span>{% endif %}
+            </div>
+            <div class="stat-val" style="color:#b45309">{{ pending_count }} <span style="font-size:14px;font-weight:600">(৳{{ pending_amount|floatformat:2 }})</span></div>
+            <div style="font-size:11px;color:var(--text3)">Awaiting Super Admin Review</div>
+        </a>
+
+        <a href="?status=approved{% if q_search %}&q={{ q_search }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" 
+           class="stat-card {% if status_filter == 'approved' %}active-stat-card{% endif %}" 
+           title="Click to view only Approved Invoices">
+            <div class="stat-lbl-row">
+                <span class="stat-lbl">Approved Invoices</span>
+                {% if status_filter == 'approved' %}<span class="active-pill">Filter Active</span>{% endif %}
+            </div>
+            <div class="stat-val" style="color:#2563eb">{{ approved_count }}</div>
+            <div style="font-size:11px;color:var(--text3)">Official Invoices Emailed</div>
+        </a>
+
+        <a href="?status=rejected{% if q_search %}&q={{ q_search }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" 
+           class="stat-card {% if status_filter == 'rejected' %}active-stat-card{% endif %}" 
+           title="Click to view only Declined Submissions">
+            <div class="stat-lbl-row">
+                <span class="stat-lbl">Declined Submissions</span>
+                {% if status_filter == 'rejected' %}<span class="active-pill pill-danger">Filter Active</span>{% endif %}
+            </div>
+            <div class="stat-val" style="color:#ef4444">{{ rejected_count }}</div>
+            <div style="font-size:11px;color:var(--text3)">Rejected / Invalid Proofs</div>
+        </a>
+    </div>
+
+    <!-- Search & Filter Controls Card -->
+    <div class="card">
+        <form method="GET" action="" class="filter-row">
+            <input type="text" name="q" value="{{ q_search }}" class="filter-input" placeholder="Search by student email, name, student ID, invoice ID, TrxID...">
+            
+            <select name="status" class="filter-select">
+                <option value="">All Verification Statuses</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Pending Verification</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>✅ Verified & Approved</option>
+                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>❌ Declined / Rejected</option>
+            </select>
+
+            <select name="method" class="filter-select">
+                <option value="">All Methods</option>
+                <option value="bKash" {% if method_filter == 'bKash' %}selected{% endif %}>bKash</option>
+                <option value="Nagad" {% if method_filter == 'Nagad' %}selected{% endif %}>Nagad</option>
+                <option value="Bank" {% if method_filter == 'Bank' %}selected{% endif %}>Bank Transfer</option>
+                <option value="Card" {% if method_filter == 'Card' %}selected{% endif %}>Card Payment</option>
+                <option value="Cash" {% if method_filter == 'Cash' %}selected{% endif %}>Cash</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">Filter</button>
+            {% if q_search or status_filter or method_filter %}
+                <a href="/admin-payments/" class="btn btn-outline">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Payments List Datatable & Mobile Card Container -->
+    <div class="card" style="padding:0;overflow:hidden">
+        <!-- Desktop Table View -->
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Student / ID</th>
+                        <th>Invoice ID</th>
+                        <th>Amount (BDT)</th>
+                        <th>Method & Ref TrxID</th>
+                        <th>Date Submitted</th>
+                        <th>Proof Screenshot</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if payments_page %}
+                        {% for p in payments_page %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight:700;color:var(--text)">{{ p.enrollment.user.get_full_name|default:p.enrollment.user.email }}</div>
+                                    <div style="font-size:11px;color:var(--text3);font-weight:600">ID: <a href="/superadmin/student/{{ p.enrollment.id }}/profile/" style="color:#2563eb;text-decoration:none">{{ p.enrollment.student_id }}</a></div>
+                                    <div style="font-size:11px;color:var(--text2)">{{ p.enrollment.user.email }}</div>
+                                </td>
+                                <td>
+                                    <span style="font-family:monospace;font-weight:700;color:#2563eb">{{ p.invoice_id }}</span>
+                                </td>
+                                <td>
+                                    <span style="font-weight:800;color:#059669;font-size:15px">৳{{ p.amount|floatformat:2 }} BDT</span>
+                                </td>
+                                <td>
+                                    <div style="font-weight:700;font-size:13px">{{ p.payment_method }}</div>
+                                    <div style="font-family:monospace;font-size:12px;color:#0284c7">{{ p.transaction_ref|default:"N/A" }}</div>
+                                </td>
+                                <td>
+                                    <div style="font-size:12px;font-weight:600">{{ p.created_at|date:"M d, Y" }}</div>
+                                    <div style="font-size:11px;color:var(--text3)">{{ p.created_at|date:"h:i A" }}</div>
+                                </td>
+                                <td>
+                                    {% if p.payment_proof %}
+                                        <a href="{{ p.payment_proof.url }}" target="_blank" class="btn btn-outline" style="font-size:11px;padding:4px 10px;color:#0284c7">
+                                            🖼️ View Proof ↗
+                                        </a>
+                                    {% else %}
+                                        <span style="font-size:12px;color:var(--text3)">No Screenshot</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if p.status == 'approved' %}
+                                        <span class="status-badge status-approved">✅ Approved</span>
+                                    {% elif p.status == 'rejected' %}
+                                        <span class="status-badge status-rejected">❌ Declined</span>
+                                    {% else %}
+                                        <span class="status-badge status-pending">⏳ Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                                        <button type="button" class="btn btn-outline" style="font-size:11px;padding:5px 10px"
+                                                onclick="openPaymentDetailsModal('{{ p.id }}', '{{ p.invoice_id }}', '{{ p.enrollment.user.get_full_name|escapejs }}', '{{ p.enrollment.user.email|escapejs }}', '{{ p.enrollment.student_id }}', '{{ p.enrollment.course_name|escapejs }}', '{{ p.amount|floatformat:2 }}', '{{ p.payment_method }}', '{{ p.transaction_ref|default:"N/A"|escapejs }}', '{{ p.notes|default:"None"|escapejs }}', '{% if p.payment_proof %}{{ p.payment_proof.url }}{% endif %}', '{{ p.status }}', '{{ p.created_at|date:"M d, Y - h:i A" }}', '{{ p.admin_notes|default:""|escapejs }}')">
+                                            👁️ Details
+                                        </button>
+
+                                        {% if p.status == 'pending' %}
+                                            <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="display:inline-flex;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="approve">
+                                                <button type="submit" class="btn btn-success" style="font-size:11px;padding:5px 10px" title="Approve payment & email official PDF invoice">
+                                                    ✓ Approve
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="display:inline-flex;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="submit" class="btn btn-outline" style="font-size:11px;padding:5px 8px;color:#ef4444;border-color:rgba(239,68,68,0.3)" title="Decline payment submission">
+                                                    ✕ Decline
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="font-size:11px;padding:5px 8px;color:#2563eb">
+                                                📄 Invoice
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">
+                                💳 No payment verification records found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Card View (For Small Devices) -->
+        <div class="mobile-payment-cards">
+            {% if payments_page %}
+                {% for p in payments_page %}
+                    <div class="mobile-p-card">
+                        <div class="mobile-p-card-header">
+                            <div>
+                                <span style="font-family:monospace;font-weight:800;color:#2563eb;font-size:14px">{{ p.invoice_id }}</span>
+                                <div style="font-size:11px;color:var(--text3)">{{ p.created_at|date:"M d, Y - h:i A" }}</div>
+                            </div>
+                            <div>
+                                {% if p.status == 'approved' %}
+                                    <span class="status-badge status-approved">✅ Approved</span>
+                                {% elif p.status == 'rejected' %}
+                                    <span class="status-badge status-rejected">❌ Declined</span>
+                                {% else %}
+                                    <span class="status-badge status-pending">⏳ Pending</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <div style="font-weight:800;color:var(--text);font-size:14px">{{ p.enrollment.user.get_full_name|default:p.enrollment.user.email }}</div>
+                                <div style="font-size:11px;color:var(--text3)">ID: {{ p.enrollment.student_id }} • {{ p.enrollment.user.email }}</div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="font-weight:900;color:#059669;font-size:16px">৳{{ p.amount|floatformat:2 }}</div>
+                                <div style="font-size:11px;color:#0284c7;font-weight:700">{{ p.payment_method }} • {{ p.transaction_ref|default:"N/A" }}</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+                            <button type="button" class="btn btn-outline" style="font-size:12px;flex:1;justify-content:center"
+                                    onclick="openPaymentDetailsModal('{{ p.id }}', '{{ p.invoice_id }}', '{{ p.enrollment.user.get_full_name|escapejs }}', '{{ p.enrollment.user.email|escapejs }}', '{{ p.enrollment.student_id }}', '{{ p.enrollment.course_name|escapejs }}', '{{ p.amount|floatformat:2 }}', '{{ p.payment_method }}', '{{ p.transaction_ref|default:"N/A"|escapejs }}', '{{ p.notes|default:"None"|escapejs }}', '{% if p.payment_proof %}{{ p.payment_proof.url }}{% endif %}', '{{ p.status }}', '{{ p.created_at|date:"M d, Y - h:i A" }}', '{{ p.admin_notes|default:""|escapejs }}')">
+                                👁️ View Details
+                            </button>
+
+                            {% if p.status == 'pending' %}
+                                <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="flex:1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-success" style="width:100%;font-size:12px;justify-content:center">
+                                        ✓ Approve
+                                    </button>
+                                </form>
+                                <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="flex:1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-outline" style="width:100%;font-size:12px;justify-content:center;color:#ef4444;border-color:rgba(239,68,68,0.3)">
+                                        ✕ Decline
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="font-size:12px;flex:1;justify-content:center;color:#2563eb">
+                                    📄 Invoice
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align:center;padding:30px;color:var(--text2)">
+                    💳 No payment verification records found.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if payments_page.has_other_pages %}
+        <div class="pagination">
+            {% if payments_page.has_previous %}
+                <a href="?page={{ payments_page.previous_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">← Prev</a>
+            {% endif %}
+
+            {% for num in payments_page.paginator.page_range %}
+                {% if payments_page.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if payments_page.has_next %}
+                <a href="?page={{ payments_page.next_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">Next →</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</main>
+
+<!-- Payment Details Popup Modal -->
+<div id="paymentDetailsModal" class="custom-modal-overlay" style="display: none;" onclick="if(event.target === this) closePaymentDetailsModal();">
+    <div class="custom-modal-card" style="max-width: 580px; text-align: left;">
+        <button type="button" class="modal-close-btn" onclick="closePaymentDetailsModal()" aria-label="Close modal">✕</button>
+        
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-right:48px;flex-wrap:wrap;">
+            <div style="width:44px;height:44px;border-radius:14px;background:rgba(37,99,235,0.15);color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💳</div>
+            <div>
+                <h3 style="font-weight:800;font-size:1.15rem;color:var(--text);line-height:1.2;" id="modalInvoiceId">Invoice #INV-2026-0000</h3>
+                <div style="font-size:0.8rem;color:var(--text2);margin-top:2px;" id="modalSubmittedDate">Submitted on Aug 31, 2026</div>
+            </div>
+            <div style="margin-left:auto;" id="modalStatusBadge"></div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Student Name</div>
+                <div style="font-weight:700;font-size:13.5px;color:var(--text);" id="modalStudentName">Siam Hossain</div>
+                <div style="font-size:11.5px;color:var(--text2);" id="modalStudentEmail">mdsiamh77@gmail.com</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Student ID</div>
+                <div style="font-weight:800;font-size:13.5px;color:#2563eb;font-family:monospace;" id="modalStudentId">QS-STU-5024</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Enrolled Course</div>
+                <div style="font-weight:700;font-size:13px;color:var(--text);" id="modalCourseName">Digital Marketing & Growth Mastery</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Payment Amount</div>
+                <div style="font-weight:900;font-size:16px;color:#059669;" id="modalAmount">৳1,000.00 BDT</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Payment Method</div>
+                <div style="font-weight:700;font-size:13px;color:var(--text);" id="modalMethod">bKash</div>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Transaction Ref / TrxID</div>
+                <div style="font-weight:800;font-size:13px;color:#0284c7;font-family:monospace;" id="modalTrxId">TRX564654</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:16px;" id="modalNotesContainer">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Student Remarks</div>
+            <div style="font-size:13px;color:var(--text2);background:var(--bg2);padding:10px 14px;border-radius:10px;border:1px solid var(--border);" id="modalNotes">None</div>
+        </div>
+
+        <div style="margin-bottom:20px;" id="modalProofContainer">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Payment Proof File</div>
+            <div id="modalProofContent">No proof file attached</div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;" id="modalActions">
+            <button type="button" class="btn btn-outline" onclick="closePaymentDetailsModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar && backdrop) {
+            sidebar.classList.toggle('open');
+            backdrop.classList.toggle('active');
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) btn.innerText = isLight ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) btn.innerText = '☀️ Light';
+    }
+
+    function openPaymentDetailsModal(id, invoiceId, studentName, studentEmail, studentId, courseName, amount, method, trxId, notes, proofUrl, status, createdDate, adminNotes) {
+        document.getElementById('modalInvoiceId').innerText = 'Invoice #' + invoiceId;
+        document.getElementById('modalSubmittedDate').innerText = 'Submitted on ' + createdDate;
+        document.getElementById('modalStudentName').innerText = studentName;
+        document.getElementById('modalStudentEmail').innerText = studentEmail;
+        document.getElementById('modalStudentId').innerText = studentId;
+        document.getElementById('modalCourseName').innerText = courseName;
+        document.getElementById('modalAmount').innerText = '৳' + amount + ' BDT';
+        document.getElementById('modalMethod').innerText = method;
+        document.getElementById('modalTrxId').innerText = trxId;
+        document.getElementById('modalNotes').innerText = notes && notes !== 'None' ? notes : 'No student remarks provided.';
+
+        const statusBadge = document.getElementById('modalStatusBadge');
+        if (status === 'approved') {
+            statusBadge.innerHTML = '<span class="status-badge status-approved">✅ Approved</span>';
+        } else if (status === 'rejected') {
+            statusBadge.innerHTML = '<span class="status-badge status-rejected">❌ Declined</span>';
+        } else {
+            statusBadge.innerHTML = '<span class="status-badge status-pending">⏳ Pending</span>';
+        }
+
+        const proofContent = document.getElementById('modalProofContent');
+        if (proofUrl && proofUrl !== '') {
+            proofContent.innerHTML = `<a href="${proofUrl}" target="_blank" class="btn btn-outline" style="font-size:12px;color:#0284c7;">🖼️ Open Proof Screenshot / File ↗</a>`;
+        } else {
+            proofContent.innerHTML = `<span style="font-size:12px;color:var(--text3);">No proof file attached by student.</span>`;
+        }
+
+        const actionsDiv = document.getElementById('modalActions');
+        let actionsHtml = '';
+        if (status === 'pending') {
+            actionsHtml = `
+                <form method="POST" action="/superadmin/payment/${id}/verify/" style="display:inline;">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${getCsrfToken()}">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit" class="btn btn-success" style="font-size:12px;">✓ Approve & Email Invoice</button>
+                </form>
+                <form method="POST" action="/superadmin/payment/${id}/verify/" style="display:inline;">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${getCsrfToken()}">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="btn btn-outline" style="font-size:12px;color:#ef4444;border-color:rgba(239,68,68,0.3);">✕ Decline</button>
+                </form>`;
+        } else {
+            actionsHtml = `<a href="/invoice/${invoiceId}/" target="_blank" class="btn btn-primary" style="font-size:12px;">📄 View Invoice</a>`;
+        }
+        actionsHtml += `<button type="button" class="btn btn-outline" onclick="closePaymentDetailsModal()">Close</button>`;
+        actionsDiv.innerHTML = actionsHtml;
+
+        document.getElementById('paymentDetailsModal').style.display = 'flex';
+    }
+
+    function closePaymentDetailsModal() {
+        document.getElementById('paymentDetailsModal').style.display = 'none';
+    }
+
+    function getCsrfToken() {
+        const input = document.querySelector('[name=csrfmiddlewaretoken]');
+        return input ? input.value : '';
+    }
+</script>
+</body>
+</html>

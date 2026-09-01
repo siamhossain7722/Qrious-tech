@@ -1,0 +1,571 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Users & Subscriptions — Super Admin Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --bg2: #111827;
+            --bg3: #1f2937;
+            --card: #131b2e;
+            --card-hover: #1e293b;
+            --text: #f8fafc;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --cyan: #ccff00; --neon: #ccff00;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --border: rgba(255,255,255,0.08);
+            --border2: rgba(255,255,255,0.15);
+        }
+
+        body.light-theme {
+            --bg: #f8fafc;
+            --bg2: #ffffff;
+            --bg3: #f1f5f9;
+            --card: #ffffff;
+            --card-hover: #f1f5f9;
+            --text: #0f172a;
+            --text2: #475569;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --border2: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+        /* Sidebar Fixed Position */
+        .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; overflow-y: auto; }
+        .logo { font-size: 18px; font-weight: 900; color: #ffffff !important; text-decoration: none; display: flex; align-items: center; gap: 10px; margin-bottom: 24px; padding: 0 8px; }
+        .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--cyan), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+
+        .nav-group { display: flex; flex-direction: column; gap: 4px; }
+        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b !important; padding: 12px 8px 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; background: transparent !important; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08) !important; color: #ffffff !important; transform: translateX(3px); }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important; font-weight: 700 !important; }
+
+        .main { margin-left: 260px; flex: 1; min-height: 100vh; padding: 32px 40px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-size: 24px; font-weight: 900; }
+
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; }
+        .btn-cyan { background: var(--cyan); color: #000; }
+        .btn-cyan:hover { background: #22d3ee; }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .stat-val { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+        .stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 32px; }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+        .form-input {
+            background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px;
+            padding: 9px 14px; color: var(--text); font-size: 13.5px; font-family: 'Inter', sans-serif;
+            outline: none; transition: all 0.2s;
+        }
+        .form-input:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(204,255,0,0.25); }
+
+        .table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .table th { background: rgba(255,255,255,0.02); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .table tr:last-child td { border-bottom: none; }
+        .table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-free { background: rgba(100,116,139,0.15); color: var(--text2); border: 1px solid var(--border2); }
+        .badge-pro { background: rgba(204,255,0,0.15); color: var(--cyan); border: 1px solid rgba(204,255,0,0.3); }
+        .badge-business { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+
+        /* Mobile Responsive & Collapsible Sidebar */
+        .btn-toggle-sidebar {
+            display: none; width: 38px; height: 38px; border-radius: 10px;
+            background: var(--card); border: 1px solid var(--border2); color: var(--text);
+            align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 18px;
+        }
+        .sidebar-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s;
+        }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        /* Responsive Views: Desktop Fixed Table vs Mobile Cards */
+        .desktop-table-view { display: block; width: 100%; }
+        .mobile-cards-view { display: none; }
+
+        @media(max-width: 900px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .btn-toggle-sidebar { display: flex; }
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh;
+                background: var(--bg2); border-right: 1px solid var(--border);
+                padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+                z-index: 99999; overflow-y: auto;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; padding: 16px !important; flex: 1; overflow-x: hidden; }
+            .desktop-table-view { display: none !important; }
+            .mobile-cards-view { display: flex !important; flex-direction: column; gap: 14px; width: 100%; }
+        }
+
+        @media(max-width: 600px) {
+            .topbar { flex-direction: column; align-items: stretch; gap: 14px; }
+            .topbar-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; width: 100% !important; }
+            .topbar-actions .btn, .topbar-actions .theme-toggle-btn { width: 100% !important; justify-content: center !important; text-align: center !important; font-size: 11px !important; padding: 8px 6px !important; }
+            .page-title { font-size: 18px !important; }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .stat-card { padding: 12px 10px !important; border-radius: 12px !important; }
+            .stat-val { font-size: 20px !important; }
+            .stat-lbl { font-size: 9px !important; letter-spacing: 0.02em !important; }
+
+            .card-header { padding: 14px !important; flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
+            .card-header form { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 8px !important; }
+            .form-input { width: 100% !important; min-width: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- CUSTOM DELETE USER CONFIRMATION MODAL -->
+<div id="deleteModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1.5px solid var(--red);border-radius:24px;max-width:440px;width:100%;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(239,68,68,0.3);position:relative">
+        <button type="button" onclick="closeDeleteModal()" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px">✕</button>
+
+        <div style="text-align:center;margin-bottom:22px">
+            <div style="width:60px;height:60px;border-radius:20px;background:rgba(239,68,68,0.15);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px auto;border:1px solid rgba(239,68,68,0.3)">⚠️</div>
+            <h3 style="font-weight:900;font-size:20px;color:var(--text);margin-bottom:6px">Delete User Account?</h3>
+            <p style="font-size:13px;color:var(--text2);margin:0">Are you sure you want to permanently delete user account <strong id="delete-user-email-text" style="color:var(--red);font-family:monospace"></strong>? This action cannot be undone.</p>
+        </div>
+
+        <form id="delete-user-form" method="post" action="">
+            {% csrf_token %}
+            <div style="display:flex;gap:10px">
+                <button type="button" class="btn btn-outline" onclick="closeDeleteModal()" style="flex:1;justify-content:center;padding:12px;border-radius:12px">Cancel</button>
+                <button type="submit" class="btn" style="flex:1;justify-content:center;padding:12px;border-radius:12px;background:var(--red);color:white;border:none;font-weight:800">🗑️ Delete Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div>
+        <a href="/superadmin/" class="logo" style="text-decoration:none">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </a>
+
+        <nav class="nav-group">
+            <div class="nav-label">Master Controls</div>
+            <a href="/superadmin/" class="nav-item">📊 Dashboard & Courses</a>
+            <a href="/admin-users/" class="nav-item active">👥 Users & Subscriptions</a>
+            <a href="/admin-payments/" class="nav-item">💳 Payment Verifications</a>
+            <a href="/admin-bookings/" class="nav-item">📅 Service Bookings</a>
+            <a href="/notifications/" class="nav-item">🔔 Notification Center</a>
+            <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+            <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+            <a href="/verify-certificate/" class="nav-item">🎓 Certificate Verification</a>
+
+            <div class="nav-label">Product Links</div>
+            <a href="/" class="nav-item">🌐 Main Landing Page</a>
+            <a href="/admin/" class="nav-item">🛠️ Django Admin</a>
+        </nav>
+    </div>
+
+    <div style="font-size:11px;color:var(--text3);padding:8px">
+        Logged in as <strong>{{ request.user.email }}</strong>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button type="button" class="btn-toggle-sidebar" onclick="toggleSidebar()">☰</button>
+            <div>
+                <h1 class="page-title">👥 Users & Subscriptions Management</h1>
+                <div style="font-size:13px;color:var(--text2);margin-top:2px">Manage user accounts, roles, and SaaS subscription tiers</div>
+            </div>
+        </div>
+
+        <div class="topbar-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            {% include 'accounts_app/notification_bell.html' %}
+            
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme">
+                🌙 Dark
+            </button>
+
+            <a href="/admin-users/export/pdf/?q={{ q_search }}&plan={{ plan_filter }}&date_joined={{ date_filter }}&contact_status={{ status_filter }}" target="_blank" class="btn btn-outline" style="font-size:12px;padding:8px 14px;border-color:var(--cyan);color:var(--cyan)">
+                📄 Download PDF Report
+            </a>
+            <a href="/admin-users/export/csv/?q={{ q_search }}&plan={{ plan_filter }}&date_joined={{ date_filter }}&contact_status={{ status_filter }}" class="btn btn-cyan" style="font-size:12px;padding:8px 14px">
+                📊 Export Excel / CSV
+            </a>
+            <a href="/superadmin/" class="btn btn-outline" style="font-size:12px;padding:8px 14px">← Master Console</a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div style="margin-bottom:20px">
+        {% for message in messages %}
+        <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:transparent;border:none;color:var(--green);cursor:pointer;font-size:14px">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="stats-grid" style="grid-template-columns:repeat(3, 1fr)">
+        <div class="stat-card">
+            <div class="stat-val">{{ total_users_count }}</div>
+            <div class="stat-lbl">Total Registered Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--cyan)">{{ active_subscriptions }}</div>
+            <div class="stat-lbl">Active Subscriptions</div>
+        </div>
+        <div class="stat-card" style="border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.05)">
+            <div class="stat-val" style="color:var(--amber)">{{ need_contact_count }}</div>
+            <div class="stat-lbl" style="color:var(--amber)">⚠️ Need Contact (>7 Days)</div>
+        </div>
+    </div>
+
+    <!-- USERS TABLE CARD -->
+    <div class="card">
+        <div class="card-header">
+            <div style="font-weight:800;font-size:16px">All Registered User Accounts</div>
+            <form method="get" action="/admin-users/" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                <input type="text" name="q" value="{{ q_search }}" class="form-input" placeholder="🔍 Search name, email, phone..." style="min-width:180px">
+                
+                <select name="date_joined" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Registration Dates</option>
+                    <option value="over_7_days" {% if date_filter == 'over_7_days' %}selected{% endif %}>⏰ Over 7 Days Ago</option>
+                    <option value="within_7_days" {% if date_filter == 'within_7_days' %}selected{% endif %}>⚡ Within Last 7 Days</option>
+                </select>
+
+                <select name="contact_status" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Contact Statuses</option>
+                    <option value="need_contact" {% if status_filter == 'need_contact' %}selected{% endif %}>📞 Need Contact (>7 Days)</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Contact Completed</option>
+                </select>
+
+                <select name="plan" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Plans</option>
+                    <option value="free" {% if plan_filter == 'free' %}selected{% endif %}>Free Tier</option>
+                    <option value="pro" {% if plan_filter == 'pro' %}selected{% endif %}>Pro Plan</option>
+                    <option value="business" {% if plan_filter == 'business' %}selected{% endif %}>Business Plan</option>
+                </select>
+
+                <button type="submit" class="btn btn-cyan btn-sm">Filter</button>
+                {% if q_search or plan_filter or date_filter or status_filter %}
+                <a href="/admin-users/" class="btn btn-outline btn-sm">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- DESKTOP TABLE VIEW -->
+        <div class="desktop-table-view">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>User ID</th>
+                        <th>Full Name & Email</th>
+                        <th>Phone / WhatsApp</th>
+                        <th>Usage & Status</th>
+                        <th>Plan</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users_page %}
+                    <tr>
+                        <td style="font-size:11px;color:var(--text3);font-weight:700">{{ forloop.counter }}</td>
+                        <td style="font-family:monospace;font-weight:700;color:var(--cyan)">#{{ u.id }}</td>
+                        <td>
+                            <div style="font-weight:700;color:var(--text)">{{ u.get_full_name|default:u.email }}</div>
+                            <div style="font-size:12px;color:var(--text2)">{{ u.email }}</div>
+                        </td>
+                        <td>
+                            {% if u.profile.phone %}
+                            <a href="https://api.whatsapp.com/send?phone={{ u.profile.phone }}" target="_blank" style="font-family:monospace;font-weight:700;color:var(--green);text-decoration:none;font-size:12px">
+                                📱 {{ u.profile.phone }} ↗
+                            </a>
+                            {% else %}
+                            <span style="color:var(--text3);font-size:12px">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.profile.is_contacted %}
+                            <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Contact Completed</span>
+                            {% else %}
+                            <span class="badge" style="background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3)">📞 Pending Contact</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.profile.plan == 'business' %}
+                            <span class="badge badge-business">⚡ Business</span>
+                            {% elif u.profile.plan == 'pro' %}
+                            <span class="badge badge-pro">🚀 Pro</span>
+                            {% else %}
+                            <span class="badge badge-free">Free</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size:12px;color:var(--text2)">{{ u.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                                <button type="button" class="btn btn-outline btn-sm" onclick="openEditStatusModal('{{ u.id }}', '{{ u.email|escapejs }}', '{% if u.profile.is_contacted %}completed{% else %}pending{% endif %}')" style="font-size:11px;padding:4px 8px;font-weight:700" title="Edit Contact Status">
+                                    📝 Edit Status
+                                </button>
+                                {% if u.id == request.user.id %}
+                                <span style="font-size:11px;color:var(--cyan);font-weight:700;padding:4px 6px">Admin</span>
+                                {% elif u.profile.is_certified %}
+                                <span class="badge" style="background:rgba(204,255,0,0.15);color:#ccff00;border:1px solid rgba(204,255,0,0.3);font-size:11px;padding:4px 8px" title="Certified student records are permanently protected from deletion.">
+                                    🎓 Certified (Protected)
+                                </span>
+                                {% else %}
+                                <button type="button" class="btn btn-sm" onclick="openDeleteModal('{{ u.id }}', '{{ u.email|escapejs }}')" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:4px 10px;font-weight:700" title="Delete User">
+                                    🗑️ Delete
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No users found matching filter criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARDS VIEW (For Mobile & Small Devices) -->
+        <div class="mobile-cards-view">
+            {% for u in users_page %}
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-family:monospace;font-weight:800;color:var(--cyan);font-size:13px">
+                        #{{ forloop.counter }} · User ID #{{ u.id }}
+                    </span>
+                    {% if u.profile.is_over_7_days %}
+                        {% if u.profile.is_contacted %}
+                        <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Complete</span>
+                        {% else %}
+                        <span class="badge" style="background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3)">⚠️ >7 Days</span>
+                        {% endif %}
+                    {% else %}
+                    <span class="badge" style="background:rgba(100,116,139,0.15);color:var(--text2);border:1px solid var(--border)">⏳ New (&lt;7 Days)</span>
+                    {% endif %}
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:white;overflow:hidden;flex-shrink:0">
+                        {% if u.profile.avatar %}
+                        <img src="{{ u.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% else %}
+                        {{ u.first_name|first|default:u.email|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:var(--text)">{{ u.get_full_name|default:u.email }}</div>
+                        <div style="font-size:12px;color:var(--text2);font-family:monospace">{{ u.email }}</div>
+                        {% if u.profile.phone %}
+                        <a href="https://api.whatsapp.com/send?phone={{ u.profile.phone }}" target="_blank" style="font-size:12px;color:var(--green);font-weight:700;text-decoration:none;display:inline-block;margin-top:2px">
+                            📱 {{ u.profile.phone }} ↗
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);padding:10px 12px;border-radius:10px;font-size:12px">
+                    <div>
+                        <div style="color:var(--text3);font-size:10px;font-weight:700">PLAN</div>
+                        <div>
+                            {% if u.profile.plan == 'business' %}
+                            <span style="font-weight:700;color:var(--purple)">⚡ Business</span>
+                            {% elif u.profile.plan == 'pro' %}
+                            <span style="font-weight:700;color:var(--cyan)">🚀 Pro</span>
+                            {% else %}
+                            <span style="font-weight:600;color:var(--text2)">Free</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="color:var(--text3);font-size:10px;font-weight:700">JOINED</div>
+                        <div style="font-weight:600;color:var(--text2)">{{ u.date_joined|date:"M d, Y" }}</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px">
+                    {% if u.profile.is_over_7_days %}
+                    <form method="post" action="/admin-users/{{ u.id }}/toggle-contact/" style="flex:1">
+                        {% csrf_token %}
+                        {% if u.profile.is_contacted %}
+                        <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;font-size:12px">
+                            ↩️ Reset Status
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-sm" style="width:100%;justify-content:center;background:var(--amber);color:#000;font-weight:800;font-size:12px">
+                            📞 Mark Complete
+                        </button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
+
+                    <a href="/admin/auth/user/{{ u.id }}/change/" target="_blank" class="btn btn-outline btn-sm" style="flex:1;justify-content:center">
+                        Edit ↗
+                    </a>
+
+                    {% if u.id == request.user.id %}
+                    <span style="font-size:11px;color:var(--cyan);font-weight:700;padding:6px 12px;background:rgba(204,255,0,0.1);border-radius:6px;flex:1;text-align:center">Active Admin</span>
+                    {% elif u.profile.is_certified %}
+                    <span class="badge" style="background:rgba(204,255,0,0.15);color:#ccff00;border:1px solid rgba(204,255,0,0.3);font-size:11px;padding:6px 12px;flex:1;text-align:center">
+                        🎓 Certified (Protected)
+                    </span>
+                    {% else %}
+                    <button type="button" class="btn btn-sm" onclick="openDeleteModal('{{ u.id }}', '{{ u.email|escapejs }}')" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);flex:1;justify-content:center">
+                        🗑️ Delete
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:24px;color:var(--text3)">
+                No users found matching filter criteria.
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION CONTROLS -->
+        {% if users_page.has_other_pages %}
+        <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2)">
+            <div style="font-size:13px;color:var(--text2)">
+                Showing <strong>{{ users_page.start_index }}</strong> - <strong>{{ users_page.end_index }}</strong> of <strong>{{ users_page.paginator.count }}</strong> users
+            </div>
+            <div style="display:flex;gap:6px">
+                {% if users_page.has_previous %}
+                <a href="?page={{ users_page.previous_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}" class="btn btn-outline btn-sm">« Prev</a>
+                {% endif %}
+
+                {% for num in users_page.paginator.page_range %}
+                    {% if users_page.number == num %}
+                    <span class="btn btn-cyan btn-sm">{{ num }}</span>
+                    {% else %}
+                    <a href="?page={{ num }}{% if q_search %}&q={{ q_search }}{% endif %}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}" class="btn btn-outline btn-sm">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users_page.has_next %}
+                <a href="?page={{ users_page.next_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}" class="btn btn-outline btn-sm">Next »</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- EDIT USER CONTACT STATUS MODAL -->
+<div id="editStatusModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:440px;width:90%;box-shadow:0 20px 50px rgba(0,0,0,0.5)">
+        <h3 style="margin-top:0;font-size:18px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:10px">
+            📝 Edit User Contact Status
+        </h3>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:20px">
+            Update communication status for user <strong id="edit-user-email-text" style="color:var(--cyan)"></strong>:
+        </p>
+        <form id="edit-status-form" method="post" action="">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom:24px">
+                <label class="form-label" style="font-weight:700;margin-bottom:8px;display:block">Contact Status</label>
+                <select name="status" id="edit-status-select" class="form-input" style="width:100%;padding:10px 14px">
+                    <option value="completed">✅ Contact Completed</option>
+                    <option value="pending">📞 Pending Contact</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeEditStatusModal()">Cancel</button>
+                <button type="submit" class="btn btn-cyan btn-sm" style="font-weight:800;padding:8px 18px">💾 Save Status</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditStatusModal(userId, userEmail, currentStatus) {
+    document.getElementById('edit-user-email-text').innerText = userEmail;
+    document.getElementById('edit-status-form').action = '/admin-users/' + userId + '/toggle-contact/';
+    const select = document.getElementById('edit-status-select');
+    if (select) select.value = currentStatus;
+    const modal = document.getElementById('editStatusModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeEditStatusModal() {
+    const modal = document.getElementById('editStatusModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function openDeleteModal(userId, userEmail) {
+    document.getElementById('delete-user-email-text').innerText = userEmail;
+    document.getElementById('delete-user-form').action = '/admin-users/' + userId + '/delete/';
+    const modal = document.getElementById('deleteModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('active');
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,692 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Center — Qrious Tech Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --bg2: #0d1222; --card: #131b2e;
+            --blue: #3b82f6; --purple: #8b5cf6; --cyan: #0284c7; --neon: #0284c7; --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+
+        body.light-theme, html.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            display: flex;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Sidebar Navigation Drawer */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: #0d1322 !important;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b !important;
+            padding: 12px 8px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #cbd5e1 !important;
+            background: transparent !important;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+            transform: translateX(3px);
+        }
+
+        .nav-item.active {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: 1px solid #3b82f6 !important;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important;
+            font-weight: 700 !important;
+        }
+
+        /* Main Content Container */
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+            padding: 32px 40px;
+            width: calc(100% - 260px);
+        }
+
+        /* Topbar Header */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-toggle-sidebar {
+            display: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        @media(max-width: 900px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .btn-toggle-sidebar { display: flex; }
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh;
+                background: #0d1322 !important; border-right: 1px solid var(--border);
+                padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+                z-index: 99999; overflow-y: auto;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; padding: 16px !important; flex: 1; overflow-x: hidden; }
+        }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.25s; font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle-btn:hover { transform: translateY(-1px); }
+
+        .btn-mark-all {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-mark-all:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-item {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-decoration: none;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .tab-item:hover {
+            color: var(--text);
+            border-color: #2563eb;
+        }
+        .tab-item.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            font-weight: 700;
+        }
+
+        /* Notification List Cards */
+        .notif-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .notif-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .notif-card:hover {
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .notif-card.unread {
+            border-left: 4px solid #2563eb;
+            background: rgba(37, 99, 235, 0.06);
+        }
+        body.light-theme .notif-card.unread {
+            background: #eff6ff;
+        }
+
+        .card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .icon-payment { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .icon-booking { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .icon-course { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .icon-agent { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .icon-system { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }
+
+        .card-body {
+            flex: 1;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-time {
+            font-size: 0.8rem;
+            color: var(--text3);
+            font-weight: 500;
+        }
+
+        .card-msg {
+            font-size: 0.9rem;
+            color: var(--text2);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .card-link {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        .card-delete-btn {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .card-delete-btn:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            background: var(--card);
+            border: 1px dashed var(--border2);
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text2);
+        }
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        /* Custom Confirm Delete Modal */
+        .custom-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .custom-modal-card {
+            background: #0d1322;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(239, 68, 68, 0.15);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            padding: 32px 28px;
+            text-align: center;
+            position: relative;
+            color: #f8fafc;
+        }
+
+        body.light-theme .custom-modal-card {
+            background: #ffffff;
+            border-color: #fca5a5;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            color: #0f172a;
+        }
+
+        .modal-icon-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text, #f8fafc);
+        }
+
+        .modal-desc {
+            font-size: 0.9rem;
+            color: var(--text2, #94a3b8);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .modal-btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .modal-btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border2, rgba(255,255,255,0.15));
+            color: var(--text, #f8fafc);
+        }
+        .modal-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        body.light-theme .modal-btn-cancel {
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        .modal-btn-delete {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+        }
+        .modal-btn-delete:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- Side Navbar Drawer -->
+<aside class="sidebar" id="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#0284c7;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+
+        {% if request.user.is_superuser %}
+            <div class="nav-label">Master Admin Controls</div>
+            <a href="/superadmin/" class="nav-item">📊 Dashboard & Courses</a>
+            <a href="/admin-users/" class="nav-item">👥 Users & Subscriptions</a>
+            <a href="/admin-bookings/" class="nav-item">📅 Service Bookings</a>
+            <a href="/notifications/" class="nav-item active">🔔 Notification Center</a>
+            <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+            <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+            <a href="/verify-certificate/" class="nav-item">🎓 Certificate Verification</a>
+
+            <div class="nav-label">Quick Links</div>
+            <a href="/" class="nav-item">🌐 Main Landing Page</a>
+            <a href="/admin/" class="nav-item">🛠️ Django Admin</a>
+        {% else %}
+            <div class="nav-label">Student Navigation</div>
+            <a href="/student/dashboard/" class="nav-item">🎓 Learning Dashboard</a>
+            <a href="/student/dashboard/#invoices" class="nav-item">📜 Tuition & Payments</a>
+            <a href="/notifications/" class="nav-item active">🔔 Notification Center</a>
+            <a href="/student/classroom/" class="nav-item">▶️ Recorded Classroom</a>
+            <a href="/student/dashboard/#certificate" class="nav-item">🏆 Verified Certificate</a>
+
+            <div class="nav-label">Quick Links</div>
+            <a href="/" class="nav-item">🌐 Main Website</a>
+        {% endif %}
+    </div>
+
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<!-- Main Workspace -->
+<main class="main">
+    <!-- Topbar Header -->
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:14px">
+            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+                ☰
+            </button>
+            <div>
+                <h1 class="page-title">
+                    🔔 Notification Center
+                    {% if unread_count > 0 %}
+                        <span style="font-size: 0.8rem; background: #ef4444; color: white; padding: 2px 10px; border-radius: 12px; font-weight: 800;">
+                            {{ unread_count }} Unread
+                        </span>
+                    {% endif %}
+                </h1>
+                <div style="font-size:12px;color:var(--text2);margin-top:2px">Real-time alerts for payments, bookings, course updates, and AI agent tasks</div>
+            </div>
+        </div>
+
+        <!-- Topbar Controls -->
+        <div style="display:flex;align-items:center;gap:12px">
+            {% include 'accounts_app/notification_bell.html' %}
+
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Theme">
+                🌙 Dark
+            </button>
+
+            <button type="button" class="theme-toggle-btn" onclick="switchLanguage()" title="Switch Language">
+                🇬🇧 English
+            </button>
+
+            <button onclick="markAllRead()" class="btn-mark-all">✓ Mark All Read</button>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="?type=all&status={{ filter_status }}" class="tab-item {% if filter_type == 'all' %}active{% endif %}">All Notifications</a>
+        <a href="?type=payment&status={{ filter_status }}" class="tab-item {% if filter_type == 'payment' %}active{% endif %}">💳 Payments & Invoices</a>
+        <a href="?type=booking&status={{ filter_status }}" class="tab-item {% if filter_type == 'booking' %}active{% endif %}">📅 Service Bookings</a>
+        <a href="?type=course&status={{ filter_status }}" class="tab-item {% if filter_type == 'course' %}active{% endif %}">🎓 Course & Certificates</a>
+        <a href="?type=agent&status={{ filter_status }}" class="tab-item {% if filter_type == 'agent' %}active{% endif %}">🤖 AI Agent Tasks</a>
+    </div>
+
+    <!-- Notification List -->
+    <div class="notif-card-list">
+        {% if notifications %}
+            {% for item in notifications %}
+                <div class="notif-card {% if not item.is_read %}unread{% endif %}" id="notif-card-{{ item.id }}">
+                    <div class="card-icon 
+                        {% if item.notification_type == 'payment' %}icon-payment
+                        {% elif item.notification_type == 'booking' %}icon-booking
+                        {% elif item.notification_type == 'course' %}icon-course
+                        {% elif item.notification_type == 'agent' %}icon-agent
+                        {% else %}icon-system{% endif %}">
+                        {% if item.notification_type == 'payment' %}💳
+                        {% elif item.notification_type == 'booking' %}📅
+                        {% elif item.notification_type == 'course' %}🎓
+                        {% elif item.notification_type == 'agent' %}🤖
+                        {% else %}🔔{% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-top">
+                            <div class="card-title">{{ item.title }}</div>
+                            <div class="card-time">{{ item.created_at|date:"M d, H:i" }}</div>
+                        </div>
+                        <div class="card-msg">{{ item.message }}</div>
+
+                        <div class="card-actions">
+                            {% if item.link and item.link != '#' %}
+                                <a href="{{ item.link }}" class="card-link" onclick="markSingleRead({{ item.id }})">View Details →</a>
+                            {% endif %}
+                            <button type="button" class="card-delete-btn" onclick="deleteNotif({{ item.id }})">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🔕</div>
+                <h3>No Notifications Found</h3>
+                <p style="margin-top: 6px; font-size: 0.9rem;">You are all caught up! New alerts will appear here in real-time.</p>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Custom Confirm Delete Modal -->
+<div id="deleteModalOverlay" class="custom-modal-overlay" style="display: none;" onclick="if(event.target === this) closeDeleteModal();">
+    <div class="custom-modal-card">
+        <div class="modal-icon-badge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+        </div>
+        <h3 class="modal-title">Delete Notification</h3>
+        <p class="modal-desc">Are you sure you want to delete this notification? This action cannot be undone.</p>
+        
+        <div class="modal-btn-row">
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="modal-btn modal-btn-delete" id="confirmDeleteSubmitBtn" onclick="executeDeleteNotification()">
+                🗑️ Yes, Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let pendingDeleteNotifId = null;
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar && backdrop) {
+            sidebar.classList.toggle('open');
+            backdrop.classList.toggle('active');
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) btn.innerText = isLight ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+
+    // Restore theme on load
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) btn.innerText = '☀️ Light';
+    }
+
+    function switchLanguage() {
+        alert("Language switched!");
+    }
+
+    function markSingleRead(id) {
+        fetch(`/api/notifications/${id}/read/`, { method: 'POST' });
+    }
+
+    function markAllRead() {
+        fetch('/api/notifications/read-all/', { method: 'POST' })
+            .then(() => window.location.reload());
+    }
+
+    function deleteNotif(id) {
+        pendingDeleteNotifId = id;
+        const modal = document.getElementById('deleteModalOverlay');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        pendingDeleteNotifId = null;
+        const modal = document.getElementById('deleteModalOverlay');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function executeDeleteNotification() {
+        if (!pendingDeleteNotifId) return;
+        const id = pendingDeleteNotifId;
+        const btn = document.getElementById('confirmDeleteSubmitBtn');
+        if (btn) btn.innerText = "Deleting...";
+
+        fetch(`/api/notifications/${id}/delete/`, { method: 'POST' })
+            .then(res => res.json())
+            .then(() => {
+                closeDeleteModal();
+                if (btn) btn.innerText = "🗑️ Yes, Delete";
+                const card = document.getElementById(`notif-card-${id}`);
+                if (card) {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 300);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                closeDeleteModal();
+                if (btn) btn.innerText = "🗑️ Yes, Delete";
+            });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,1043 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Super Admin Console — Qrious Tech Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --bg2: #0d1222; --card: #131b2e; --card-hover: #1c273e;
+            --blue: #2563eb; --purple: #7c3aed; --cyan: #0284c7; --neon: #0284c7; --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+        body.light-theme, html.light-theme {
+            --bg: #FAFAFA; --bg2: #FFFFFF; --card: #FFFFFF; --card-hover: #F8FAF8;
+            --text: #111827; --text2: #4B5563; --text3: #6B7280;
+            --border: #E4E4E7; --border2: #D4D4D8;
+        }
+        .sidebar { background: #0d1322 !important; }
+        .sidebar .brand-logo-dark { display: block !important; }
+        .sidebar .brand-logo-light { display: none !important; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; transition: background 0.3s, color 0.3s; }
+
+        .theme-toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border2); background: rgba(255,255,255,0.08); color: var(--text);
+            transition: all 0.25s; font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle-btn:hover { transform: translateY(-1px); }
+
+        /* Sidebar Fixed Position on Desktop */
+        @media(min-width: 901px) {
+            .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; overflow-y: auto; }
+            .main { margin-left: 260px; flex: 1; min-height: 100vh; padding: 32px 40px; }
+        }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 0 8px; }
+        .logo-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--amber), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; }
+        .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 800; color: #ffffff !important; }
+
+        .nav-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b !important; margin: 18px 8px 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; background: transparent !important; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.08) !important; color: #ffffff !important; transform: translateX(3px); }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important; font-weight: 700 !important; }
+
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; }
+        .page-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; }
+
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; font-family: 'Inter'; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; }
+        .btn-cyan { background: linear-gradient(135deg, var(--cyan), var(--blue)); color: white; box-shadow: 0 4px 15px rgba(204,255,0,0.3); }
+        .btn-cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(204,255,0,0.45); }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+        /* Modern Form Inputs */
+        .form-input {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 13.5px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 12px rgba(204,255,0,0.25);
+            background: var(--card);
+        }
+        body.light-theme .form-input {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+        @media(max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media(max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .stat-val { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+        .stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); }
+
+        /* Card Sections */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 32px; }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .card-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 24px; }
+
+        /* Table Fixed Layout on Desktop (No Scrollbars) */
+        .table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .table th { background: rgba(255,255,255,0.02); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; padding: 12px 14px; border-bottom: 1px solid var(--border); word-wrap: break-word; }
+        .table td { padding: 14px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
+        .table tr:last-child td { border-bottom: none; }
+        .table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Responsive Views: Desktop Fixed Table vs Mobile Cards */
+        .desktop-table-view { display: block; width: 100%; }
+        .mobile-cards-view { display: none; }
+
+        /* Progress Bar */
+        .progress-bar-wrap { width: 100px; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; display: inline-block; vertical-align: middle; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 10px; }
+
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-completed { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+        .badge-progress { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+
+        /* Mobile Responsive & Collapsible Sidebar */
+        .btn-toggle-sidebar {
+            display: none; width: 38px; height: 38px; border-radius: 10px;
+            background: var(--card); border: 1px solid var(--border2); color: var(--text);
+            align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 18px;
+        }
+        .sidebar-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s;
+        }
+        .sidebar-backdrop.active { opacity: 1; visibility: visible; }
+
+        .topbar-dropdown {
+            position: absolute; top: calc(100% + 8px); right: 0; width: 250px;
+            background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); opacity: 0; visibility: hidden;
+            transform: translateY(8px); transition: all 0.2s ease; z-index: 1000;
+        }
+        .topbar-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+        .topbar-dropdown-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+            color: var(--text2); text-decoration: none; font-size: 13px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .topbar-dropdown-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+        @media(max-width: 900px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .btn-toggle-sidebar { display: flex; }
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh;
+                background: var(--bg2); border-right: 1px solid var(--border);
+                padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;
+                z-index: 99999; overflow-y: auto;
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            .sidebar { position: fixed; top: 0; bottom: 0; left: -280px; width: 270px; height: 100vh; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08); padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+            .sidebar.active { left: 0; }
+            .sidebar-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 99; }
+            .sidebar-backdrop.active { display: block; }
+            .main { margin-left: 0 !important; padding: 20px 16px !important; }
+            .btn-toggle-sidebar { display: inline-flex !important; }
+        }
+        .btn-toggle-sidebar { display: none; background: var(--bg2); border: 1px solid var(--border2); color: var(--text); padding: 8px 12px; border-radius: 10px; font-size: 18px; cursor: pointer; }
+
+        @media(max-width: 600px) {
+            .topbar { flex-direction: column; align-items: stretch; gap: 14px; }
+            .topbar-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; width: 100% !important; }
+            .topbar-actions .btn, .topbar-actions .theme-toggle-btn { width: 100% !important; justify-content: center !important; text-align: center !important; font-size: 11px !important; padding: 8px 6px !important; }
+            .page-title { font-size: 18px !important; }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .stat-card { padding: 12px 10px !important; border-radius: 12px !important; }
+            .stat-val { font-size: 20px !important; }
+            .stat-lbl { font-size: 9px !important; letter-spacing: 0.02em !important; }
+
+            .card-header { padding: 14px !important; flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
+            .card-header form { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 8px !important; }
+            .form-input { width: 100% !important; min-width: 0 !important; }
+
+            .form-grid-responsive { grid-template-columns: 1fr !important; gap: 12px !important; }
+            .form-actions-responsive { flex-direction: column-reverse !important; align-items: stretch !important; gap: 10px !important; }
+            .form-actions-responsive .btn { width: 100% !important; justify-content: center !important; text-align: center !important; }
+            #create-user-form-box, #enroll-form-box { padding: 16px 14px !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+            </div>
+        </div>
+
+        <div class="nav-label">Master Controls</div>
+        <a href="/superadmin/" class="nav-item active">📊 Dashboard & Courses</a>
+        <a href="/admin-users/" class="nav-item">👥 Users & Subscriptions</a>
+        <a href="/admin-payments/" class="nav-item">💳 Payment Verifications</a>
+        <a href="/admin-bookings/" class="nav-item">📅 Service Bookings</a>
+        <a href="/notifications/" class="nav-item">🔔 Notification Center</a>
+        <a href="/superadmin/live-classes/" class="nav-item">🎥 Live Class Meetings</a>
+        <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+        <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+        <a href="/verify-certificate/" class="nav-item">🎓 Certificate Verification</a>
+
+        <div class="nav-label">Product Links</div>
+        <a href="/" class="nav-item">🌐 Main Landing Page</a>
+        <a href="/admin/" class="nav-item">🛠️ Django Admin</a>
+    </div>
+
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
+                ☰
+            </button>
+            <div>
+                <h1 class="page-title">👑 Super Admin Master Console</h1>
+                <div style="font-size:13px;color:var(--text2);margin-top:2px">Welcome {{ request.user.get_full_name|default:request.user.email }}</div>
+            </div>
+        </div>
+
+        <!-- Topbar Action Controls -->
+        <div style="display:flex;gap:12px;align-items:center">
+            {% include 'accounts_app/notification_bell.html' %}
+
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme">
+                🌙 Dark
+            </button>
+
+            <button type="button" class="theme-toggle-btn lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
+                🇬🇧 English
+            </button>
+
+            <!-- Topbar Profile Menu -->
+            <div class="topbar-profile" id="topbar-profile" style="position:relative">
+                <button class="topbar-profile-btn" id="profile-menu-btn" onclick="toggleProfileMenu(event)" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border2);padding:6px 14px;border-radius:30px;cursor:pointer;color:var(--text)">
+                    <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;overflow:hidden">
+                        {% if request.user.profile.avatar %}
+                        <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% else %}
+                        {{ request.user.email|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div style="text-align:left">
+                        <div style="font-size:13px;font-weight:700;line-height:1.2">{{ request.user.get_full_name|default:request.user.email }}</div>
+                        <div style="font-size:11px;color:var(--amber);font-weight:600">👑 Super Admin</div>
+                    </div>
+                    <span style="font-size:10px;color:var(--text3);margin-left:4px">▾</span>
+                </button>
+
+                <!-- Profile Dropdown Menu -->
+                <div class="topbar-dropdown" id="profile-dropdown">
+                    <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+                        <div style="font-size:13px;font-weight:700">{{ request.user.get_full_name|default:request.user.email }}</div>
+                        <div style="font-size:11px;color:var(--text3)">{{ request.user.email }}</div>
+                    </div>
+                    <a href="/settings/" class="topbar-dropdown-item">⚙️ Profile & Settings</a>
+                    <a href="/dashboard/" class="topbar-dropdown-item">🤖 LinkedIn AI Job Agent</a>
+                    <a href="/admin/" class="topbar-dropdown-item">🛠️ Django Admin</a>
+                    <div style="border-top:1px solid var(--border)"></div>
+                    <a href="/logout/" class="topbar-dropdown-item" style="color:var(--red)">🚪 Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div style="margin-bottom:20px">
+        {% for message in messages %}
+        <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
+            <span><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> {{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:transparent;border:none;color:var(--green);cursor:pointer;font-size:14px">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+{% if created_credentials %}
+<!-- CREATED STUDENT CREDENTIALS POPUP MODAL -->
+<div id="credentialsModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1.5px solid var(--cyan);border-radius:24px;max-width:540px;width:100%;padding:32px;box-shadow:0 25px 60px rgba(0,0,0,0.9), 0 0 40px rgba(204,255,0,0.3);position:relative">
+        
+        <!-- Modal Close Button -->
+        <button type="button" onclick="closeCredentialsModal()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+
+        <!-- Header -->
+        <div style="text-align:center;margin-bottom:24px">
+            <div style="width:68px;height:68px;border-radius:22px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 16px auto;box-shadow:0 8px 24px rgba(204,255,0,0.4)">🎉</div>
+            {% if created_credentials.phone %}
+            <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(37,211,102,0.15);color:#25D366;border:1px solid rgba(37,211,102,0.3);font-size:11.5px;font-weight:700;margin-bottom:12px">
+                ⚡ Automatic WhatsApp Agent Dispatching...
+            </div>
+            {% endif %}
+            <h2 style="font-weight:900;font-size:22px;color:var(--text);margin-bottom:6px">Student Account Created!</h2>
+            <p style="font-size:13px;color:var(--text2);margin:0">Account auto-enrolled successfully. Automated WhatsApp & email dispatch initiated.</p>
+        </div>
+
+        <!-- Structured Credentials Box -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px" id="credentials-box-content">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px">
+                <span style="font-size:11px;color:var(--text3);font-weight:700">STUDENT ID</span>
+                <span style="font-size:13.5px;font-weight:800;color:var(--cyan);font-family:monospace">👤 {{ created_credentials.student_id }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px">
+                <span style="font-size:11px;color:var(--text3);font-weight:700">FULL NAME</span>
+                <span style="font-size:13.5px;font-weight:700;color:var(--text)">{{ created_credentials.full_name }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px">
+                <span style="font-size:11px;color:var(--text3);font-weight:700">GMAIL / EMAIL</span>
+                <span style="font-size:13.5px;font-weight:700;color:var(--text);font-family:monospace">📧 {{ created_credentials.email }}</span>
+            </div>
+            {% if created_credentials.phone %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px">
+                <span style="font-size:11px;color:var(--text3);font-weight:700">WHATSAPP / PHONE</span>
+                <span style="font-size:13.5px;font-weight:800;color:var(--green);font-family:monospace">📱 {{ created_credentials.phone }}</span>
+            </div>
+            {% endif %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px">
+                <span style="font-size:11px;color:var(--text3);font-weight:700">ACCOUNT PASSWORD</span>
+                <span style="font-size:13.5px;font-weight:800;color:var(--amber);font-family:monospace">🔑 {{ created_credentials.password }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:11px;color:var(--text3);font-weight:700">ENROLLED COURSE</span>
+                <span style="font-size:12.5px;font-weight:700;color:var(--purple);text-align:right">📚 {{ created_credentials.course_name }}</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+            {% if created_credentials.whatsapp_url %}
+            <a href="{{ created_credentials.whatsapp_url }}" id="auto-whatsapp-link" target="_blank" class="btn" style="flex:1;justify-content:center;padding:12px;font-weight:800;font-size:13.5px;border-radius:12px;background:#25D366;color:#ffffff;border:none">
+                💬 Open WhatsApp Chat
+            </a>
+            {% endif %}
+            <button type="button" class="btn btn-cyan" id="copy-credentials-btn" onclick="copyAllCredentials()" style="flex:1;justify-content:center;padding:12px;font-weight:800;font-size:13.5px;border-radius:12px">
+                📋 Copy All Credentials
+            </button>
+            <button type="button" class="btn btn-outline" onclick="closeCredentialsModal()" style="padding:12px 18px;border-radius:12px">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if created_credentials.whatsapp_url %}
+    // Automatically trigger auto-opening of WhatsApp Dispatch window
+    setTimeout(function() {
+        const waLink = document.getElementById('auto-whatsapp-link');
+        if (waLink) {
+            window.open(waLink.href, '_blank');
+        }
+    }, 400);
+    {% endif %}
+});
+
+function copyAllCredentials() {
+    const credText = `🎓 Qrious Tech Academy - Student Account Credentials
+--------------------------------------------------
+Student ID: {{ created_credentials.student_id }}
+Full Name: {{ created_credentials.full_name }}
+Email: {{ created_credentials.email }}
+Password: {{ created_credentials.password }}
+Enrolled Course: {{ created_credentials.course_name }}
+Login Portal: ${window.location.origin}/login/
+--------------------------------------------------`;
+
+    navigator.clipboard.writeText(credText).then(() => {
+        const btn = document.getElementById('copy-credentials-btn');
+        if (btn) {
+            btn.innerHTML = '<span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Credentials Copied!';
+            btn.style.background = 'var(--green)';
+            btn.style.borderColor = 'var(--green)';
+            btn.style.color = '#ffffff';
+            setTimeout(() => {
+                btn.innerHTML = '📋 Copy All Credentials';
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }, 3000);
+        }
+    }).catch(err => {
+        alert('Failed to copy credentials automatically.');
+    });
+}
+
+function closeCredentialsModal() {
+    const modal = document.getElementById('credentialsModal');
+    if (modal) modal.style.display = 'none';
+}
+</script>
+{% endif %}
+
+    <!-- Metrics Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-val">{{ total_users }}</div>
+            <div class="stat-lbl">Total Registered Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--purple)">{{ total_enrollments }}</div>
+            <div class="stat-lbl">Enrolled Students</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--green)">{{ completed_certificates }}</div>
+            <div class="stat-lbl">Certificates Issued</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--cyan)">{{ total_bookings }}</div>
+            <div class="stat-lbl">Service Bookings</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" style="color:var(--amber)">{{ total_applications }}</div>
+            <div class="stat-lbl">AI Applications</div>
+        </div>
+    </div>
+
+    <!-- COURSE & STUDENT MANAGEMENT SECTION -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">🎓 Student Course & Certificate Enrollment</div>
+            <div style="display:flex;gap:10px">
+                <button type="button" class="btn btn-cyan btn-sm" onclick="toggleFormBox('create-user-form-box')">
+                    ➕ Create New Student User
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleFormBox('enroll-form-box')">
+                    🔗 Enroll Existing User
+                </button>
+            </div>
+        </div>
+
+        <!-- Create New Student Form Card -->
+        <div id="create-user-form-box" style="padding:24px 28px;background:rgba(204,255,0,0.04);border-bottom:1px solid var(--border);border-top:2px solid var(--cyan)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(204,255,0,0.15);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">➕</div>
+                    <div>
+                        <div style="font-weight:800;font-size:16px;color:var(--text)">Create New Student User Account</div>
+                        <div style="font-size:12px;color:var(--text2)">Auto-generate student profile & credentials with immediate course enrollment</div>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('create-user-form-box').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px">✕</button>
+            </div>
+
+            <form method="post" action="/admin/student/create/">
+                {% csrf_token %}
+                <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 1fr;gap:16px;margin-bottom:16px" class="form-grid-responsive">
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">👤 Student Full Name *</label>
+                        <input type="text" name="full_name" class="form-input" placeholder="e.g. Rahim Ahmed" style="width:100%" required>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📧 Email Address *</label>
+                        <input type="email" name="email" class="form-input" placeholder="rahim@example.com" style="width:100%" required>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📱 WhatsApp / Phone Number</label>
+                        <input type="text" name="phone" class="form-input" placeholder="e.g. +8801700000000" style="width:100%">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">🔒 Password *</label>
+                        <input type="text" name="password" class="form-input" placeholder="Set password" value="Student123#" style="width:100%" required>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:16px;margin-bottom:20px" class="form-grid-responsive">
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📚 Assign Course *</label>
+                        <select name="course_name" class="form-input" style="width:100%" required>
+                            <option value="Digital Marketing & Growth Mastery">Digital Marketing & Growth Mastery (12 Weeks)</option>
+                            <option value="Full-Stack Web Development (Python & React)">Full-Stack Web Development (Python & React)</option>
+                            <option value="Autonomous AI Agent & Prompt Engineering">Autonomous AI Agent & Prompt Engineering</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">🏷️ Select Batch</label>
+                        <select name="batch_id" class="form-input" style="width:100%">
+                            {% for b in batches %}
+                            <option value="{{ b.id }}">🏷️ {{ b.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">💰 Total Tuition Fee (BDT ৳)</label>
+                        <input type="number" step="0.01" name="total_fee" class="form-input" value="10000.00" style="width:100%">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📊 Initial Progress %</label>
+                        <input type="number" name="progress_percent" class="form-input" min="0" max="100" value="0" style="width:100%">
+                    </div>
+                </div>
+
+                <div class="form-actions-responsive" style="display:flex;justify-content:flex-end;gap:12px;border-top:1px solid var(--border);padding-top:16px">
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('create-user-form-box').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-cyan" style="padding:10px 24px">🚀 Create Account & Auto-Enroll Student</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Enroll Form Collapsible Box -->
+        <div id="enroll-form-box" style="display:none;padding:24px 28px;background:var(--bg2);border-bottom:1px solid var(--border);border-top:2px solid var(--purple)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(168,85,247,0.15);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">🔗</div>
+                    <div>
+                        <div style="font-weight:800;font-size:16px;color:var(--text)">Enroll Existing User in Course</div>
+                        <div style="font-size:12px;color:var(--text2)">Select an existing registered account and generate a unique student enrollment ID</div>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('enroll-form-box').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px">✕</button>
+            </div>
+
+            <form method="post" action="/admin/student/enroll/">
+                {% csrf_token %}
+                <div style="display:grid;grid-template-columns:1.5fr 2fr 1fr 1fr 1fr;gap:16px;margin-bottom:20px" class="form-grid-responsive">
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">👤 Select Existing User *</label>
+                        <select name="user_id" class="form-input" style="width:100%" required>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.email }} ({{ u.get_full_name|default:"User" }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📚 Course Name *</label>
+                        <select name="course_name" class="form-input" style="width:100%" required>
+                            <option value="Digital Marketing & Growth Mastery">Digital Marketing & Growth Mastery (12 Weeks)</option>
+                            <option value="Full-Stack Web Development (Python & React)">Full-Stack Web Development (Python & React)</option>
+                            <option value="Autonomous AI Agent & Prompt Engineering">Autonomous AI Agent & Prompt Engineering</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">🏷️ Select Batch</label>
+                        <select name="batch_id" class="form-input" style="width:100%">
+                            {% for b in batches %}
+                            <option value="{{ b.id }}">🏷️ {{ b.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">📊 Progress %</label>
+                        <input type="number" name="progress_percent" class="form-input" min="0" max="100" value="0" style="width:100%">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text2);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">🎓 Course Status</label>
+                        <select name="is_completed" class="form-input" style="width:100%">
+                            <option value="false">⚡ In Progress</option>
+                            <option value="true">🎓 Completed (Issue Cert)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions-responsive" style="display:flex;justify-content:flex-end;gap:12px;border-top:1px solid var(--border);padding-top:16px">
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('enroll-form-box').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="padding:10px 24px">🔗 Enroll & Generate Student ID</button>
+                </div>
+            </form>
+        </div>
+
+        {% if pending_payments %}
+        <!-- PENDING PAYMENT VERIFICATIONS ALERT CARD -->
+        <div style="padding:20px 24px;background:rgba(245,158,11,0.06);border-bottom:1px solid rgba(245,158,11,0.2);border-top:3px solid var(--amber)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.15);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">⏳</div>
+                    <div>
+                        <div style="font-weight:800;font-size:16px;color:var(--text)">Pending Payment Proof Verifications ({{ pending_payments.count }})</div>
+                        <div style="font-size:12px;color:var(--text2)">Students have submitted payment receipts. Verify proofs and approve to issue official PDF invoices.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto">
+                <table class="table" style="background:var(--bg2);border-radius:12px;border:1px solid var(--border)">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Invoice ID</th>
+                            <th>Amount</th>
+                            <th>Method & TrxID</th>
+                            <th>Date Submitted</th>
+                            <th>Proof Screenshot</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pending_payments %}
+                        <tr>
+                            <td>
+                                <div style="font-weight:800;color:var(--text)">{{ p.enrollment.user.get_full_name|default:p.enrollment.user.email }}</div>
+                                <div style="font-size:11px;color:var(--text3);font-family:monospace">{{ p.enrollment.student_id }} • {{ p.enrollment.user.email }}</div>
+                            </td>
+                            <td><span style="font-weight:800;color:var(--cyan);font-family:monospace">{{ p.invoice_id }}</span></td>
+                            <td><span style="font-weight:800;color:var(--green)">৳{{ p.amount|floatformat:2 }} BDT</span></td>
+                            <td>
+                                <div style="font-weight:600">{{ p.payment_method }}</div>
+                                <div style="font-family:monospace;font-size:11px;color:var(--amber)">{{ p.transaction_ref|default:"—" }}</div>
+                            </td>
+                            <td style="font-size:12px;color:var(--text2)">{{ p.created_at|date:"M d, Y — h:i A" }}</td>
+                            <td>
+                                {% if p.payment_proof %}
+                                <a href="{{ p.payment_proof.url }}" target="_blank" class="btn btn-outline btn-sm" style="font-size:11px;padding:4px 8px">🖼️ View Proof ↗</a>
+                                {% else %}
+                                <span style="font-size:11px;color:var(--text3)">No File</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:6px;align-items:center">
+                                    <form method="post" action="/superadmin/payment/{{ p.id }}/verify/">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-sm" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3);font-weight:700;padding:5px 10px;font-size:11px" onclick="return confirm('Approve payment of ৳{{ p.amount|floatformat:2 }} BDT and email official PDF invoice?')">
+                                            ✅ Approve & Send Invoice
+                                        </button>
+                                    </form>
+                                    <form method="post" action="/superadmin/payment/{{ p.id }}/verify/">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-sm" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);font-weight:700;padding:5px 10px;font-size:11px" onclick="return confirm('Decline this payment submission?')">
+                                            ❌ Decline
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- SEARCH & FILTER BAR -->
+        <div style="padding:16px 24px;background:var(--bg2);border-bottom:1px solid var(--border)">
+            <form method="get" action="/superadmin/" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <!-- Search Input -->
+                <div style="flex:1;min-width:220px">
+                    <input type="text" name="q" value="{{ q_search }}" class="form-input" placeholder="🔍 Search student email, name, ID..." style="width:100%">
+                </div>
+
+                <!-- Course Filter -->
+                <select name="course" class="form-input" style="min-width:160px" onchange="this.form.submit()">
+                    <option value="">📚 All Courses</option>
+                    <option value="Digital Marketing" {% if course_filter == 'Digital Marketing' %}selected{% endif %}>Digital Marketing</option>
+                    <option value="Full-Stack Web" {% if course_filter == 'Full-Stack Web' %}selected{% endif %}>Full-Stack Web Dev</option>
+                    <option value="Autonomous AI Agent" {% if course_filter == 'Autonomous AI Agent' %}selected{% endif %}>AI Agent & Prompt Eng</option>
+                </select>
+
+                <!-- Fee & Due Status Filter -->
+                <select name="due_status" class="form-input" style="min-width:150px" onchange="this.form.submit()">
+                    <option value="">💰 All Fee Status</option>
+                    <option value="due" {% if due_filter == 'due' %}selected{% endif %}>🔴 Pending Due Balance</option>
+                    <option value="paid" {% if due_filter == 'paid' %}selected{% endif %}>🟢 Paid in Full</option>
+                </select>
+
+                <!-- Progress Filter -->
+                <select name="progress_status" class="form-input" style="min-width:150px" onchange="this.form.submit()">
+                    <option value="">📊 All Progress</option>
+                    <option value="in_progress" {% if progress_filter == 'in_progress' %}selected{% endif %}>⚡ In Progress</option>
+                    <option value="completed" {% if progress_filter == 'completed' %}selected{% endif %}>🎓 Completed</option>
+                </select>
+
+                <button type="submit" class="btn btn-cyan btn-sm" style="padding:10px 18px">Filter</button>
+                {% if q_search or due_filter or course_filter or progress_filter %}
+                <a href="/superadmin/" class="btn btn-outline btn-sm" style="padding:10px 14px">Clear ✕</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- DESKTOP FIXED TABLE VIEW (No Scrollbars) -->
+        <div class="desktop-table-view">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:14%">Student ID</th>
+                        <th style="width:22%">Student / Email</th>
+                        <th style="width:20%">Enrolled Course</th>
+                        <th style="width:14%">Fee & Due Status</th>
+                        <th style="width:12%">Progress %</th>
+                        <th style="width:10%">Status</th>
+                        <th style="width:8%">Certificate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in enrollments %}
+                    <tr>
+                        <td>
+                            <a href="/superadmin/student/{{ e.id }}/profile/" style="font-weight:800;color:var(--cyan);font-family:monospace;font-size:12px;text-decoration:none">
+                                👤 {{ e.student_id }} ↗
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/superadmin/student/{{ e.id }}/profile/" style="text-decoration:none;color:white;display:flex;align-items:center;gap:8px">
+                                <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:white;overflow:hidden;flex-shrink:0">
+                                    {% if e.user.profile.avatar %}
+                                    <img src="{{ e.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                                    {% else %}
+                                    {{ e.user.first_name|first|default:e.user.email|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div style="min-width:0">
+                                    <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.user.get_full_name|default:e.user.email }}</div>
+                                    <div style="font-size:10.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.user.email }}</div>
+                                </div>
+                            </a>
+                        </td>
+                        <td><div style="font-weight:600;font-size:12px">{{ e.course_name }}</div></td>
+                        <td>
+                            <div style="font-size:11.5px">
+                                <div>Fee: ৳{{ e.total_fee|floatformat:0 }}</div>
+                                <div>Paid: <span style="color:var(--green);font-weight:700">৳{{ e.total_paid|floatformat:0 }}</span></div>
+                                <div>Due: <span style="color:{% if e.due_amount > 0 %}var(--red){% else %}var(--green){% endif %};font-weight:700">৳{{ e.due_amount|floatformat:0 }}</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:6px">
+                                <div class="progress-bar-wrap" style="width:60px">
+                                    <div class="progress-fill" style="width:{{ e.progress_percent }}%"></div>
+                                </div>
+                                <span style="font-weight:700;font-size:11px">{{ e.progress_percent }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if e.is_completed %}
+                            <span class="badge badge-completed" style="font-size:10px">🎓 Done</span>
+                            {% else %}
+                            <span class="badge badge-progress" style="font-size:10px">⚡ Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if e.is_completed %}
+                            <a href="/certificate/{{ e.certificate_id }}/" target="_blank" style="color:var(--cyan);font-weight:700;font-size:11px;text-decoration:none">
+                                📜 View ↗
+                            </a>
+                            {% else %}
+                            <a href="/superadmin/student/{{ e.id }}/profile/" style="font-size:11px;color:var(--cyan);text-decoration:none;font-weight:700">
+                                💳 Profile ↗
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">
+                            No students enrolled yet. Click "+ Create New Student User" above to assign courses.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARDS VIEW (For Mobile & Small Devices) -->
+        <div class="mobile-cards-view">
+            {% for e in enrollments %}
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <a href="/superadmin/student/{{ e.id }}/profile/" style="font-weight:800;color:var(--cyan);font-family:monospace;font-size:13px;text-decoration:none">
+                        👤 {{ e.student_id }} ↗
+                    </a>
+                    {% if e.is_completed %}
+                    <span class="badge badge-completed">🎓 Completed</span>
+                    {% else %}
+                    <span class="badge badge-progress">⚡ In Progress</span>
+                    {% endif %}
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:white;overflow:hidden;flex-shrink:0">
+                        {% if e.user.profile.avatar %}
+                        <img src="{{ e.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% else %}
+                        {{ e.user.first_name|first|default:e.user.email|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:var(--text)">{{ e.user.get_full_name|default:e.user.email }}</div>
+                        <div style="font-size:12px;color:var(--text2)">{{ e.user.email }}</div>
+                    </div>
+                </div>
+
+                <div style="font-size:13px;font-weight:600;color:var(--text)">
+                    📚 {{ e.course_name }}
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:var(--bg3);padding:10px 12px;border-radius:10px;font-size:12px">
+                    <div>
+                        <div style="color:var(--text3);font-size:10px;font-weight:700">FEE</div>
+                        <div style="font-weight:700;color:var(--text)">৳{{ e.total_fee|floatformat:0 }}</div>
+                    </div>
+                    <div>
+                        <div style="color:var(--text3);font-size:10px;font-weight:700">PAID</div>
+                        <div style="font-weight:700;color:var(--green)">৳{{ e.total_paid|floatformat:0 }}</div>
+                    </div>
+                    <div>
+                        <div style="color:var(--text3);font-size:10px;font-weight:700">DUE</div>
+                        <div style="font-weight:700;color:{% if e.due_amount > 0 %}var(--red){% else %}var(--green){% endif %}">৳{{ e.due_amount|floatformat:0 }}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                        <span style="color:var(--text2)">Progress</span>
+                        <span style="font-weight:700">{{ e.progress_percent }}%</span>
+                    </div>
+                    <div class="progress-bar-wrap" style="width:100%;height:8px">
+                        <div class="progress-fill" style="width:{{ e.progress_percent }}%"></div>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px">
+                    <a href="/superadmin/student/{{ e.id }}/profile/" class="btn btn-cyan btn-sm" style="flex:1;justify-content:center">
+                        💳 Profile & Payments ↗
+                    </a>
+                    {% if e.is_completed %}
+                    <a href="/certificate/{{ e.certificate_id }}/" target="_blank" class="btn btn-outline btn-sm">
+                        📜 Cert
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:24px;color:var(--text3)">
+                No students enrolled yet.
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION CONTROLS (10 Per Page) -->
+        {% if enrollments.has_other_pages %}
+        <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:var(--bg2)">
+            <div style="font-size:13px;color:var(--text2)">
+                Showing <strong>{{ enrollments.start_index }}</strong> - <strong>{{ enrollments.end_index }}</strong> of <strong>{{ enrollments.paginator.count }}</strong> enrolled students
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+                {% if enrollments.has_previous %}
+                <a href="?page={{ enrollments.previous_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if due_filter %}&due_status={{ due_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if progress_filter %}&progress_status={{ progress_filter }}{% endif %}" class="btn btn-outline btn-sm">
+                    « Prev
+                </a>
+                {% endif %}
+
+                {% for num in enrollments.paginator.page_range %}
+                    {% if enrollments.number == num %}
+                    <span class="btn btn-cyan btn-sm" style="cursor:default;font-weight:800;padding:6px 12px">{{ num }}</span>
+                    {% else %}
+                    <a href="?page={{ num }}{% if q_search %}&q={{ q_search }}{% endif %}{% if due_filter %}&due_status={{ due_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if progress_filter %}&progress_status={{ progress_filter }}{% endif %}" class="btn btn-outline btn-sm" style="padding:6px 12px">
+                        {{ num }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if enrollments.has_next %}
+                <a href="?page={{ enrollments.next_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if due_filter %}&due_status={{ due_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if progress_filter %}&progress_status={{ progress_filter }}{% endif %}" class="btn btn-outline btn-sm">
+                    Next »
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- CLIENT SERVICE BOOKINGS SECTION -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">📅 Client Service Booking Requests</div>
+            <span style="font-size:12px;color:var(--text3)">Bookings from Website Floating Widget & Booking Page</span>
+        </div>
+
+        <!-- DESKTOP FIXED TABLE VIEW -->
+        <div class="desktop-table-view">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:10%">ID</th>
+                        <th style="width:18%">Client Name</th>
+                        <th style="width:20%">Phone / Email</th>
+                        <th style="width:18%">Category</th>
+                        <th style="width:18%">Service Type</th>
+                        <th style="width:16%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td>#{{ b.id }}</td>
+                        <td style="font-weight:700;font-size:13px">{{ b.name }}</td>
+                        <td>
+                            <div style="font-size:12px">📞 {{ b.phone }}</div>
+                            {% if b.email %}<div style="font-size:10.5px;color:var(--text2)">📧 {{ b.email }}</div>{% endif %}
+                        </td>
+                        <td><span style="font-weight:700;color:var(--cyan);font-size:12px">{{ b.service_category }}</span></td>
+                        <td><span style="font-size:12px">{{ b.service_type }}</span></td>
+                        <td>
+                            <form method="post" action="/admin/booking/{{ b.id }}/status/">
+                                {% csrf_token %}
+                                <select name="status" onchange="this.form.submit()" style="padding:4px 8px;border-radius:6px;background:var(--bg2);color:white;border:1px solid var(--border2);font-size:12px;cursor:pointer">
+                                    <option value="pending" {% if b.status == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                                    <option value="confirmed" {% if b.status == 'confirmed' %}selected{% endif %}><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Confirmed</option>
+                                    <option value="completed" {% if b.status == 'completed' %}selected{% endif %}>🎓 Completed</option>
+                                    <option value="cancelled" {% if b.status == 'cancelled' %}selected{% endif %}>❌ Cancelled</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">
+                            No service bookings received yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARDS VIEW -->
+        <div class="mobile-cards-view">
+            {% for b in bookings %}
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-weight:800;color:var(--cyan);font-family:monospace;font-size:13px">#{{ b.id }}</span>
+                    <form method="post" action="/admin/booking/{{ b.id }}/status/">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()" style="padding:4px 8px;border-radius:6px;background:var(--bg3);color:white;border:1px solid var(--border2);font-size:12px;cursor:pointer">
+                            <option value="pending" {% if b.status == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                            <option value="confirmed" {% if b.status == 'confirmed' %}selected{% endif %}><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Confirmed</option>
+                            <option value="completed" {% if b.status == 'completed' %}selected{% endif %}>🎓 Completed</option>
+                            <option value="cancelled" {% if b.status == 'cancelled' %}selected{% endif %}>❌ Cancelled</option>
+                        </select>
+                    </form>
+                </div>
+                <div style="font-weight:700;font-size:15px;color:var(--text)">{{ b.name }}</div>
+                <div style="font-size:12px;color:var(--text2)">📞 {{ b.phone }} {% if b.email %}• 📧 {{ b.email }}{% endif %}</div>
+                <div style="font-size:13px;font-weight:700;color:var(--cyan)">{{ b.service_category }} — {{ b.service_type }}</div>
+                {% if b.notes %}<div style="font-size:12px;color:var(--text3);background:var(--bg3);padding:8px 10px;border-radius:8px">{{ b.notes }}</div>{% endif %}
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:24px;color:var(--text3)">
+                No service bookings received yet.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</main>
+
+<script>
+// Form Box Toggle Handler
+function toggleFormBox(boxId) {
+    const targetBox = document.getElementById(boxId);
+    if (!targetBox) return;
+    const isHidden = targetBox.style.display === 'none' || targetBox.style.display === '';
+    document.getElementById('create-user-form-box').style.display = 'none';
+    document.getElementById('enroll-form-box').style.display = 'none';
+    if (isHidden) {
+        targetBox.style.display = 'block';
+    }
+}
+
+// Sidebar Toggle Handler
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar || !backdrop) return;
+    const isOpen = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    backdrop.classList.toggle('active', !isOpen);
+}
+
+// Profile Menu Toggle Handler
+function toggleProfileMenu(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('profile-dropdown');
+    if (!dropdown) return;
+    const isOpen = dropdown.classList.contains('open');
+    dropdown.classList.toggle('open', !isOpen);
+}
+
+// Close Dropdowns & Sidebar on Outside Click
+document.addEventListener('click', (e) => {
+    const profile = document.getElementById('topbar-profile');
+    if (profile && !profile.contains(e.target)) {
+        const dropdown = document.getElementById('profile-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+    }
+});
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('active');
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme', isLight);
+    const newTheme = isLight ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleUI(newTheme);
+}
+
+function updateThemeToggleUI(theme) {
+    const btns = document.querySelectorAll('.theme-toggle-btn');
+    btns.forEach(btn => {
+        if (theme === 'light') {
+            btn.innerHTML = '☀️ Light';
+            btn.style.background = '#e2e8f0';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#cbd5e1';
+        } else {
+            btn.innerHTML = '🌙 Dark';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.style.color = '#f8fafc';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.documentElement.classList.add('light-theme');
+    }
+});
+</script>
+
+</body>
+</html>

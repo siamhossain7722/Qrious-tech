@@ -1,0 +1,799 @@
+{% extends "landing/base.html" %}
+{% load static %}
+
+{% block title %}LinkedIn Autonomous AI Job Apply Agent — Qrious Tech Academy{% endblock %}
+{% block meta_title %}LinkedIn Autonomous AI Job Apply Agent — Auto Apply & Gemini Cover Letters{% endblock %}
+{% block meta_desc %}Automate your LinkedIn job search. Qrious AI Agent parses your CV, generates custom Gemini AI cover letters, and submits Easy Apply applications on auto-pilot.{% endblock %}
+
+{% block content %}
+<style>
+    /* Hero Section */
+    .job-hero {
+        padding: 15px 28px 20px; text-align: center; max-width: 1100px; margin: 0 auto;
+        position: relative; z-index: 10;
+    }
+    .agent-pill {
+        display: inline-flex; align-items: center; gap: 8px; padding: 4px 16px;
+        border-radius: 999px; background: #D4FF00; border: none;
+        color: #111827; font-size: 12.5px; font-weight: 800; margin-bottom: 10px;
+        box-shadow: 0 6px 18px rgba(212,255,0,0.3);
+    }
+    .job-title {
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: 48px; font-weight: 900;
+        line-height: 1.15; margin-bottom: 14px; letter-spacing: -0.025em; color: #111827;
+    }
+    @media(max-width: 768px) { .job-title { font-size: 36px; } }
+    .gradient-text {
+        color: #111827; border-bottom: 4px solid #D4FF00; display: inline-block;
+    }
+    .job-sub { font-size: 18.5px; color: var(--text2); max-width: 820px; margin: 0 auto 36px; line-height: 1.65; }
+    .job-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+    .btn-lg { padding: 15px 32px; font-size: 16px; border-radius: 999px; font-weight: 800; }
+
+    /* Trust Feature Pills */
+    .trust-pills-bar {
+        display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap;
+        padding-top: 10px; font-size: 13px; font-weight: 700; color: #4B5563;
+    }
+    .trust-pill-item { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); padding: 6px 16px; border-radius: 999px; border: 1.5px solid #E4E4E7; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+    /* Sections Global */
+    .section { padding: 60px 28px 85px; max-width: 1240px; margin: 0 auto; position: relative; z-index: 10; }
+    .section-header { text-align: center; max-width: 760px; margin: 0 auto 54px; }
+    .section-tag { display: inline-block; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #111827; background: #D4FF00; border: none; margin-bottom: 12px; }
+    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 38px; font-weight: 900; margin-bottom: 14px; letter-spacing: -0.02em; color: #111827; }
+    @media(max-width: 768px) { .section-title { font-size: 28px; } }
+    .section-sub { font-size: 16px; color: var(--text2); line-height: 1.6; }
+
+    /* Grid Layouts */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    @media(max-width: 1024px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
+    @media(max-width: 600px) { .grid-4 { grid-template-columns: 1fr; } }
+
+    /* Live AI Simulation Widget */
+    .sim-card {
+        background: linear-gradient(135deg, rgba(11,15,30,0.95), rgba(5,7,15,0.98));
+        border: 1.5px solid rgba(204,255,0,0.35); border-radius: 28px; padding: 36px;
+        box-shadow: 0 25px 70px rgba(0,0,0,0.6), 0 0 40px rgba(204,255,0,0.15);
+        max-width: 1000px; margin: 20px auto 0; text-align: left;
+    }
+    .sim-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .sim-status-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.12); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); }
+    .sim-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } }
+
+    .sim-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media(max-width: 768px) { .sim-body { grid-template-columns: 1fr; } }
+    .sim-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 18px; padding: 20px; }
+    .sim-box-title { font-size: 12px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+    /* Features Card */
+    .feature-card {
+        background: var(--card); border: 1.5px solid var(--border); border-radius: 24px;
+        padding: 32px; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex; flex-direction: column;
+    }
+    .feature-card:hover { transform: translateY(-8px); border-color: rgba(204,255,0,0.4); box-shadow: 0 25px 50px rgba(204,255,0,0.18); }
+    .feature-icon {
+        width: 54px; height: 54px; border-radius: 16px; background: rgba(204,255,0,0.15);
+        border: 1px solid rgba(204,255,0,0.3); display: flex; align-items: center; justify-content: center;
+        font-size: 26px; color: var(--cyan); margin-bottom: 22px; flex-shrink: 0;
+    }
+    .feature-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; color: var(--text); }
+    .feature-desc { font-size: 14px; color: var(--text2); line-height: 1.65; flex: 1; }
+
+    /* Workflow Step Cards */
+    .step-card {
+        background: var(--card); border: 1.5px solid var(--border); border-radius: 24px;
+        padding: 30px; text-align: left; position: relative; transition: all 0.3s;
+    }
+    .step-card:hover { border-color: var(--cyan); transform: translateY(-5px); }
+    .step-num { font-size: 12px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: inline-block; padding: 4px 10px; border-radius: 12px; background: rgba(204,255,0,0.1); }
+
+    /* Comparison Table */
+    .comp-table-wrap { overflow-x: auto; margin-top: 30px; }
+    .comp-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--card); }
+    .comp-table th, .comp-table td { padding: 18px 24px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14.5px; }
+    .comp-table th { background: rgba(255,255,255,0.03); font-size: 15px; font-weight: 800; color: var(--text); }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .highlight-cell { background: rgba(204,255,0,0.08); font-weight: 700; color: white; }
+
+    /* Pricing Grid */
+    .currency-btn {
+        padding: 8px 18px; border-radius: 24px; font-size: 13px; font-weight: 700;
+        background: transparent; color: var(--text2); border: none; cursor: pointer;
+        transition: all 0.25s; font-family: 'Inter', sans-serif;
+    }
+    .currency-btn.active {
+        background: linear-gradient(135deg, var(--cyan), var(--blue));
+        color: white; box-shadow: 0 4px 14px rgba(204, 255, 0, 0.35);
+    }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    @media(max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; } }
+    .pricing-card {
+        background: var(--card); border: 1.5px solid var(--border); border-radius: 28px;
+        padding: 36px; display: flex; flex-direction: column; transition: all 0.3s;
+    }
+    .pricing-card.featured {
+        border-color: var(--cyan); background: linear-gradient(180deg, rgba(204,255,0,0.12), var(--card));
+        box-shadow: 0 20px 50px rgba(204,255,0,0.22); transform: scale(1.03);
+    }
+    @media(max-width: 900px) { .pricing-card.featured { transform: none; } }
+    .pricing-price { font-size: 42px; font-weight: 900; margin: 16px 0 8px; color: white; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 24px 0 32px; flex: 1; }
+    .pricing-feat { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text2); }
+
+    /* Use Cases Cards */
+    .use-case-card {
+        background: var(--card); border: 1.5px solid var(--border); border-radius: 20px;
+        padding: 26px; transition: all 0.3s;
+    }
+    .use-case-card:hover { border-color: var(--purple); transform: translateY(-5px); }
+
+    /* Help Center Section Styling (Matching Screenshot UI) */
+    .help-center-header { text-align: left; margin-bottom: 24px; }
+    .help-tag { color: #3b82f6; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .help-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 42px; font-weight: 900; letter-spacing: -0.025em; color: var(--text); }
+    .help-title-highlight { color: #ccff00; }
+    .help-sub { font-size: 15.5px; color: var(--text2); margin-top: 6px; }
+
+    /* Top Controls Bar: Search Input + Category Filter Tabs */
+    .help-controls-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+        margin-bottom: 34px; margin-top: 24px;
+    }
+    .help-search-box {
+        position: relative; flex: 1; min-width: 250px; max-width: 280px;
+    }
+    .help-search-input {
+        width: 100%; padding: 11px 16px 11px 40px; border-radius: 12px;
+        background: var(--card); border: 1.5px solid var(--border); color: var(--text);
+        font-size: 13.5px; font-family: 'Inter', sans-serif; transition: all 0.25s;
+    }
+    .help-search-input:focus { outline: none; border-color: #ccff00; box-shadow: 0 0 20px rgba(37,99,235,0.2); }
+    .help-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; }
+
+    .help-tabs-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .help-tab-btn {
+        padding: 9px 16px; border-radius: 12px; font-size: 13px; font-weight: 700;
+        background: var(--card); border: 1.5px solid var(--border); color: var(--text2);
+        cursor: pointer; transition: all 0.25s; font-family: 'Inter', sans-serif;
+        display: inline-flex; align-items: center; gap: 6px; user-select: none;
+    }
+    .help-tab-btn:hover, .help-tab-btn.active {
+        background: #ccff00; color: white; border-color: #ccff00;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    /* Main Grid 2 Columns */
+    .help-main-grid {
+        display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: start;
+    }
+    @media(max-width: 900px) { .help-main-grid { grid-template-columns: 1fr; } }
+
+    /* Left Support Card with 3D Avatar */
+    .help-support-card {
+        background: linear-gradient(180deg, #0b132b 0%, #050b1a 100%);
+        border: 1.5px solid rgba(59, 130, 246, 0.3); border-radius: 24px;
+        padding: 26px 20px; text-align: left; position: relative; overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    body.light-theme .help-support-card {
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+    }
+    .help-card-title { font-size: 18px; font-weight: 800; color: white; }
+    .help-card-sub { font-size: 12px; color: #94a3b8; margin-top: 3px; margin-bottom: 14px; }
+
+    .help-avatar-wrapper { text-align: center; margin: 10px 0 18px; }
+    .help-avatar-img {
+        width: 150px; height: 150px; border-radius: 50%; object-fit: cover;
+        border: 3.5px solid rgba(59, 130, 246, 0.5); box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    }
+
+    .help-action-btn-blue {
+        width: 100%; padding: 12px 16px; border-radius: 14px; font-size: 14px; font-weight: 800;
+        background: #ccff00; color: white; border: none; cursor: pointer;
+        display: flex; flex-direction: column; align-items: flex-start; text-decoration: none;
+        transition: all 0.25s; margin-bottom: 10px; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+    .help-action-btn-blue:hover { transform: translateY(-2px); background: #1d4ed8; }
+    
+    .help-action-btn-green {
+        width: 100%; padding: 12px 16px; border-radius: 14px; font-size: 14px; font-weight: 800;
+        background: #059669; color: white; border: none; cursor: pointer;
+        display: flex; flex-direction: column; align-items: flex-start; text-decoration: none;
+        transition: all 0.25s; box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+    }
+    .help-action-btn-green:hover { transform: translateY(-2px); background: #047857; }
+
+    .help-action-sub { font-size: 11px; font-weight: 500; opacity: 0.85; margin-top: 2px; }
+
+    .help-footer-note { margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 11.5px; color: #94a3b8; line-height: 1.5; }
+
+    /* Right Accordion FAQ Cards */
+    .help-accordion-list { display: flex; flex-direction: column; gap: 12px; }
+    .help-faq-card {
+        background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
+        transition: all 0.25s; overflow: hidden;
+    }
+    .help-faq-card:hover { border-color: var(--border2); }
+    .help-faq-card.active {
+        border-color: #ccff00; background: rgba(37, 99, 235, 0.03);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
+    }
+    .help-faq-header {
+        padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+        cursor: pointer; gap: 16px; user-select: none;
+    }
+    .help-faq-qtext { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .help-faq-star { color: #ccff00; font-size: 15px; flex-shrink: 0; }
+    .help-faq-toggle-btn {
+        width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+        color: var(--text2); font-size: 13px; transition: all 0.25s; flex-shrink: 0;
+    }
+    body.light-theme .help-faq-toggle-btn { background: #f1f5f9; border-color: #e2e8f0; }
+    .help-faq-card.active .help-faq-toggle-btn {
+        background: #ccff00; color: white; border-color: #ccff00; transform: rotate(180deg);
+    }
+    .help-faq-body {
+        padding: 0 22px 20px 46px; font-size: 14px; color: var(--text2); line-height: 1.65;
+        display: none;
+    }
+    .help-faq-card.active .help-faq-body { display: block; }
+
+    /* Bottom Submit Question Banner */
+    .help-submit-banner {
+        margin-top: 24px; background: var(--card); border: 1.5px solid var(--border);
+        border-radius: 18px; padding: 20px 24px; display: flex; align-items: center;
+        justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    }
+    .help-submit-info { display: flex; align-items: center; gap: 14px; }
+    .help-submit-icon {
+        width: 42px; height: 42px; border-radius: 12px; background: rgba(37, 99, 235, 0.12);
+        color: #ccff00; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .help-submit-title { font-size: 15px; font-weight: 800; color: var(--text); }
+    .help-submit-sub { font-size: 12.5px; color: var(--text2); margin-top: 2px; }
+    .help-submit-btn {
+        padding: 11px 22px; border-radius: 12px; background: #0f172a; color: white;
+        font-size: 13.5px; font-weight: 800; text-decoration: none; transition: all 0.25s; border: 1px solid rgba(255,255,255,0.15);
+    }
+    body.light-theme .help-submit-btn { background: #0f172a; color: white; }
+    .help-submit-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+</style>
+
+<!-- Hero Section -->
+<section class="job-hero" style="padding-top: 5px;">
+    <div class="agent-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>
+        Autonomous AI Agent Solution • Powered by Gemini 1.5 Pro
+    </div>
+    <h1 class="job-title">
+        Apply to <span class="gradient-text">1,000+ Targeted LinkedIn Jobs</span><br>
+        While You Sleep
+    </h1>
+    <p class="job-sub">
+        Qrious Tech Academy's Autonomous LinkedIn AI Agent scans job listings 24/7, evaluates your CV relevance, generates bespoke AI cover letters with Gemini, and submits Easy Apply applications on auto-pilot.
+    </p>
+    <div class="job-ctas">
+        <a href="/auth/signup/" class="btn btn-primary btn-lg">Start Free — 30 Apps/mo →</a>
+        <a href="#pricing" class="btn btn-outline btn-lg">View Subscription Plans ↓</a>
+    </div>
+
+    <div class="trust-pills-bar">
+        <div class="trust-pill-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            100% Anti-Detection Stealth
+        </div>
+        <div class="trust-pill-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Custom Gemini Cover Letters
+        </div>
+        <div class="trust-pill-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Live Application Tracker
+        </div>
+        <div class="trust-pill-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Encrypted Local Credentials
+        </div>
+    </div>
+
+    <!-- Live Agent Terminal Preview Card -->
+    <div class="sim-card">
+        <div class="sim-header">
+            <div style="font-family:'Plus Jakarta Sans';font-weight:800;font-size:16px;color:white;display:flex;align-items:center;gap:8px">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4FF00" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                Qrious Job Agent Engine
+            </div>
+            <div class="sim-status-badge">
+                <div class="sim-status-dot"></div>
+                <span>AGENT STATUS: ACTIVE & APPLYING</span>
+            </div>
+        </div>
+        <div class="sim-body">
+            <div class="sim-box">
+                <div class="sim-box-title">📍 Current Target Job</div>
+                <div style="font-size:16px;font-weight:800;color:white;margin-bottom:4px">Senior Full Stack Developer</div>
+                <div style="font-size:13px;color:var(--text2)">TechCorp Global • Remote (United States)</div>
+                <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+                    <span style="background:rgba(16,185,129,0.15);color:#34d399;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:800">96% CV Match Score</span>
+                    <span style="font-size:12px;color:var(--text3)">Easy Apply Detected</span>
+                </div>
+            </div>
+
+            <div class="sim-box">
+                <div class="sim-box-title">⚡ Gemini AI Action Execution</div>
+                <div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px">
+                    "Drafting tailored 240-word cover letter highlighting 4+ years Python, Django & React expertise..."
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:12px">
+                    <span style="font-size:12.5px;color:white;font-weight:700">Submitting Application...</span>
+                    <span style="color:#10b981;font-size:12px;font-weight:800"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Applied (2s)</span>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--text3)">
+            <span>📊 Today's Progress: <strong>24 Applications Submitted</strong></span>
+            <span>⚡ Average Execution Speed: <strong>4.2 Seconds / Job</strong></span>
+            <span>🎯 Interview Callback Rate: <strong>14.8% Average</strong></span>
+        </div>
+    </div>
+</section>
+
+<!-- In-Depth Technical Capabilities (6 Pillars Grid) -->
+<section class="section">
+    <div class="section-header">
+        <span class="section-tag">Key Features</span>
+        <h2 class="section-title">Built For Maximum Job Search Velocity</h2>
+        <p class="section-sub">Everything you need to automate your job application process without compromising quality or security.</p>
+    </div>
+
+    <div class="grid-3">
+        <div class="feature-card">
+            <div class="feature-icon">✍️</div>
+            <h3 class="feature-title">Gemini AI Cover Letters</h3>
+            <p class="feature-desc">Automatically reads the job description requirements and your PDF resume, generating highly compelling, tailored cover letters in under 3 seconds.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(139,92,246,0.15);color:var(--purple)">🎯</div>
+            <h3 class="feature-title">CV Match & Scoring Engine</h3>
+            <p class="feature-desc">Extracts key skills, experience years, and keywords from your resume to calculate a percentage match score before applying, filtering out low-relevance jobs.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:var(--green)">🛡️</div>
+            <h3 class="feature-title">Human-Stealth Anti-Detection</h3>
+            <p class="feature-desc">Operates via Playwright automation with human-like typing speeds, random delays, mouse hover curves, and session encryption to keep your account 100% safe.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:var(--amber)">🔍</div>
+            <h3 class="feature-title">Granular Target Filters</h3>
+            <p class="feature-desc">Set target job titles, locations (Remote, Hybrid, Onsite), minimum match score thresholds, and posting dates to target exactly the roles you want.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:var(--pink)">📊</div>
+            <h3 class="feature-title">Real-Time Tracker & Exports</h3>
+            <p class="feature-desc">Track status changes (Applied, Interview Call, Offer, Rejected), add private interview notes, and export CSV/PDF logs for full job search visibility.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(59,130,246,0.15);color:var(--blue)">💼</div>
+            <h3 class="feature-title">Multi-Profile & CV Support</h3>
+            <p class="feature-desc">Store multiple versions of your resume (e.g. Frontend, Backend, Full Stack) and link multiple LinkedIn accounts under a single dashboard.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Table Section: Manual vs Qrious AI Agent -->
+<section class="section" style="background:rgba(255,255,255,0.01);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="section-header">
+        <span class="section-tag">Performance Comparison</span>
+        <h2 class="section-title">Manual Applying vs Qrious AI Agent</h2>
+        <p class="section-sub">Why automated AI applications yield 10x higher interview callbacks in a fraction of the time.</p>
+    </div>
+
+    <div class="comp-table-wrap">
+        <table class="comp-table">
+            <thead>
+                <tr>
+                    <th style="width:30%">Metric / Feature</th>
+                    <th style="width:35%;color:var(--text3)">Manual Job Search 🐌</th>
+                    <th style="width:35%;color:var(--cyan)" class="highlight-cell">Qrious Tech Academy ⚡</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Monthly Application Output</strong></td>
+                    <td style="color:var(--text2)">30 - 50 jobs max</td>
+                    <td class="highlight-cell">30 to 1,000+ jobs per month</td>
+                </tr>
+                <tr>
+                    <td><strong>Daily Time Required</strong></td>
+                    <td style="color:var(--text2)">3 - 4 hours of tedious manual clicking</td>
+                    <td class="highlight-cell">0 minutes (100% Auto-pilot background execution)</td>
+                </tr>
+                <tr>
+                    <td><strong>Cover Letter Creation</strong></td>
+                    <td style="color:var(--text2)">15 mins per job or generic copy-paste</td>
+                    <td class="highlight-cell">Tailored Gemini 1.5 AI cover letters in 2 seconds</td>
+                </tr>
+                <tr>
+                    <td><strong>CV Relevance Matching</strong></td>
+                    <td style="color:var(--text2)">Manual guessing & eyeball scanning</td>
+                    <td class="highlight-cell">Automated AI match scoring & skill extraction</td>
+                </tr>
+                <tr>
+                    <td><strong>Application Tracking</strong></td>
+                    <td style="color:var(--text2)">Messy manual Excel spreadsheets</td>
+                    <td class="highlight-cell">Real-time status dashboard & automated PDF exports</td>
+                </tr>
+                <tr>
+                    <td><strong>Interview Callback Rate</strong></td>
+                    <td style="color:var(--text2)">2% - 4% average</td>
+                    <td class="highlight-cell">12% - 18% targeted callback rate</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- 4 Step Workflow Blueprint -->
+<section class="section">
+    <div class="section-header">
+        <span class="section-tag">Simple Setup</span>
+        <h2 class="section-title">Get Started in 3 Easy Steps</h2>
+        <p class="section-sub">Set up your profile once in under 3 minutes and let the agent work while you focus on interviews.</p>
+    </div>
+
+    <div class="grid-4">
+        <div class="step-card">
+            <span class="step-num">Step 01</span>
+            <h4 style="font-size:17px;font-weight:800;margin:8px 0 6px;color:var(--text)">Connect Account</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Link your LinkedIn profile safely using encrypted browser session cookies.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-num">Step 02</span>
+            <h4 style="font-size:17px;font-weight:800;margin:8px 0 6px;color:var(--text)">Upload Resume</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Upload your PDF or DOCX CV for AI skill extraction and match evaluation.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-num">Step 03</span>
+            <h4 style="font-size:17px;font-weight:800;margin:8px 0 6px;color:var(--text)">Set Job Criteria</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Define job titles, remote preferences, locations, and match score threshold.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-num">Step 04</span>
+            <h4 style="font-size:17px;font-weight:800;margin:8px 0 6px;color:var(--text)">Launch Auto-Apply</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Activate the agent and watch applied jobs populate your live dashboard.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Who Is This For? Use Cases Grid -->
+<section class="section" style="background:rgba(255,255,255,0.01);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="section-header">
+        <span class="section-tag">Target Audience</span>
+        <h2 class="section-title">Designed For Job Seekers & Professionals</h2>
+        <p class="section-sub">Whether you are seeking your next career move or applying to international remote roles.</p>
+    </div>
+
+    <div class="grid-4">
+        <div class="use-case-card">
+            <div style="font-size:28px;margin-bottom:12px">💻</div>
+            <h4 style="font-size:17px;font-weight:800;margin-bottom:8px">Software Developers</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Land remote developer positions in US, Europe, and UAE with automated tech stack matching.</p>
+        </div>
+        <div class="use-case-card">
+            <div style="font-size:28px;margin-bottom:12px">🎓</div>
+            <h4 style="font-size:17px;font-weight:800;margin-bottom:8px">New Graduates</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Apply at volume to entry-level jobs and internships to launch your career fast.</p>
+        </div>
+        <div class="use-case-card">
+            <div style="font-size:28px;margin-bottom:12px">✈️</div>
+            <h4 style="font-size:17px;font-weight:800;margin-bottom:8px">Global Remote Job Hunters</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Automatically target international remote listings without timezone restrictions.</p>
+        </div>
+        <div class="use-case-card">
+            <div style="font-size:28px;margin-bottom:12px">👔</div>
+            <h4 style="font-size:17px;font-weight:800;margin-bottom:8px">Busy Executives</h4>
+            <p style="font-size:13.5px;color:var(--text2);line-height:1.55">Maintain a continuous job opportunity pipeline while keeping your current full-time job.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Subscription Plans & Country Switcher -->
+<section class="section" id="pricing">
+    <div class="section-header" style="margin-bottom:24px">
+        <span class="section-tag">Transparent Pricing</span>
+        <h2 class="section-title">Choose Your Job Agent Plan</h2>
+        <p class="section-sub">Start free with 30 applications/month, upgrade as your job application volume grows.</p>
+    </div>
+
+    <!-- Country / Currency Selector Toggle -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:40px">
+        <span style="font-size:13px;font-weight:700;color:var(--text2)">Select Country Pricing:</span>
+        <div style="background:var(--card);border:1.5px solid var(--border);border-radius:30px;padding:4px;display:inline-flex;gap:4px;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
+            <button type="button" class="currency-btn active" id="btnBDT" onclick="setCurrency('BDT')">
+                🇧🇩 Bangladesh (৳ BDT)
+            </button>
+            <button type="button" class="currency-btn" id="btnUSD" onclick="setCurrency('USD')">
+                🌐 Global ($ USD)
+            </button>
+        </div>
+    </div>
+
+    <div class="pricing-grid">
+        <!-- Free Plan -->
+        <div class="pricing-card">
+            <div style="font-size:14px;font-weight:700;color:var(--text3)">FREE TIER</div>
+            <div class="pricing-price" id="priceFree">৳0 <span style="font-size:16px;color:var(--text3)">/ mo</span></div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:20px">Perfect to test the agent</div>
+            <ul class="pricing-features">
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> <strong>30 Job Applications / month</strong></li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> 1 LinkedIn Account</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> 1 Resume Upload</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Basic Application Tracking</li>
+            </ul>
+            <a href="/auth/signup/" class="btn btn-outline" style="width:100%;justify-content:center">Start Free Now</a>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="pricing-card featured">
+            <div style="font-size:12px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.1em">MOST POPULAR</div>
+            <div class="pricing-price" id="pricePro">৳250 <span style="font-size:16px;color:var(--text3)">/ mo</span></div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:20px">For serious job seekers</div>
+            <ul class="pricing-features">
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> <strong>1,000 Job Applications / month</strong></li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> 3 LinkedIn Accounts</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> 5 Resume Uploads</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Gemini AI Custom Cover Letters</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Advanced CV Match Scoring</li>
+            </ul>
+            <a href="/auth/signup/" class="btn btn-primary" style="width:100%;justify-content:center;background:linear-gradient(135deg,var(--cyan),var(--blue))">Get Pro Plan</a>
+        </div>
+
+        <!-- Business Plan -->
+        <div class="pricing-card">
+            <div style="font-size:14px;font-weight:700;color:var(--purple)">BUSINESS TIER</div>
+            <div class="pricing-price" id="priceBusiness">৳999 <span style="font-size:16px;color:var(--text3)">/ mo</span></div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:20px">Unlimited high-volume applications</div>
+            <ul class="pricing-features">
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> <strong>Unlimited Job Applications</strong></li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> 10 LinkedIn Accounts</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Unlimited Resumes</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Priority Execution & Dedicated IP</li>
+                <li class="pricing-feat"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> 24/7 Priority Support</li>
+            </ul>
+            <a href="/auth/signup/" class="btn btn-outline" style="width:100%;justify-content:center">Get Business Plan</a>
+        </div>
+    </div>
+</section>
+
+<!-- HELP CENTER & PRODUCT FAQ SECTION (Matching Custom UI Screenshot) -->
+<section class="section" id="faq">
+    <div class="help-center-header">
+        <span class="help-tag">HELP CENTER</span>
+        <h2 class="help-title">Have Question? <span class="help-title-highlight">We Have Answers</span></h2>
+        <p class="help-sub">Everything you need to know about LinkedIn Autonomous AI Job Agent, account safety & Gemini AI.</p>
+    </div>
+
+    <!-- Top Controls: Search Input + Category Filter Tabs -->
+    <div class="help-controls-bar">
+        <div class="help-search-box">
+            <span class="help-search-icon">🔍</span>
+            <input type="text" id="faqSearchInput" class="help-search-input" placeholder="Search FAQs..." onkeyup="filterFaqs()">
+        </div>
+
+        <div class="help-tabs-wrap">
+            <button type="button" class="help-tab-btn active" onclick="switchFaqTab('all', this)">⭐ Most Asked</button>
+            <button type="button" class="help-tab-btn" onclick="switchFaqTab('safety', this)">🛡️ Safety & Stealth</button>
+            <button type="button" class="help-tab-btn" onclick="switchFaqTab('ai', this)">🤖 Gemini AI</button>
+            <button type="button" class="help-tab-btn" onclick="switchFaqTab('plans', this)">⚡ Limits & Plans</button>
+            <button type="button" class="help-tab-btn" onclick="switchFaqTab('tracking', this)">📊 Tracking & Exports</button>
+        </div>
+    </div>
+
+    <!-- 2 Column Main Help Center Grid -->
+    <div class="help-main-grid">
+        <!-- Left Column: Support Assistant Widget Card with 3D Avatar -->
+        <div class="help-support-card">
+            <div class="help-card-title">Most Asked Questions</div>
+            <div class="help-card-sub">Top questions from our customers.</div>
+
+            <div class="help-avatar-wrapper">
+                <img src="{% static 'images/support_avatar.jpg' %}" alt="Support Assistant" class="help-avatar-img">
+            </div>
+
+            <a href="javascript:void(0)" onclick="toggleFloatingWidget(); openWidgetAiChat();" class="help-action-btn-blue">
+                <span>🎧 Live Chat</span>
+                <span class="help-action-sub">We reply in seconds</span>
+            </a>
+
+            <a href="https://wa.me/971566631501" target="_blank" class="help-action-btn-green">
+                <span>💬 WhatsApp Us</span>
+                <span class="help-action-sub">Quick response (+971 566631501)</span>
+            </a>
+
+            <div class="help-footer-note">
+                <strong>STILL NEED HELP?</strong><br>
+                Our support team is available 24/7.<br>
+                ⏱️ <strong>Avg. Response 1 Min</strong>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Categorized Accordion List -->
+        <div>
+            <div class="help-accordion-list" id="helpFaqList">
+                <!-- FAQ Item 1 -->
+                <div class="help-faq-card active" data-category="safety all">
+                    <div class="help-faq-header" onclick="toggleHelpFaq(this)">
+                        <div class="help-faq-qtext">
+                            <span class="help-faq-star">★</span>
+                            <span>Is using the AI Job Agent safe for my LinkedIn account?</span>
+                        </div>
+                        <div class="help-faq-toggle-btn">▾</div>
+                    </div>
+                    <div class="help-faq-body">
+                        Yes! The agent runs using Playwright browser automation with human stealth behavior — including randomized mouse movements, natural typing delays, and realistic browser headers. It never makes direct unauthorized API requests.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="help-faq-card" data-category="ai all">
+                    <div class="help-faq-header" onclick="toggleHelpFaq(this)">
+                        <div class="help-faq-qtext">
+                            <span class="help-faq-star">★</span>
+                            <span>How does Gemini AI write personalized cover letters?</span>
+                        </div>
+                        <div class="help-faq-toggle-btn">▾</div>
+                    </div>
+                    <div class="help-faq-body">
+                        When a job listing requires a cover letter or screening questions, our integration sends the job description and your parsed CV to Google Gemini 1.5 Pro. Gemini crafts a customized 200-300 word cover letter matching your experience to the job requirements in 2 seconds.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="help-faq-card" data-category="plans all">
+                    <div class="help-faq-header" onclick="toggleHelpFaq(this)">
+                        <div class="help-faq-qtext">
+                            <span class="help-faq-star">★</span>
+                            <span>Can I filter which jobs the agent applies to?</span>
+                        </div>
+                        <div class="help-faq-toggle-btn">▾</div>
+                    </div>
+                    <div class="help-faq-body">
+                        Absolutely. You can set exact target job titles, target cities/countries, workplace type (Remote, Hybrid, Onsite), experience level, and set a minimum CV Match Score (e.g. only apply if match is > 75%).
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="help-faq-card" data-category="plans all">
+                    <div class="help-faq-header" onclick="toggleHelpFaq(this)">
+                        <div class="help-faq-qtext">
+                            <span class="help-faq-star">★</span>
+                            <span>What happens when I reach my monthly application limit?</span>
+                        </div>
+                        <div class="help-faq-toggle-btn">▾</div>
+                    </div>
+                    <div class="help-faq-body">
+                        Free accounts can submit 30 applications per month. Once reached, you can upgrade to Pro (1,000 apps/mo for ৳250/mo or $9/mo) or wait until your monthly reset date.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="help-faq-card" data-category="tracking all">
+                    <div class="help-faq-header" onclick="toggleHelpFaq(this)">
+                        <div class="help-faq-qtext">
+                            <span class="help-faq-star">★</span>
+                            <span>Can I track applied jobs and export reports?</span>
+                        </div>
+                        <div class="help-faq-toggle-btn">▾</div>
+                    </div>
+                    <div class="help-faq-body">
+                        Yes! You get a live application dashboard tracking job titles, companies, match scores, application timestamps, and status (Applied, Interview, Offer, Rejected). You can export CSV or PDF reports anytime.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Still Couldn't Find What You Need Banner -->
+            <div class="help-submit-banner">
+                <div class="help-submit-info">
+                    <div class="help-submit-icon">❓</div>
+                    <div>
+                        <div class="help-submit-title">Still couldn't find what you need?</div>
+                        <div class="help-submit-sub">Submit your query to our customer success team.</div>
+                    </div>
+                </div>
+                <a href="/contact/" class="help-submit-btn">Submit a Question</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call To Action -->
+<section class="section" style="text-align:center;padding:90px 28px">
+    <div style="background:linear-gradient(135deg,rgba(204,255,0,0.18),rgba(139,92,246,0.18));border:1.5px solid rgba(204,255,0,0.35);border-radius:32px;padding:60px 40px;max-width:960px;margin:0 auto;box-shadow:0 25px 60px rgba(0,0,0,0.5)">
+        <h2 style="font-family:'Plus Jakarta Sans';font-size:38px;font-weight:900;margin-bottom:16px;color:white">Ready to Automate Your Job Search?</h2>
+        <p style="font-size:16.5px;color:var(--text2);max-width:640px;margin:0 auto 32px;line-height:1.6">
+            Sign up in 30 seconds and let your autonomous AI agent apply to targeted LinkedIn jobs while you focus on preparing for interviews.
+        </p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+            <a href="/auth/signup/" class="btn btn-primary btn-lg">🚀 Start Free — 30 Apps/mo</a>
+            <a href="https://wa.me/971566631501" target="_blank" class="btn btn-outline btn-lg" style="color:#25D366;border-color:rgba(37,211,102,0.4)">
+                💬 WhatsApp Inquiries (+971 566631501)
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+function toggleHelpFaq(header) {
+    const card = header.closest('.help-faq-card');
+    const isAlreadyActive = card.classList.contains('active');
+    document.querySelectorAll('.help-faq-card').forEach(c => c.classList.remove('active'));
+    if (!isAlreadyActive) {
+        card.classList.add('active');
+    }
+}
+
+function switchFaqTab(category, btn) {
+    document.querySelectorAll('.help-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.help-faq-card').forEach(card => {
+        const cats = card.getAttribute('data-category');
+        if (category === 'all' || cats.includes(category)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function filterFaqs() {
+    const query = document.getElementById('faqSearchInput').value.toLowerCase().trim();
+    document.querySelectorAll('.help-faq-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function setCurrency(curr) {
+    const isBDT = curr === 'BDT';
+    document.getElementById('btnBDT').classList.toggle('active', isBDT);
+    document.getElementById('btnUSD').classList.toggle('active', !isBDT);
+    const priceFree = document.getElementById('priceFree');
+    const pricePro = document.getElementById('pricePro');
+    const priceBusiness = document.getElementById('priceBusiness');
+    if (priceFree) priceFree.innerHTML = isBDT ? '৳0 <span style="font-size:16px;color:var(--text3)">/ mo</span>' : '$0 <span style="font-size:16px;color:var(--text3)">/ mo</span>';
+    if (pricePro) pricePro.innerHTML = isBDT ? '৳250 <span style="font-size:16px;color:var(--text3)">/ mo</span>' : '$9 <span style="font-size:16px;color:var(--text3)">/ mo</span>';
+    if (priceBusiness) priceBusiness.innerHTML = isBDT ? '৳999 <span style="font-size:16px;color:var(--text3)">/ mo</span>' : '$29 <span style="font-size:16px;color:var(--text3)">/ mo</span>';
+    localStorage.setItem('userCurrency', curr);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem('userCurrency');
+    if (saved) {
+        setCurrency(saved);
+        return;
+    }
+    try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const lang = navigator.language || '';
+        if (tz.includes('Dhaka') || lang.includes('bn') || lang.includes('BD')) {
+            setCurrency('BDT');
+            return;
+        }
+    } catch (e) {}
+    setCurrency('BDT');
+});
+</script>
+
+{% endblock %}

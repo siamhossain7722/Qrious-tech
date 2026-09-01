@@ -1,0 +1,33 @@
+# ========================
+# LinkedIn Agent .gitignore
+# ========================
+
+# Environment & secrets
+.env
+*.env
+
+# Django
+db.sqlite3
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Agent data (sessions, screenshots, logs)
+data/
+!data/.gitkeep
+
+# Static/Media
+staticfiles/
+media/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

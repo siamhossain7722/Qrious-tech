@@ -1,0 +1,23 @@
+{% extends "account/base.html" %}
+{% block title %}Verify Email — Qrious Tech Academy{% endblock %}
+
+{% block account_content %}
+<div style="text-align:center;padding:10px 0">
+    <div style="font-size:54px;margin-bottom:16px">📬</div>
+    <div class="auth-title" style="margin-bottom:8px">Check your inbox!</div>
+    <div class="auth-sub" style="margin-bottom:24px">
+        We sent an official verification link to <strong style="color:var(--text, #111827)">{{ email }}</strong>.<br>
+        Click the button inside the email to activate your account.
+    </div>
+    <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:14px;font-size:13px;color:var(--text2, #475569);margin-bottom:20px;text-align:left">
+        💡 <strong>Can't find the email?</strong> Check your spam/junk folder or request a new verification email below.
+    </div>
+    <form method="post" action="{% url 'account_email_verification_sent' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-submit" style="max-width:300px;margin:0 auto">Resend Verification Email 📧</button>
+    </form>
+    <div class="auth-link" style="margin-top:16px">
+        <a href="{% url 'account_login' %}">← Back to Sign In</a>
+    </div>
+</div>
+{% endblock %}

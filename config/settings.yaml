@@ -1,0 +1,33 @@
+job_search:
+  keywords:
+    - "Python Developer"
+    - "Django Developer"
+    - "Full Stack Developer"
+    - "Backend Developer"
+    - "FastAPI Developer"
+  location: "Worldwide"          # Options: "Worldwide" (Global search), "Remote", or country like "United States", "Bangladesh"
+  workplace_type: "remote"       # Options: remote, onsite, hybrid, remote_or_onsite, all
+  min_match_score: 60            # Minimum CV Match score (0-100%) to apply
+  experience_levels:
+    - "Entry level"
+    - "Mid-Senior level"
+    - "Associate"
+  date_posted: "past_week"       # Options: past_24_hours, past_week, past_month, any_time
+  max_applications_per_run: 30   # Target jobs to apply per agent run (e.g. 30 applications)
+  blacklisted_companies: []      # e.g., ["Company A", "Company B"]
+  required_keywords: []          # Job must contain these keywords: ["Python", "Django"]
+
+applicant:
+  name: "Siam Hossain"
+  phone: "+880 1XXX-XXXXXX"
+  years_of_experience: "3"
+  current_position: "Full Stack Developer"
+  cover_letter_style: "professional"  # professional | casual | enthusiastic
+  resume_path: ""                     # Optional: path to resume PDF for upload
+
+agent:
+  headless: false         # false = show browser, true = run hidden
+  slow_mo_ms: 600         # Delay between actions in ms (human-like behavior)
+  dry_run: false          # false = ACTUALLY APPLY; true = preview/dry run
+  screenshot_on_error: true
+  session_file: "data/linkedin_session.json"

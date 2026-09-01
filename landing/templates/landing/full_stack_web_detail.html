@@ -1,0 +1,365 @@
+{% extends "landing/base.html" %}
+{% load static %}
+
+{% block title %}Full-Stack Web Development (Python & React) — Qrious Tech Academy{% endblock %}
+{% block meta_title %}Full-Stack Web Development Masterclass — Python, Django & React (10k BDT){% endblock %}
+{% block meta_desc %}Master Full-Stack Web Development in 12 weeks. Learn HTML5, CSS3, JavaScript, React, Python, Django, DRF, PostgreSQL, Docker & AWS. 10 Seats per batch!{% endblock %}
+
+{% block content %}
+<style>
+    .course-hero {
+        padding: 5px 28px 20px; text-align: center; max-width: 1100px; margin: 0 auto;
+        position: relative; z-index: 10;
+    }
+    .phase-badge {
+        display: inline-flex; align-items: center; gap: 8px; padding: 4px 16px;
+        border-radius: 999px; background: #D4FF00; border: none;
+        color: #111827; font-size: 12.5px; font-weight: 800; margin-bottom: 10px;
+        box-shadow: 0 6px 18px rgba(212,255,0,0.3);
+    }
+    .hero-title {
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: 48px; font-weight: 900;
+        line-height: 1.15; margin-bottom: 14px; letter-spacing: -0.025em; color: #111827;
+    }
+    @media(max-width: 768px) { .hero-title { font-size: 34px; } }
+    .gradient-text {
+        color: #111827; border-bottom: 4px solid #D4FF00; display: inline-block;
+    }
+    .hero-sub { font-size: 18.5px; color: var(--text2); max-width: 820px; margin: 0 auto 36px; line-height: 1.65; }
+
+    /* Price & Batch Limit Box */
+    .price-box-hero {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 28px;
+        padding: 36px; max-width: 800px; margin: 0 auto 60px; display: flex; align-items: center;
+        justify-content: space-between; gap: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    @media(max-width: 768px) { .price-box-hero { flex-direction: column; text-align: center; } }
+    .old-price { font-size: 16px; color: #6B7280; text-decoration: line-through; margin-bottom: 4px; }
+    .new-price { font-size: 42px; font-weight: 900; color: #111827; display: flex; align-items: center; gap: 10px; }
+
+    .batch-limit-pill {
+        display: inline-flex; align-items: center; gap: 6px; background: #D4FF00;
+        border: none; color: #111827; padding: 5px 14px;
+        border-radius: 999px; font-size: 12.5px; font-weight: 800; margin-top: 8px;
+    }
+
+    /* Section Global */
+    .section { padding: 40px 28px 90px; max-width: 1240px; margin: 0 auto; position: relative; z-index: 10; }
+    .section-header { text-align: center; max-width: 760px; margin: 0 auto 54px; }
+    .section-tag { display: inline-block; padding: 4px 16px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #111827; background: #D4FF00; border: none; margin-bottom: 12px; }
+    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 38px; font-weight: 900; margin-bottom: 14px; letter-spacing: -0.02em; color: #111827; }
+    @media(max-width: 768px) { .section-title { font-size: 28px; } }
+    .section-sub { font-size: 16px; color: var(--text2); line-height: 1.6; }
+
+    /* Module Grid */
+    .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    @media(max-width: 900px) { .module-grid { grid-template-columns: 1fr; } }
+
+    .module-card {
+        background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid #E4E4E7; border-radius: 24px;
+        padding: 30px; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .module-card:hover { transform: translateY(-6px); border-color: #111827; box-shadow: 0 20px 45px rgba(0,0,0,0.08); }
+    .module-num {
+        font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+        color: #111827; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .module-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; color: #111827; }
+    .module-desc { font-size: 14px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; }
+    .topic-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .topic-item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text2); }
+
+    .support-badge {
+        background: #D4FF00; border: none;
+        color: #111827; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 999px;
+    }
+
+    /* Certification Card */
+    .cert-card {
+        background: #FFFFFF;
+        border: 1.5px solid #E4E4E7; border-radius: 28px; padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03); display: grid; grid-template-columns: 1fr 1fr;
+        gap: 36px; align-items: center; margin-top: 60px;
+    }
+    @media(max-width: 900px) { .cert-card { grid-template-columns: 1fr; } }
+</style>
+
+<div style="position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%, rgba(212,255,0,0.15) 0%, rgba(255,255,255,0) 75%);pointer-events:none;z-index:0"></div>
+
+<!-- Hero Section -->
+<section class="course-hero">
+    <div class="phase-badge">
+        ⚡ FULL STACK BOOTCAMP • 12 WEEKS INTENSIVE TRAINING
+    </div>
+    <h1 class="hero-title">
+        Full-Stack Web Development<br>
+        <span class="gradient-text">(Python, Django & React)</span>
+    </h1>
+    <p class="hero-sub">
+        A comprehensive 12-week hands-on bootcamp. Build and deploy production-ready web applications with HTML5, CSS3, JavaScript ES6+, React, Python, Django REST Framework, PostgreSQL, Docker, and AWS Cloud.
+    </p>
+
+    <!-- Pricing Box -->
+    <div class="price-box-hero">
+        <div style="text-align:left">
+            <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Special Limited Admission Fee</div>
+            <div class="old-price">Regular Fee: ৳20,000 BDT</div>
+            <div class="new-price">
+                ৳10,000 <span style="font-size:18px;color:var(--text2);font-weight:600">BDT</span>
+                <span style="font-size:12px;background:#10b981;color:white;padding:4px 10px;border-radius:20px;font-weight:700">50% DISCOUNT</span>
+            </div>
+            <div class="batch-limit-pill">
+                🔥 Batch Capacity: Strictly Limited to 10 Persons / Batch
+            </div>
+        </div>
+        <div>
+            <a href="/contact/?subject=Web+Development+Enrollment" class="btn btn-primary" style="padding:15px 30px;font-size:16px;background:linear-gradient(135deg,#3b82f6,#10b981);font-weight:800">
+                Enroll Now (৳10,000 BDT) →
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Modules Overview Section -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-tag">Complete Curriculum</span>
+        <h2 class="section-title">12 In-Depth Modules (Step-by-Step)</h2>
+        <p class="section-sub">From foundational front-end design to complex back-end architectures and cloud deployment.</p>
+    </div>
+
+    <div class="module-grid">
+        <!-- Module 01 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 01 • Week 1</span>
+                <span class="support-badge">Front-End Foundation</span>
+            </div>
+            <h3 class="module-title">Modern HTML5 & Responsive CSS3 Layouts</h3>
+            <p class="module-desc">Master semantic HTML structure, CSS Flexbox, Grid systems, media queries, and dark/light design tokens.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> HTML5 Semantic Tags & Accessible Web Standards</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> CSS Flexbox & 12-Column Responsive Grid Systems</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Modern Typography, Gradients & Glassmorphism UI</li>
+            </ul>
+        </div>
+
+        <!-- Module 02 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 02 • Week 2</span>
+                <span class="support-badge">Core Logic</span>
+            </div>
+            <h3 class="module-title">JavaScript ES6+ & DOM Manipulation</h3>
+            <p class="module-desc">Deep dive into JavaScript logic, arrow functions, destructuring, DOM manipulation, events, and Async/Fetch API.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> ES6+ Syntax, Promises, Async/Await & Fetch API</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Interactive Web Page DOM Manipulation</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Form Validation & Local/Session Storage Management</li>
+            </ul>
+        </div>
+
+        <!-- Module 03 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 03 • Week 3-4</span>
+                <span class="support-badge">React Framework</span>
+            </div>
+            <h3 class="module-title">React.js Architecture & Hooks State Management</h3>
+            <p class="module-desc">Build interactive single-page applications (SPAs) with reusable React components, JSX, props, state, and custom hooks.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> React Component Lifecycle, Props & JSX Syntax</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Hooks Mastery (useState, useEffect, useContext, useReducer)</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> React Router v6 & Client-Side Navigation</li>
+            </ul>
+        </div>
+
+        <!-- Module 04 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 04 • Week 5</span>
+                <span class="support-badge">Modern SSR</span>
+            </div>
+            <h3 class="module-title">Next.js Framework & Server-Side Rendering</h3>
+            <p class="module-desc">Learn Next.js 14 App Router, Server Components, Server-Side Rendering (SSR), Static Site Generation (SSG), and SEO optimization.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Next.js App Router Architecture & File-based Routing</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Server vs Client Components & Performance Optimization</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Dynamic Metadata, SEO Tags & API Routes</li>
+            </ul>
+        </div>
+
+        <!-- Module 05 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 05 • Week 6</span>
+                <span class="support-badge">Python Backend</span>
+            </div>
+            <h3 class="module-title">Python Core & Object-Oriented Programming (OOP)</h3>
+            <p class="module-desc">Master Python programming fundamentals, data structures, modules, file handling, and Object-Oriented design patterns.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Python Data Structures (Lists, Dicts, Sets, Tuples)</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> OOP Concepts: Classes, Inheritance, Polymorphism & Encapsulation</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Error Handling, Decorators & Virtual Environments</li>
+            </ul>
+        </div>
+
+        <!-- Module 06 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 06 • Week 7-8</span>
+                <span class="support-badge">Django Core</span>
+            </div>
+            <h3 class="module-title">Django Web Framework Core & ORM Databases</h3>
+            <p class="module-desc">Build robust web backends with Django MVC/MVT, Django ORM database queries, forms, authentication, and admin panel customizing.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Django Models, Relational Schema & ORM Queries</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> User Authentication, Session Cookies & Security</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Custom Django Admin Dashboard Customization</li>
+            </ul>
+        </div>
+
+        <!-- Module 07 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 07 • Week 9</span>
+                <span class="support-badge">REST API & JWT</span>
+            </div>
+            <h3 class="module-title">Django REST Framework (DRF) & API Auth</h3>
+            <p class="module-desc">Design scalable RESTful APIs with DRF serializers, ViewSets, permissions, filtering, and JWT token authentication.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> RESTful API Principles, Serializers & ModelViewSets</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> SimpleJWT Token Authentication & Permission Classes</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Swagger / OpenAPI Documentation Integration</li>
+            </ul>
+        </div>
+
+        <!-- Module 08 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 08 • Week 10</span>
+                <span class="support-badge">Databases</span>
+            </div>
+            <h3 class="module-title">Relational PostgreSQL & Redis Performance Caching</h3>
+            <p class="module-desc">Connect production PostgreSQL databases, write optimized SQL queries, execute migrations, and implement Redis caching.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Production PostgreSQL Setup, Indexing & Constraints</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Redis Caching & In-Memory Session Management</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Database Migrations & Query Optimization</li>
+            </ul>
+        </div>
+
+        <!-- Module 09 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 09 • Week 11</span>
+                <span class="support-badge">SaaS & Payments</span>
+            </div>
+            <h3 class="module-title">Stripe Payment Gateway & Multi-Tenant Billing</h3>
+            <p class="module-desc">Integrate Stripe payment checkout, recurring subscription billing, webhooks, and multi-tenant SaaS architecture.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Stripe Payment Intent API & Checkout Integration</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Recurring Monthly/Yearly Subscription Billing</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Webhook Listeners & Automated Access Control</li>
+            </ul>
+        </div>
+
+        <!-- Module 10 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 10 • Week 11</span>
+                <span class="support-badge">DevOps & Git</span>
+            </div>
+            <h3 class="module-title">Version Control (Git/GitHub) & CI/CD Pipelines</h3>
+            <p class="module-desc">Master Git branching strategies, pull requests, code reviews, automated linting, and GitHub Actions CI/CD deployment pipelines.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Git Branching, Merge Conflicts & Pull Requests</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> GitHub Actions CI/CD Automated Testing</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Code Review Best Practices & Clean Architecture</li>
+            </ul>
+        </div>
+
+        <!-- Module 11 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 11 • Week 12</span>
+                <span class="support-badge">Cloud Deployment</span>
+            </div>
+            <h3 class="module-title">Docker Containerization & Production AWS Cloud</h3>
+            <p class="module-desc">Package applications with Docker & Docker-Compose, configure Nginx reverse proxies, Gunicorn WSGI servers, and deploy on AWS EC2.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Dockerfile & Docker-Compose Container Management</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Production Nginx Reverse Proxy & SSL Certificates</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Deploying Python/Django Apps to AWS EC2 & RDS</li>
+            </ul>
+        </div>
+
+        <!-- Module 12 -->
+        <div class="module-card">
+            <div class="module-num">
+                <span>Module 12 • Week 12</span>
+                <span class="support-badge">Capstone Project</span>
+            </div>
+            <h3 class="module-title">Real-World Enterprise Capstone Web Application</h3>
+            <p class="module-desc">Build and launch a live, multi-tenant SaaS application from scratch — deploying your project live to the internet with full portfolio code review.</p>
+            <ul class="topic-list">
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> End-to-End Enterprise Project Engineering</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Live Internet Deployment & Custom Domain Setup</li>
+                <li class="topic-item"><span style="display:inline-flex;align-items:center;margin-right:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Portfolio Code Verification Badge & Industry Reference</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Certification & Batch Guarantee Card -->
+    <div class="cert-card">
+        <div>
+            <div style="font-size:12px;font-weight:800;color:var(--cyan);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">
+                VERIFIED GRADUATION CERTIFICATE
+            </div>
+            <h2 style="font-family:'Plus Jakarta Sans';font-size:32px;font-weight:900;margin-bottom:16px;color:white">
+                Earn an Industry-Recognized Certification
+            </h2>
+            <p style="font-size:15px;color:var(--text2);line-height:1.65;margin-bottom:20px">
+                Upon successfully completing the 12-week bootcamp and deploying your capstone web application, you will receive a verified **Full-Stack Web Engineering Certificate** issued by Qrious Tech Academy — complete with a unique verification link and GitHub portfolio badge.
+            </p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <span style="background:rgba(16,185,129,0.15);color:#34d399;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:800">
+                    📜 Verified Industry Certificate
+                </span>
+                <span style="background:rgba(204,255,0,0.15);color:var(--cyan);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:800">
+                    👥 Strict 10 Seats / Batch Limit
+                </span>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:left">
+            <div style="font-size:16px;font-weight:800;color:white;margin-bottom:14px">💡 Why Our 10-Person Batch Works:</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--text2)">
+                <li style="display:flex;gap:10px;align-items:center"><span>👥</span> <strong>Direct 1-on-1 Mentorship:</strong> Never get lost in crowded 200+ student batches.</li>
+                <li style="display:flex;gap:10px;align-items:center"><span>💻</span> <strong>Personalized Code Reviews:</strong> Senior engineers review your GitHub code line-by-line.</li>
+                <li style="display:flex;gap:10px;align-items:center"><span>💼</span> <strong>Career & Interview Prep:</strong> Mock technical interviews & direct job referrals.</li>
+                <li style="display:flex;gap:10px;align-items:center"><span>🎥</span> <strong>Lifetime Access:</strong> All live session recordings and source code repositories.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom CTA Section -->
+<section class="section" style="text-align:center;padding-top:20px">
+    <div style="background:linear-gradient(135deg,rgba(59,130,246,0.18),rgba(16,185,129,0.18));border:1.5px solid rgba(59,130,246,0.35);border-radius:32px;padding:60px 40px;max-width:960px;margin:0 auto;box-shadow:0 25px 60px rgba(0,0,0,0.5)">
+        <h2 style="font-family:'Plus Jakarta Sans';font-size:38px;font-weight:900;margin-bottom:16px;color:white">Ready to Master Full-Stack Engineering?</h2>
+        <p style="font-size:16.5px;color:var(--text2);max-width:640px;margin:0 auto 32px;line-height:1.6">
+            Reserve your seat in our next 10-person exclusive batch today for ৳10,000 BDT (50% OFF Regular Fee ৳20,000 BDT).
+        </p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+            <a href="/contact/?subject=Web+Development+Enrollment" class="btn btn-primary" style="padding:15px 32px;font-size:16px;background:linear-gradient(135deg,#3b82f6,#10b981);font-weight:800">
+                Enroll Now (৳10,000 BDT) →
+            </a>
+            <a href="https://wa.me/971566631501" target="_blank" class="btn btn-outline" style="padding:15px 28px;font-size:16px;color:#25D366;border-color:rgba(37,211,102,0.4)">
+                💬 WhatsApp Inquiries (+971 566631501)
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

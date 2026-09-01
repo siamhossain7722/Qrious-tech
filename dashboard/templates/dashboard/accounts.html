@@ -1,0 +1,1469 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Resumes & CVs — Qrious Tech Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAFAFA;
+            --bg-secondary: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8FAF8;
+            --brand-lime: #D4FF00;
+            --brand-dark: #111827;
+            --accent-blue: #2563EB;
+            --accent-purple: #7C3AED;
+            --accent-green: #059669;
+            --accent-amber: #D97706;
+            --accent-red: #DC2626;
+            --accent-cyan: #ccff00;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #6B7280;
+            --border: #E4E4E7;
+            --border-hover: #D4D4D8;
+        }
+        body.light-theme, html.light-theme, body, html {
+            --bg-primary: #FAFAFA;
+            --bg-secondary: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8FAF8;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #6B7280;
+            --border: #E4E4E7;
+            --border-hover: #D4D4D8;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #0d1322 0%, #080c16 100%) !important;
+        }
+        .sidebar .logo-text {
+            color: #ffffff !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+        .sidebar .logo-sub {
+            color: #64748b !important;
+        }
+        .sidebar .nav-label {
+            color: #64748b !important;
+        }
+        .sidebar .nav-item {
+            color: #cbd5e1 !important;
+            background: transparent !important;
+        }
+        .sidebar .nav-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+        }
+        .sidebar .nav-item.active {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: 1px solid #3b82f6 !important;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35) !important;
+            font-weight: 700 !important;
+        }
+        body.light-theme .sidebar-footer {
+            border-top: 1px solid #e2e8f0 !important;
+            background: #f8fafc !important;
+        }
+        body.light-theme .sidebar-footer div {
+            color: #0f172a !important;
+        }
+        body.light-theme .topbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+        }
+        body.light-theme .page-title {
+            color: #0f172a !important;
+        }
+        body.light-theme .topbar-profile-btn {
+            background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* Sidebar */
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 270px; background: linear-gradient(180deg, #0d1322 0%, #080c16 100%); border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; z-index: 100; overflow: hidden; box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
+        .logo { padding: 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.015); }
+        .logo-inner { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 16px rgba(59,130,246,0.35); flex-shrink: 0; }
+        .logo-text { font-size: 16.5px; font-weight: 800; background: linear-gradient(135deg, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-sub { font-size: 11px; color: #64748b; margin-top: 2px; font-weight: 500; }
+        .sidebar-nav { padding: 16px 14px; flex: 1; overflow-y: auto; }
+        .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: #64748b; text-transform: uppercase; padding: 0 10px; margin-bottom: 6px; margin-top: 18px; }
+        .nav-label:first-child { margin-top: 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; color: #94a3b8; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 3px; position: relative; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #ffffff; transform: translateX(3px); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(59,130,246,0.22), rgba(139,92,246,0.08)); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); box-shadow: 0 2px 12px rgba(59,130,246,0.15); }
+        .nav-item.active::before { content: ''; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; background: #3b82f6; border-radius: 0 4px 4px 0; }
+        .nav-count-badge { margin-left: auto; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+        .sidebar-footer { padding: 16px 18px; border-top: 1px solid rgba(255,255,255,0.07); background: rgba(0,0,0,0.2); }
+        .profile-mini-card { display: flex; align-items: center; gap: 10px; }
+        .profile-avatar-mini { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #ffffff; box-shadow: 0 2px 8px rgba(59,130,246,0.3); flex-shrink: 0; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); display: inline-block; margin-right: 4px; box-shadow: 0 0 8px var(--accent-green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* ===== SIDEBAR BACKDROP & TOGGLE BUTTON ===== */
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+        }
+
+        .btn-toggle-sidebar {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .btn-toggle-sidebar:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #60a5fa;
+            transform: scale(1.04);
+        }
+
+        .sidebar-close-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            min-height: 32px !important;
+            border-radius: 8px !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            color: #ffffff !important;
+            cursor: pointer !important;
+            margin-left: auto !important;
+            transition: all 0.2s ease !important;
+            position: relative !important;
+            z-index: 10005 !important;
+            pointer-events: auto !important;
+        }
+        .sidebar-close-btn * {
+            pointer-events: none !important;
+        }
+        .sidebar-close-btn:hover {
+            background: #ef4444 !important;
+            border-color: #f87171 !important;
+            color: #ffffff !important;
+            transform: scale(1.08) !important;
+        }
+
+        /* ===== MAIN & SIDEBAR RESPONSIVENESS ===== */
+        .sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .main {
+            margin-left: 270px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+            overflow-x: hidden;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease;
+        }
+
+        /* WHEN SIDEBAR IS CLOSED (ANY DEVICE & SCREEN SIZE) */
+        body.sidebar-closed .sidebar {
+            transform: translateX(-100%) !important;
+        }
+        body.sidebar-closed .main {
+            margin-left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        body.sidebar-closed .btn-toggle-sidebar {
+            display: inline-flex !important;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            background: rgba(10,14,26,0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-title { font-size: 20px; font-weight: 700; }
+        .content { padding: 28px 32px; max-width: 1400px; }
+
+        @media (max-width: 1024px) {
+            .btn-toggle-sidebar {
+                display: inline-flex !important;
+            }
+            .sidebar {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                bottom: 0 !important;
+                width: 280px !important;
+                max-width: 85vw !important;
+                transform: translateX(-100%);
+                z-index: 10000 !important;
+                box-shadow: 10px 0 50px rgba(0, 0, 0, 0.8) !important;
+            }
+            .sidebar-close-btn {
+                display: inline-flex !important;
+            }
+            .main {
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+            }
+            body.sidebar-open .sidebar {
+                transform: translateX(0) !important;
+            }
+            body.sidebar-open .sidebar-backdrop {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                visibility: visible !important;
+            }
+            body.sidebar-open {
+                overflow: hidden !important;
+            }
+            .two-col {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                padding: 12px 16px !important;
+            }
+            .page-title {
+                font-size: 17px !important;
+            }
+            .content {
+                padding: 16px 12px !important;
+            }
+        }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: white; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(59,130,246,0.3); }
+        .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--border-hover); color: var(--text-primary); background: var(--bg-card); }
+        .btn-danger { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.3); }
+        .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+        .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+        /* Download buttons */
+        .btn-download {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 7px !important;
+            padding: 7px 16px !important;
+            border-radius: 12px !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            text-decoration: none !important;
+            cursor: pointer !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            font-family: 'Inter', sans-serif !important;
+            white-space: nowrap !important;
+            outline: none !important;
+        }
+        .btn-download:hover { transform: translateY(-2px) !important; filter: brightness(1.1) !important; }
+        .btn-download-csv { background: #00b875 !important; color: #ffffff !important; border: 1.5px solid #20bf6b !important; box-shadow: 0 4px 14px rgba(0, 184, 117, 0.4) !important; }
+        .btn-download-csv:hover { background: #00d284 !important; border-color: #55efc4 !important; box-shadow: 0 6px 20px rgba(0, 184, 117, 0.65) !important; }
+        .btn-download-json { background: #e67e22 !important; color: #ffffff !important; border: 1.5px solid #f39c12 !important; box-shadow: 0 4px 14px rgba(230, 126, 34, 0.4) !important; }
+        .btn-download-json:hover { background: #f39c12 !important; border-color: #fed330 !important; box-shadow: 0 6px 20px rgba(243, 156, 18, 0.65) !important; }
+        .btn-download-pdf { background: #6c5ce7 !important; color: #ffffff !important; border: 1.5px solid #8c7ae6 !important; box-shadow: 0 4px 14px rgba(108, 92, 231, 0.4) !important; }
+        .btn-download-pdf:hover { background: #7d6dfa !important; border-color: #a29bfe !important; box-shadow: 0 6px 20px rgba(108, 92, 231, 0.65) !important; }
+
+        /* Grid */
+        .two-col { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 24px; align-items: start; }
+        @media(max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+
+        /* Card */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; min-width: 0; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .card-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 24px; }
+
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+        .form-input { width: 100%; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text-primary); font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.2s; box-sizing: border-box; }
+        .form-input:focus { outline: none; border-color: var(--accent-blue); }
+        .form-input[type="password"] { letter-spacing: 0.1em; }
+        .password-wrap { position: relative; display: flex; align-items: center; width: 100%; }
+        .password-wrap .form-input { padding-right: 44px; }
+        .password-toggle-btn {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 18px; cursor: pointer; padding: 4px; display: flex;
+            align-items: center; justify-content: center; transition: color 0.2s;
+            user-select: none; z-index: 10;
+        }
+        .password-toggle-btn:hover { color: var(--text-primary); }
+
+
+        /* Account cards */
+        .account-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 16px; transition: all 0.3s; position: relative; min-width: 0; overflow: hidden; }
+        .account-card:hover { border-color: var(--border-hover); }
+        .account-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+        .avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .account-info { flex: 1; min-width: 220px; }
+        .account-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; word-break: break-word; }
+        .account-headline { font-size: 13px; color: var(--text-secondary); line-height: 1.45; word-break: break-word; margin-bottom: 6px; }
+        .account-email { font-size: 12px; color: var(--text-muted); }
+
+        /* Status badge */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; align-self: flex-start; }
+        .status-active { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .status-syncing { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); animation: blink 1s infinite; }
+        .status-needs_verification { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .status-inactive { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        /* Profile stats */
+        .profile-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); }
+        .pstat { text-align: left; margin-right: 8px; }
+        .pstat-val { font-size: 18px; font-weight: 700; color: var(--accent-blue); }
+        .pstat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+
+        /* Skills chips */
+        .skills-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .chip { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: var(--accent-blue); border-radius: 20px; padding: 4px 11px; font-size: 11px; font-weight: 500; }
+
+        /* Account actions */
+        .account-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+        /* Resume cards */
+        .resume-card { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; transition: all 0.2s; flex-wrap: wrap; }
+        .resume-card.active-resume { border-color: var(--accent-green); background: rgba(16,185,129,0.05); }
+        .resume-card:hover { border-color: var(--border-hover); }
+        .resume-icon { width: 44px; height: 44px; background: rgba(239,68,68,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .resume-info { flex: 1; min-width: 160px; }
+        .resume-name { font-size: 14px; font-weight: 600; word-break: break-word; }
+        .resume-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .active-badge { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 2px 8px; font-size: 10px; font-weight: 700; margin-left: 8px; }
+        .resume-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+        /* Responsive Breakpoints */
+        @media(max-width: 992px) {
+            .sidebar { width: 72px; }
+            .sidebar .logo-text, .sidebar .logo-sub, .sidebar .nav-label, .sidebar .nav-item span:last-child { display: none; }
+            .main { margin-left: 72px; }
+            .content { padding: 20px 16px; }
+            .topbar { padding: 14px 16px; }
+        }
+        @media(max-width: 680px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+            .content { padding: 16px 12px; }
+            .two-col { grid-template-columns: 1fr; gap: 16px; }
+            .account-actions { flex-direction: column; }
+            .account-actions .btn { width: 100%; justify-content: center; }
+        }
+
+        /* Upload zone */
+        .upload-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+        .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent-blue); background: rgba(59,130,246,0.05); }
+        .upload-icon { font-size: 36px; margin-bottom: 12px; }
+        .upload-text { font-size: 14px; color: var(--text-secondary); }
+        .upload-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        #resume-file-input { display: none; }
+
+        /* Notification */
+        .notification { position: fixed; bottom: 24px; right: 24px; background: #111827; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 12px 18px; font-size: 13.5px; font-weight: 600; z-index: 100001; transform: translateX(150%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: #f1f5f9; }
+        .notification.show { transform: translateX(0); }
+        .notification.success { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.12); color: #34d399; }
+        .notification.error { border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.12); color: #f87171; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid var(--border-hover); border-radius: 20px; padding: 32px; max-width: 460px; width: 90%; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .modal-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+
+        /* Empty state */
+        .empty { text-align: center; padding: 40px; color: var(--text-muted); }
+        .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+        /* Sync progress */
+        .sync-progress { display: none; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: var(--accent-blue); margin-top: 12px; }
+        .sync-progress.active { display: flex; align-items: center; gap: 10px; }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(59,130,246,0.3); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== DANGER DELETE MODAL ===== */
+        #danger-modal-overlay {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(4, 7, 16, 0.88) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            z-index: 999999 !important;
+            display: none;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 20px !important;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        #danger-modal-overlay.active { opacity: 1 !important; }
+        .danger-modal-card {
+            background: linear-gradient(145deg, #161f33 0%, #0d1424 100%) !important;
+            border: 1px solid rgba(239,68,68,0.4) !important;
+            border-radius: 20px !important;
+            padding: 32px !important;
+            max-width: 460px !important;
+            width: 90% !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(239,68,68,0.18) !important;
+            text-align: center !important;
+            animation: modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+            position: relative !important;
+            margin: auto !important;
+        }
+        @keyframes modalPop { from { transform: scale(0.85) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        .danger-modal-icon-wrap { width: 60px; height: 60px; border-radius: 16px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.35); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 18px; box-shadow: 0 0 20px rgba(239,68,68,0.25); }
+        .danger-modal-title { font-size: 19px; font-weight: 800; color: #f8fafc; margin-bottom: 10px; }
+        .danger-modal-desc { font-size: 13.5px; color: #94a3b8; line-height: 1.55; margin-bottom: 24px; }
+        .danger-modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .btn-danger-cancel { flex: 1; padding: 11px 18px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Inter', sans-serif; }
+        .btn-danger-cancel:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .btn-danger-confirm { flex: 1; padding: 11px 18px; border-radius: 12px; background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; color: #fff; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(239,68,68,0.4); display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Inter', sans-serif; }
+        .btn-danger-confirm:hover { background: linear-gradient(135deg, #f87171, #ef4444); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.6); }
+
+        /* ===== TOPBAR PROFILE CARD ===== */
+        .topbar-profile { position: relative; flex-shrink: 0; }
+        .topbar-profile-btn { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; cursor: pointer; transition: all 0.2s ease; font-family: 'Inter', sans-serif; color: var(--text-primary); }
+        .topbar-profile-btn:hover { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.35); }
+        .topbar-avatar-initials { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 2px 8px rgba(59,130,246,0.35); }
+        .topbar-avatar-img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(59,130,246,0.4); }
+        .topbar-profile-info { display: flex; flex-direction: column; text-align: left; min-width: 0; }
+        .topbar-profile-name { font-size: 13px; font-weight: 700; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .topbar-profile-email { font-size: 10.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .topbar-chevron { color: #64748b; flex-shrink: 0; transition: transform 0.2s ease; }
+        .topbar-profile-btn.open .topbar-chevron { transform: rotate(180deg); }
+        .topbar-dropdown { display: none; position: absolute; right: 0; top: calc(100% + 10px); background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; min-width: 230px; box-shadow: 0 16px 48px rgba(0,0,0,0.7); z-index: 9999; overflow: hidden; animation: dropdownFadeIn 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+        .topbar-dropdown.open { display: block; }
+        @keyframes dropdownFadeIn { from { opacity:0; transform: translateY(-8px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .topbar-dropdown-header { padding: 14px 16px; background: rgba(255,255,255,0.025); }
+        .topbar-dropdown-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0; }
+        .topbar-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; font-weight: 500; color: #cbd5e1; text-decoration: none; transition: all 0.15s ease; }
+        .topbar-dropdown-item:hover { background: rgba(59,130,246,0.12); color: #60a5fa; }
+        .topbar-dropdown-item-danger { color: #f87171; }
+        .topbar-dropdown-item-danger:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+        @media (max-width: 560px) { .topbar-profile-info { display: none; } .topbar-profile-btn { padding: 6px 8px; } }
+    </style>
+</head>
+<body>
+{% csrf_token %}
+
+<!-- Sidebar Backdrop for Mobile/Tablet -->
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar(event)"></div>
+
+<aside class="sidebar" id="app-sidebar">
+    <div class="logo">
+        <div class="logo-inner">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:36px;width:auto;max-width:44px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(124,58,237,0.4))">
+            <div style="flex:1;min-width:0">
+                <div class="logo-text">Qrious Tech Academy</div>
+                <div class="logo-sub">Tech Academy</div>
+            </div>
+            <button type="button" class="sidebar-close-btn" onclick="closeSidebar(event)" aria-label="Close sidebar" title="Close menu">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">🚀 Pipeline & Jobs</div>
+        <a href="/dashboard/" class="nav-item"><span>📊</span> All Applications</a>
+        <a href="/dashboard/?status=applied" class="nav-item"><span>✅</span> Applied Jobs</a>
+        <a href="/dashboard/?min_score=70" class="nav-item"><span>🎯</span> Top CV Matches (≥70%)</a>
+        <a href="/dashboard/?status=interview" class="nav-item"><span>🎉</span> Interview Calls</a>
+        <a href="/dashboard/?status=offer" class="nav-item"><span>🏆</span> Job Offers</a>
+
+        <div class="nav-label">⏱️ Time Horizons</div>
+        <a href="/dashboard/?date_preset=today" class="nav-item"><span>⚡</span> Today's Jobs</a>
+        <a href="/dashboard/?date_preset=7days" class="nav-item"><span>📅</span> Past 7 Days</a>
+        <a href="/dashboard/?date_preset=30days" class="nav-item"><span>🗓️</span> This Month</a>
+
+        <div class="nav-label">⚙️ Manage & Account</div>
+        <a href="/settings/" class="nav-item"><span>⚙️</span> User Profile</a>
+        {% if not request.user.enrollments.exists %}
+        <a href="/billing/" class="nav-item"><span>💳</span> Billing & Plan</a>
+        {% endif %}
+        <a href="/dashboard/accounts/" class="nav-item active"><span>📄</span> Resumes & CVs</a>
+        <a href="/export/pdf/" target="_blank" class="nav-item">
+            <span>📑</span> PDF Report (A4)
+            <span class="nav-count-badge" style="background:rgba(108,92,231,0.25);color:#a29bfe">A4</span>
+        </a>
+        {% if request.user.is_superuser %}
+        <a href="/superadmin/" class="nav-item"><span>👑</span> Master Super Admin Console</a>
+        <a href="/admin/" class="nav-item"><span>🛠️</span> Admin Panel</a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+        <div class="profile-mini-card">
+            <div class="profile-avatar-mini">{{ request.user.first_name|first|default:request.user.email|first|upper }}</div>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:700;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ request.user.get_full_name|default:request.user.email }}</div>
+                <div style="font-size:11px;color:#64748b;display:flex;align-items:center;margin-top:2px">
+                    <span class="status-dot"></span>
+                    <span>System Ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu" title="Open menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <h1 class="page-title">📄 Resumes & CV Manager</h1>
+        </div>
+        <div class="topbar-profile" id="topbar-profile">
+            <button class="topbar-profile-btn" id="profile-menu-btn" onclick="toggleProfileMenu(event)" aria-label="User menu">
+                {% if request.user.profile.avatar %}
+                <img src="{{ request.user.profile.avatar.url }}" alt="Avatar" class="topbar-avatar-img" style="border-radius:50%;object-fit:cover;">
+                {% elif active_account and active_account.profile_photo_url %}
+                <img src="{{ active_account.profile_photo_url }}" alt="Avatar" class="topbar-avatar-img">
+                {% else %}
+                <div class="topbar-avatar-initials">
+                    {{ request.user.email|first|upper }}
+                </div>
+                {% endif %}
+                <div class="topbar-profile-info">
+                    <div class="topbar-profile-name">{{ active_account.full_name|default:request.user.get_full_name|default:request.user.email }}</div>
+                    <div class="topbar-profile-email">{{ active_account.email|default:request.user.email }}</div>
+                </div>
+                <svg class="topbar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div class="topbar-dropdown" id="profile-dropdown">
+                <div class="topbar-dropdown-header">
+                    <div style="font-size:12.5px;font-weight:700;color:#f1f5f9;">{{ active_account.full_name|default:request.user.get_full_name|default:request.user.email }}</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">{{ request.user.email }}</div>
+                    {% if active_account %}
+                    <div style="margin-top:6px;">
+                        <span style="font-size:10.5px;padding:2px 8px;border-radius:20px;background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);font-weight:600;">● {{ active_account.status|title }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="topbar-dropdown-divider"></div>
+                <a href="/settings/" class="topbar-dropdown-item"><span>⚙️</span> My User Profile</a>
+                {% if not request.user.enrollments.exists %}
+                <a href="/billing/" class="topbar-dropdown-item"><span>💳</span> Subscription & Billing</a>
+                {% endif %}
+                <a href="/dashboard/accounts/" class="topbar-dropdown-item"><span>📄</span> Resumes & CVs</a>
+                {% if request.user.is_superuser %}
+                <a href="/superadmin/" class="topbar-dropdown-item" style="color:var(--accent-amber)"><span>👑</span> Super Admin Console</a>
+                <a href="/admin/" class="topbar-dropdown-item"><span>🛠️</span> Admin Panel</a>
+                {% endif %}
+                <div class="topbar-dropdown-divider"></div>
+                <a href="/logout/" class="topbar-dropdown-item topbar-dropdown-item-danger"><span>🚪</span> Sign Out</a>
+            </div>
+        </div>
+                <div class="topbar-dropdown-divider"></div>
+                <a href="/logout/" class="topbar-dropdown-item topbar-dropdown-item-danger"><span>🚪</span> Sign Out</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="two-col">
+
+            <!-- ===== LEFT: LINKEDIN ACCOUNTS ===== -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🔗 LinkedIn Accounts</div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="font-size:13px;color:var(--text-muted)">{{ accounts|length }} account(s)</span>
+                            <button class="btn btn-primary btn-sm" id="open-add-account" style="white-space:nowrap;">➕ Add Account</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        {% if accounts %}
+                        {% for account in accounts %}
+                        <div class="account-card" id="account-{{ account.id }}">
+                            <div class="account-header">
+                                <div class="avatar" id="avatar-{{ account.id }}">
+                                    {% if account.profile_photo_url %}
+                                    <img src="{{ account.profile_photo_url }}" alt="photo" onerror="this.parentElement.textContent='{{ account.full_name|first|default:account.email|first|upper }}'">
+                                    {% else %}
+                                    {{ account.full_name|first|default:account.email|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="account-info">
+                                    <div class="account-name" id="name-{{ account.id }}">
+                                        {{ account.full_name|default:"Profile not synced" }}
+                                    </div>
+                                    <div class="account-headline" id="headline-{{ account.id }}">
+                                        {{ account.headline|default:"—" }}
+                                    </div>
+                                    <div class="account-email">{{ account.email }}</div>
+                                </div>
+                                <span class="status-badge status-{{ account.status }}" id="status-{{ account.id }}">
+                                    {% if account.status == "active" %}✅ Active
+                                    {% elif account.status == "syncing" %}🔄 Syncing
+                                    {% elif account.status == "needs_verification" %}⚠️ Verify
+                                    {% else %}❌ Inactive{% endif %}
+                                </span>
+                            </div>
+
+                            {% if account.full_name %}
+                            <div class="profile-stats">
+                                <div class="pstat">
+                                    <div class="pstat-val" id="skills-count-{{ account.id }}">{{ account.get_skills_list|length }}</div>
+                                    <div class="pstat-label">Skills</div>
+                                </div>
+                                <div class="pstat">
+                                    <div class="pstat-val" id="exp-count-{{ account.id }}">{{ account.get_experience_list|length }}</div>
+                                    <div class="pstat-label">Experience</div>
+                                </div>
+                                <div class="pstat">
+                                    <div class="pstat-val" id="edu-count-{{ account.id }}">{{ account.get_education_list|length }}</div>
+                                    <div class="pstat-label">Education</div>
+                                </div>
+                                {% if account.connections %}
+                                <div class="pstat">
+                                    <div class="pstat-val">{{ account.connections }}</div>
+                                    <div class="pstat-label">Connections</div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if account.display_skills %}
+                            <div class="skills-chips">
+                                {% for skill in account.get_skills_list %}
+                                {% if forloop.counter <= 8 %}
+                                <span class="chip">{{ skill }}</span>
+                                {% endif %}
+                                {% endfor %}
+                                {% if account.get_skills_list|length > 8 %}
+                                <span class="chip" style="background:rgba(100,116,139,0.1);color:var(--text-muted)">+{{ account.get_skills_list|length|add:"-8" }} more</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if account.last_synced %}
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:10px">
+                                Last synced: {{ account.last_synced|date:"M d, Y H:i" }}
+                            </div>
+                            {% endif %}
+                            {% endif %}
+
+                            <div class="sync-progress" id="sync-progress-{{ account.id }}">
+                                <div class="spinner"></div>
+                                <span id="sync-msg-{{ account.id }}">Syncing profile from LinkedIn... This may take 30-60 seconds.</span>
+                            </div>
+
+                            <div class="account-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+                                <button class="btn btn-primary btn-sm" onclick="openLoginBrowser({{ account.id }}, this)" title="Opens browser window to log in or sync profile data with LinkedIn / Google">
+                                    🌐 Connect & Sync Profile (Browser)
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="openEditModal({{ account.id }}, '{{ account.full_name|escapejs }}', '{{ account.headline|escapejs }}', '{{ account.location|escapejs }}', '{{ account.profile_url|escapejs }}', '{{ account.get_skills_list|join:", "|escapejs }}', '{{ account.status }}')">
+                                    ✏️ Edit Profile
+                                </button>
+                                {% if account.profile_url %}
+                                <a href="{{ account.profile_url }}" target="_blank" class="btn btn-outline btn-sm">
+                                    👁 View Profile ↗
+                                </a>
+                                {% endif %}
+                                <a href="/dashboard/accounts/{{ account.id }}/profile/" class="btn btn-outline btn-sm">
+                                    📋 Details
+                                </a>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAccount({{ account.id }}, '{{ account.email }}')">
+                                    🗑 Delete
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="empty">
+                            <div class="empty-icon">🔗</div>
+                            <div style="font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:8px">No accounts added yet</div>
+                            <div>Click "Add LinkedIn Account" to get started</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== RIGHT: RESUME / CV ===== -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📄 Resume / CV</div>
+                        <span style="font-size:13px;color:var(--text-muted)">{{ resumes|length }} file(s)</span>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Upload Zone -->
+                        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('resume-file-input').click()">
+                            <div class="upload-icon">📤</div>
+                            <div class="upload-text">Drop your CV here or <strong style="color:var(--accent-blue)">click to browse</strong></div>
+                            <div class="upload-sub">PDF files only · Max 10 MB</div>
+                        </div>
+                        <input type="file" id="resume-file-input" accept=".pdf" onchange="handleFileSelect(this)">
+
+                        <!-- Resume Name Input -->
+                        <div class="form-group">
+                            <label class="form-label">Resume Label</label>
+                            <input type="text" class="form-input" id="resume-name-input" placeholder="e.g. Python Developer CV 2024">
+                        </div>
+
+                        <!-- Account link -->
+                        {% if accounts %}
+                        <div class="form-group">
+                            <label class="form-label">Link to Account (optional)</label>
+                            <select class="form-input" id="resume-account-select">
+                                <option value="">— General (all accounts) —</option>
+                                {% for acc in accounts %}
+                                <option value="{{ acc.id }}">{{ acc.full_name|default:acc.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <div style="display:flex;gap:10px;margin-bottom:20px">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-secondary)">
+                                <input type="checkbox" id="set-active-check" style="accent-color:var(--accent-blue)">
+                                Set as active resume (agent will use this one)
+                            </label>
+                        </div>
+
+                        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:24px" onclick="uploadResume()" id="upload-btn" disabled>
+                            📤 Upload Resume
+                        </button>
+
+                        <!-- Resume list -->
+                        <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">
+                            Uploaded Resumes
+                        </div>
+
+                        {% if resumes %}
+                        <div id="resume-list">
+                        {% for resume in resumes %}
+                        <div class="resume-card {% if resume.is_active %}active-resume{% endif %}" id="resume-{{ resume.id }}">
+                            <div class="resume-icon">📕</div>
+                            <div class="resume-info">
+                                <div class="resume-name">
+                                    {{ resume.name }}
+                                    {% if resume.is_active %}
+                                    <span class="active-badge">✅ ACTIVE</span>
+                                    {% endif %}
+                                </div>
+                                <div class="resume-meta">
+                                    {{ resume.filename }} · {{ resume.file_size_kb }} KB ·
+                                    {{ resume.uploaded_at|date:"M d, Y" }}
+                                    {% if resume.account %}· {{ resume.account.full_name|default:resume.account.email }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="resume-actions">
+                                <a href="{{ resume.file.url }}" target="_blank" class="btn btn-outline btn-sm">👁</a>
+                                {% if not resume.is_active %}
+                                <button class="btn btn-success btn-sm" onclick="activateResume({{ resume.id }})">✅ Use This</button>
+                                {% endif %}
+                                <button class="btn btn-danger btn-sm" onclick="deleteResume({{ resume.id }}, '{{ resume.name }}')">🗑</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty" id="resume-empty">
+                            <div class="empty-icon">📭</div>
+                            <div>No resumes uploaded yet</div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- Add Account Modal -->
+<div class="modal-overlay" id="add-account-modal">
+    <div class="modal">
+        <div class="modal-title">🔗 Add LinkedIn Account</div>
+        <div class="modal-sub">Your credentials are stored locally and never shared.</div>
+
+        <div class="form-group">
+            <label class="form-label">LinkedIn Email</label>
+            <input type="email" class="form-input" id="add-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+            <label class="form-label">LinkedIn Password</label>
+            <div class="password-wrap">
+                <input type="password" class="form-input" id="add-password" placeholder="••••••••••">
+                <button type="button" class="password-toggle-btn" onclick="togglePassword(this)" title="Show password" aria-label="Toggle Password Visibility">👁️</button>
+            </div>
+        </div>
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--accent-amber);margin-bottom:4px">
+            ⚠️ After adding, click <strong>Log In via Browser</strong> to authenticate with LinkedIn or Google.
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('add-account-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="addAccount()">Add Account</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Account Modal -->
+<div class="modal-overlay" id="edit-account-modal">
+    <div class="modal" style="max-width:540px">
+        <div class="modal-title">✏️ Edit Account & Profile Info</div>
+        <div class="modal-sub">Set or customize your profile information directly for CV matching.</div>
+
+        <input type="hidden" id="edit-account-id">
+        <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-input" id="edit-fullname" placeholder="e.g. Md Siam Hossain">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Headline / Current Title</label>
+            <input type="text" class="form-input" id="edit-headline" placeholder="e.g. Python Django Backend Developer">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" class="form-input" id="edit-location" placeholder="e.g. Dhaka, Bangladesh or Remote">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Skills (Comma-separated)</label>
+            <input type="text" class="form-input" id="edit-skills" placeholder="Python, Django, PostgreSQL, REST APIs, Docker, Git">
+        </div>
+        <div class="form-group">
+            <label class="form-label">LinkedIn Profile URL</label>
+            <input type="text" class="form-input" id="edit-url" placeholder="https://www.linkedin.com/in/your-username/">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Account Status</label>
+            <select class="form-input" id="edit-status">
+                <option value="active">Active ✅</option>
+                <option value="inactive">Inactive ❌</option>
+                <option value="needs_verification">Needs Verification ⚠️</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('edit-account-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditProfile()">💾 Save Profile</button>
+        </div>
+    </div>
+</div>
+
+<!-- Notification -->
+<div class="notification" id="notification">
+    <span id="notif-icon">✅</span>
+    <span id="notif-text"></span>
+</div>
+
+<!-- Danger Delete Confirmation Modal -->
+<div id="danger-modal-overlay" onclick="if(event.target===this) closeDangerModal()">
+    <div class="danger-modal-card">
+        <div class="danger-modal-icon-wrap">⚠️</div>
+        <div class="danger-modal-title" id="danger-modal-title">Confirm Delete</div>
+        <div class="danger-modal-desc" id="danger-modal-desc">
+            Are you sure you want to permanently delete <strong id="danger-modal-item" style="color:#ffffff;"></strong>? This action cannot be undone.
+        </div>
+        <div class="danger-modal-actions">
+            <button type="button" class="btn-danger-cancel" onclick="closeDangerModal()">Cancel</button>
+            <button type="button" class="btn-danger-confirm" id="danger-confirm-btn">🗑️ Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCsrfToken() {
+        const input = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (input && input.value) return input.value;
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue || '{{ csrf_token }}';
+    }
+
+    let pendingFile = null;
+
+    function openEditModal(id, fullName, headline, location, profileUrl, skills, status) {
+        document.getElementById('edit-account-id').value = id;
+        document.getElementById('edit-fullname').value = fullName || '';
+        document.getElementById('edit-headline').value = headline || '';
+        document.getElementById('edit-location').value = location || '';
+        document.getElementById('edit-url').value = profileUrl || '';
+        document.getElementById('edit-skills').value = skills || '';
+        document.getElementById('edit-status').value = status || 'active';
+        document.getElementById('edit-account-modal').classList.add('active');
+    }
+
+    async function saveEditProfile() {
+        const id = document.getElementById('edit-account-id').value;
+        const payload = {
+            full_name: document.getElementById('edit-fullname').value,
+            headline: document.getElementById('edit-headline').value,
+            location: document.getElementById('edit-location').value,
+            profile_url: document.getElementById('edit-url').value,
+            skills: document.getElementById('edit-skills').value,
+            status: document.getElementById('edit-status').value,
+        };
+
+        try {
+            const res = await fetch(`/dashboard/accounts/${id}/edit/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                closeModal('edit-account-modal');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showNotification(data.error || 'Failed to save profile', 'error');
+            }
+        } catch(e) {
+            showNotification('Error saving profile: ' + e.message, 'error');
+        }
+    }
+
+    // ===== MODAL =====
+    document.getElementById('open-add-account').onclick = () => {
+        document.getElementById('add-account-modal').classList.add('active');
+        document.getElementById('add-email').focus();
+    };
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    document.getElementById('add-account-modal').onclick = function(e) {
+        if (e.target === this) closeModal('add-account-modal');
+    };
+    document.getElementById('edit-account-modal').onclick = function(e) {
+        if (e.target === this) closeModal('edit-account-modal');
+    };
+
+    // ===== ADD ACCOUNT =====
+    async function addAccount() {
+        const email = document.getElementById('add-email').value.trim();
+        const password = document.getElementById('add-password').value.trim();
+
+        if (!email || !password) {
+            showNotification('Please enter both email and password.', 'error');
+            return;
+        }
+
+        try {
+            const res = await fetch('/dashboard/accounts/add/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                closeModal('add-account-modal');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showNotification(data.error, 'error');
+            }
+        } catch(e) {
+            showNotification('Failed to add account.', 'error');
+        }
+    }
+
+    // ===== OPEN LOGIN BROWSER =====
+    async function openLoginBrowser(accountId, btn) {
+        const progressEl = document.getElementById(`sync-progress-${accountId}`);
+        const statusEl = document.getElementById(`status-${accountId}`);
+        const msgEl = document.getElementById(`sync-msg-${accountId}`);
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Syncing...';
+        }
+        progressEl.classList.add('active');
+        if (msgEl) {
+            msgEl.textContent = '🌐 Browser is open! Complete login or verify session in the opened browser window.';
+        }
+        statusEl.className = 'status-badge status-syncing';
+        statusEl.textContent = '🔄 Syncing';
+
+        showNotification('Browser launched! Complete login in the opened browser window.', 'success');
+
+        try {
+            const res = await fetch(`/dashboard/accounts/${accountId}/open-login/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCsrfToken() }
+            });
+            const data = await res.json();
+            if (data.success) {
+                pollAccountStatus(accountId, progressEl, btn);
+            } else {
+                showNotification(data.error || 'Failed to launch browser', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🌐 Connect & Sync Profile (Browser)';
+                }
+            }
+        } catch(e) {
+            progressEl.classList.remove('active');
+            showNotification('Failed to launch login browser.', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '🌐 Connect & Sync Profile (Browser)';
+            }
+        }
+    }
+
+    // ===== SYNC PROFILE (ALIAS TO BROWSER SYNC) =====
+    function syncProfile(accountId) {
+        const btn = document.querySelector(`#account-${accountId} button.btn-primary`);
+        openLoginBrowser(accountId, btn);
+    }
+
+    function pollAccountStatus(accountId, progressEl, btn) {
+        let attempts = 0;
+        const maxAttempts = 100; // 5 minutes max polling
+        const interval = setInterval(async () => {
+            attempts++;
+            try {
+                const res = await fetch(`/dashboard/accounts/${accountId}/status/`);
+                const data = await res.json();
+
+                if (data.status !== 'syncing' || attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    progressEl.classList.remove('active');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = '🌐 Connect & Sync Profile (Browser)';
+                    }
+
+                    if (data.status === 'active') {
+                        showNotification(`✅ Profile synced: ${data.full_name || 'Logged in'}`, 'success');
+                        const nameEl = document.getElementById(`name-${accountId}`);
+                        if (nameEl) nameEl.textContent = data.full_name || 'Logged In Account';
+                        const headEl = document.getElementById(`headline-${accountId}`);
+                        if (headEl) headEl.textContent = data.headline || '—';
+                        const statEl = document.getElementById(`status-${accountId}`);
+                        if (statEl) {
+                            statEl.className = 'status-badge status-active';
+                            statEl.textContent = '✅ Active';
+                        }
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else if (data.status === 'needs_verification') {
+                        showNotification('Verification required or login timed out.', 'error');
+                        const statEl = document.getElementById(`status-${accountId}`);
+                        if (statEl) {
+                            statEl.className = 'status-badge status-needs_verification';
+                            statEl.textContent = '⚠️ Verify';
+                        }
+                    } else {
+                        showNotification(attempts >= maxAttempts ? 'Login check timed out.' : 'Profile sync failed.', 'error');
+                        const statEl = document.getElementById(`status-${accountId}`);
+                        if (statEl) {
+                            statEl.className = 'status-badge status-inactive';
+                            statEl.textContent = '❌ Inactive';
+                        }
+                    }
+                }
+            } catch(e) {
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    progressEl.classList.remove('active');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = '🌐 Log In via Browser (Google / LinkedIn)';
+                    }
+                }
+            }
+        }, 3000);
+    }
+
+    // ===== DELETE ACCOUNT =====
+    async function deleteAccount(accountId, email) {
+        openDangerModal(
+            'Delete LinkedIn Account?',
+            `"${email}"`,
+            async () => {
+                try {
+                    const res = await fetch(`/dashboard/accounts/${accountId}/delete/`, { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        const el = document.getElementById(`account-${accountId}`);
+                        if (el) {
+                            el.style.transition = 'all 0.35s ease';
+                            el.style.opacity = '0';
+                            el.style.transform = 'scale(0.94) translateY(6px)';
+                            setTimeout(() => el.remove(), 350);
+                        }
+                        showNotification(data.message, 'success');
+                    }
+                } catch(e) {
+                    showNotification('Failed to delete account.', 'error');
+                }
+            }
+        );
+    }
+
+    // ===== RESUME UPLOAD =====
+    const uploadZone = document.getElementById('upload-zone');
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) setFile(file);
+    });
+
+    function handleFileSelect(input) {
+        if (input.files[0]) setFile(input.files[0]);
+    }
+
+    function setFile(file) {
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            showNotification('Only PDF files are accepted.', 'error');
+            return;
+        }
+        pendingFile = file;
+        uploadZone.innerHTML = `
+            <div class="upload-icon">📕</div>
+            <div class="upload-text"><strong style="color:var(--accent-green)">${file.name}</strong></div>
+            <div class="upload-sub">${(file.size/1024).toFixed(0)} KB — Ready to upload</div>
+        `;
+        if (!document.getElementById('resume-name-input').value) {
+            document.getElementById('resume-name-input').value = file.name.replace('.pdf', '');
+        }
+        document.getElementById('upload-btn').disabled = false;
+    }
+
+    async function uploadResume() {
+        if (!pendingFile) return;
+
+        const name = document.getElementById('resume-name-input').value.trim() || pendingFile.name;
+        const accountId = document.getElementById('resume-account-select')?.value || '';
+        const setActive = document.getElementById('set-active-check').checked;
+
+        const formData = new FormData();
+        formData.append('file', pendingFile);
+        formData.append('name', name);
+        formData.append('account_id', accountId);
+        formData.append('set_active', setActive ? 'true' : 'false');
+
+        const btn = document.getElementById('upload-btn');
+        btn.textContent = '⏳ Uploading...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/dashboard/resumes/upload/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCsrfToken() },
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => window.location.reload(), 1200);
+            } else {
+                showNotification(data.error || 'Upload failed.', 'error');
+                btn.textContent = '📤 Upload Resume';
+                btn.disabled = false;
+            }
+        } catch(e) {
+            showNotification('Upload failed: ' + e.message, 'error');
+            btn.textContent = '📤 Upload Resume';
+            btn.disabled = false;
+        }
+    }
+
+    async function activateResume(resumeId) {
+        try {
+            const res = await fetch(`/dashboard/resumes/${resumeId}/activate/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCsrfToken() }
+            });
+            const data = await res.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        } catch(e) {
+            showNotification('Failed to activate resume.', 'error');
+        }
+    }
+
+    async function deleteResume(resumeId, name) {
+        openDangerModal(
+            'Delete Resume?',
+            `"${name}"`,
+            async () => {
+                try {
+                    const res = await fetch(`/dashboard/resumes/${resumeId}/delete/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': getCsrfToken() }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const el = document.getElementById(`resume-${resumeId}`);
+                        if (el) {
+                            el.style.transition = 'all 0.35s ease';
+                            el.style.opacity = '0';
+                            el.style.transform = 'scale(0.94) translateY(6px)';
+                            setTimeout(() => el.remove(), 350);
+                        }
+                        showNotification(data.message, 'success');
+                    }
+                } catch(e) {
+                    showNotification('Failed to delete.', 'error');
+                }
+            }
+        );
+    }
+
+    // Close Sidebar explicitly
+    function closeSidebar(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        document.body.classList.remove('sidebar-open');
+        document.body.classList.add('sidebar-closed');
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const main = document.querySelector('.main');
+        if (sidebar) {
+            sidebar.classList.remove('active');
+            sidebar.style.transform = 'translateX(-100%)';
+        }
+        if (main) {
+            main.style.marginLeft = '0px';
+            main.style.width = '100%';
+            main.style.maxWidth = '100%';
+        }
+        if (backdrop) {
+            backdrop.style.opacity = '0';
+            backdrop.style.pointerEvents = 'none';
+            backdrop.style.visibility = 'hidden';
+        }
+    }
+
+    function openSidebar(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        document.body.classList.add('sidebar-open');
+        document.body.classList.remove('sidebar-closed');
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const main = document.querySelector('.main');
+        if (sidebar) {
+            sidebar.classList.add('active');
+            sidebar.style.transform = 'translateX(0)';
+        }
+        if (main) {
+            if (window.innerWidth > 1024) {
+                main.style.marginLeft = '270px';
+                main.style.width = 'calc(100% - 270px)';
+            } else {
+                main.style.marginLeft = '0px';
+                main.style.width = '100%';
+            }
+        }
+        // Only show backdrop on mobile/tablet — NOT on desktop
+        if (backdrop) {
+            if (window.innerWidth <= 1024) {
+                backdrop.style.opacity = '1';
+                backdrop.style.pointerEvents = 'auto';
+                backdrop.style.visibility = 'visible';
+            } else {
+                backdrop.style.opacity = '0';
+                backdrop.style.pointerEvents = 'none';
+                backdrop.style.visibility = 'hidden';
+            }
+        }
+    }
+
+    // Toggle Sidebar Drawer (Mobile/Tablet) or Collapsed State (Desktop)
+    function toggleSidebar(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const sidebar = document.getElementById('app-sidebar');
+        const isOpen = document.body.classList.contains('sidebar-open') || (sidebar && sidebar.classList.contains('active'));
+        if (isOpen) {
+            closeSidebar(e);
+        } else {
+            openSidebar(e);
+        }
+    }
+
+    // Auto close sidebar on nav link click on mobile
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.body.classList.remove('sidebar-open');
+                }
+            });
+        });
+    });
+
+    // ===== NOTIFICATION =====
+    function showNotification(msg, type = 'success') {
+        const notif = document.getElementById('notification');
+        document.getElementById('notif-text').textContent = msg;
+        document.getElementById('notif-icon').textContent = type === 'success' ? '✅' : '❌';
+        notif.className = `notification show ${type}`;
+        setTimeout(() => notif.classList.remove('show'), 4000);
+    }
+
+    // ===== DANGER MODAL =====
+    let _dangerCallback = null;
+
+    function openDangerModal(title, itemName, onConfirm) {
+        _dangerCallback = onConfirm;
+        document.getElementById('danger-modal-title').textContent = title;
+        document.getElementById('danger-modal-item').textContent = itemName;
+        const overlay = document.getElementById('danger-modal-overlay');
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => overlay.classList.add('active'));
+    }
+
+    function closeDangerModal() {
+        const overlay = document.getElementById('danger-modal-overlay');
+        overlay.classList.remove('active');
+        setTimeout(() => { overlay.style.display = 'none'; }, 250);
+        _dangerCallback = null;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('danger-confirm-btn').addEventListener('click', async () => {
+            if (!_dangerCallback) return;
+            const btn = document.getElementById('danger-confirm-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Deleting...';
+            try {
+                await _dangerCallback();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🗑️ Yes, Delete';
+                closeDangerModal();
+            }
+        });
+    });
+
+    // ===== TOPBAR PROFILE DROPDOWN =====
+    function toggleProfileMenu(e) {
+        e.stopPropagation();
+        const btn = document.getElementById('profile-menu-btn');
+        const dropdown = document.getElementById('profile-dropdown');
+        if (!btn || !dropdown) return;
+        const isOpen = dropdown.classList.contains('open');
+        dropdown.classList.toggle('open', !isOpen);
+        btn.classList.toggle('open', !isOpen);
+    }
+    document.addEventListener('click', (e) => {
+        const profile = document.getElementById('topbar-profile');
+        if (profile && !profile.contains(e.target)) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const btn = document.getElementById('profile-menu-btn');
+            if (dropdown) dropdown.classList.remove('open');
+            if (btn) btn.classList.remove('open');
+        }
+    });
+    // ===== PASSWORD TOGGLE =====
+    function togglePassword(btn) {
+        const input = btn.previousElementSibling || btn.parentElement.querySelector('input');
+        if (input) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '🙈';
+                btn.setAttribute('title', 'Hide password');
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '👁️';
+                btn.setAttribute('title', 'Show password');
+            }
+        }
+    }
+</script>
+</body>
+</html>

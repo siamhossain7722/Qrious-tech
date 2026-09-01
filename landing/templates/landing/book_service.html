@@ -1,0 +1,102 @@
+{% extends "landing/base.html" %}
+{% load static %}
+
+{% block title %}Book a Service — Qrious Tech Academy{% endblock %}
+
+{% block content %}
+<style>
+    .book-hero { padding: 70px 28px 40px; text-align: center; max-width: 900px; margin: 0 auto; }
+    .book-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 42px; font-weight: 900; margin-bottom: 12px; }
+    .book-sub { font-size: 16px; color: var(--text2); line-height: 1.6; }
+
+    .form-container { max-width: 760px; margin: 0 auto 90px; padding: 0 28px; }
+    .form-card {
+        background: var(--card); border: 1px solid var(--border); border-radius: 28px;
+        padding: 40px; box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+    .form-group { margin-bottom: 22px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+    .req-star { color: var(--pink); font-weight: 800; }
+    .form-input {
+        width: 100%; background: var(--bg2); border: 1px solid var(--border2);
+        border-radius: 12px; padding: 14px 18px; color: var(--text);
+        font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(204,255,0,0.15); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    .alert-success {
+        background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+        border-radius: 16px; padding: 18px 24px; color: #6ee7b7; font-size: 15px;
+        margin-bottom: 28px; text-align: center;
+    }
+</style>
+
+<div class="book-hero">
+    <h1 class="book-title">📅 Book a Service</h1>
+    <p class="book-sub">Schedule a development, maintenance, or custom AI service for your product or company with Qrious Tech Academy.</p>
+</div>
+
+<div class="form-container">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert-success">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <form method="post" action="/book-service/">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Full Name <span class="req-star">*</span></label>
+                <input type="text" name="name" class="form-input" placeholder="e.g. John Doe" value="{{ request.user.get_full_name|default:'' }}" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Phone Number <span class="req-star">*</span></label>
+                    <input type="text" name="phone" class="form-input" placeholder="e.g. 01XXXXXXXXX or +971..." required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email (Optional)</label>
+                    <input type="email" name="email" class="form-input" placeholder="john@example.com" value="{{ request.user.email|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Product / Service Category <span class="req-star">*</span></label>
+                    <select name="service_category" class="form-input" style="cursor:pointer" required>
+                        <option value="Website & Web App">🌐 Website & Web App Development</option>
+                        <option value="Mobile Application">📱 Mobile App Development (iOS / Android)</option>
+                        <option value="SaaS Product Building">🚀 SaaS Product Building</option>
+                        <option value="LinkedIn AI Job Agent">🤖 LinkedIn AI Job Agent Solution</option>
+                        <option value="Custom AI Automation">🧠 Custom AI Workflow & Automation</option>
+                        <option value="Academy Training Course">🎓 Academy Course Enrollment</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Type <span class="req-star">*</span></label>
+                    <select name="service_type" class="form-input" style="cursor:pointer" required>
+                        <option value="New Product Development">🆕 New Product Development</option>
+                        <option value="Maintenance & Repair">🛠️ Maintenance & Repair</option>
+                        <option value="System Upgrade">⚡ System Upgrade / Migration</option>
+                        <option value="Technical Consultation">💬 Technical Consultation</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Project Details / Special Requirements</label>
+                <textarea name="notes" class="form-input" rows="4" placeholder="Describe your project goals, timelines, or specific feature requests..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:16px;font-size:16px;background:linear-gradient(135deg,var(--blue),var(--cyan))">
+                Confirm Service Booking 🚀
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
