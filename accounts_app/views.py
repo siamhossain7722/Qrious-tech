@@ -1894,16 +1894,28 @@ def admin_manage_live_classes(request):
 
                     if recording_url:
                         notif_cnt, email_cnt = send_class_recording_notifications(live_class, request)
+                        live_class.auto_email_sent = True
+                        live_class.save()
                         messages.success(
                             request,
                             f"🎉 Class Recording '{title}' published for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email notifications to all batch students."
                         )
                     else:
-                        notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
-                        messages.success(
-                            request,
-                            f"🎉 Live Class '{title}' scheduled for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
-                        )
+                        if scheduled_at <= timezone.now():
+                            notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
+                            live_class.auto_email_sent = True
+                            live_class.save()
+                            messages.success(
+                                request,
+                                f"🎉 Live Class '{title}' published for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
+                            )
+                        else:
+                            live_class.auto_email_sent = False
+                            live_class.save()
+                            messages.success(
+                                request,
+                                f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! Student email invitations will be auto-dispatched by Vercel Cron at the scheduled date & time."
+                            )
                     # Redirect with created ID so template shows WhatsApp share modal
                     return redirect(f'/superadmin/live-classes/?created={live_class.id}')
                 except Exception as ex:
@@ -2769,7 +2781,7 @@ def process_scheduled_classes_cron(request):
     )
 
     for lc in pending_live_classes:
-        sent = send_class_recording_notifications(lc)
+        notif_cnt, sent = send_live_class_notifications(lc)
         lc.auto_email_sent = True
         lc.save()
         live_classes_activated += 1

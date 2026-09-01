@@ -332,7 +332,12 @@
             <div class="module-box">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
                     <div style="font-size:16.5px;font-weight:800;color:var(--cyan)">{{ m.title }}</div>
-                    <button type="button" class="btn btn-outline" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:rgba(239,68,68,0.3)" onclick="openConfirmDeleteModal('module', '{{ m.id }}', '{{ m.title|escapejs }}')">🗑️ Delete Module</button>
+                    <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this module?');" style="display:inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_module">
+                        <input type="hidden" name="module_id" value="{{ m.id }}">
+                        <button type="submit" class="btn btn-outline" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:rgba(239,68,68,0.3)">🗑️ Delete Module</button>
+                    </form>
                 </div>
                 {% if m.description %}
                 <div style="font-size:12.5px;color:var(--text2);margin-bottom:12px">{{ m.description }}</div>
@@ -357,9 +362,14 @@
                             <button type="button" class="btn btn-outline" style="padding:5px 12px;font-size:12px" onclick="openEditLessonModal('{{ l.id }}', '{{ m.id }}', '{{ l.title|escapejs }}', '{{ l.video_url|escapejs }}', '{{ l.duration|escapejs }}', '{{ l.notes|escapejs }}', '{{ l.batch.id|default:"" }}')">
                                 ✏️ Edit Class
                             </button>
-                            <button type="button" class="btn btn-outline" style="padding:5px 12px;font-size:12px;color:var(--red);border-color:rgba(239,68,68,0.3)" onclick="openConfirmDeleteModal('lesson', '{{ l.id }}', '{{ l.title|escapejs }}')">
-                                🗑️ Delete Class
-                            </button>
+                            <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this class?');" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_lesson">
+                                <input type="hidden" name="lesson_id" value="{{ l.id }}">
+                                <button type="submit" class="btn btn-outline" style="padding:5px 12px;font-size:12px;color:var(--red);border-color:rgba(239,68,68,0.3)">
+                                    🗑️ Delete Class
+                                </button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}
@@ -465,62 +475,10 @@ function openEditLessonModal(id, moduleId, title, videoUrl, duration, notes, bat
     document.getElementById('editLessonModal').classList.add('active');
 }
 
-function openConfirmDeleteModal(type, id, title) {
-    if (type === 'module') {
-        document.getElementById('delete_module_id').value = id;
-        document.getElementById('delete_module_title_text').innerText = title;
-        document.getElementById('deleteModuleModal').classList.add('active');
-    } else if (type === 'lesson') {
-        document.getElementById('delete_lesson_id').value = id;
-        document.getElementById('delete_lesson_title_text').innerText = title;
-        document.getElementById('deleteLessonModal').classList.add('active');
-    }
-}
-
-function closeConfirmDeleteModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
+function closeEditLessonModal() {
+    document.getElementById('editLessonModal').classList.remove('active');
 }
 </script>
-
-<!-- Delete Module Modal -->
-<div class="modal" id="deleteModuleModal">
-    <div class="modal-content" style="max-width:440px;text-align:center">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;">⚠️</div>
-        <h3 style="font-weight:900;font-size:20px;color:var(--text);margin-bottom:8px">Delete Module</h3>
-        <p style="font-size:13.5px;color:var(--text2);line-height:1.5;margin-bottom:24px">
-            Are you sure you want to delete <strong id="delete_module_title_text" style="color:var(--red)"></strong>? All associated lessons will be removed.
-        </p>
-        <form method="post" action="">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="delete_module">
-            <input type="hidden" name="module_id" id="delete_module_id">
-            <div style="display:flex;gap:12px;justify-content:center">
-                <button type="button" class="btn btn-outline" onclick="closeConfirmDeleteModal('deleteModuleModal')" style="flex:1">Cancel</button>
-                <button type="submit" class="btn" style="flex:1;background:var(--red);color:white;font-weight:800">🗑 Delete Module</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Delete Lesson Modal -->
-<div class="modal" id="deleteLessonModal">
-    <div class="modal-content" style="max-width:440px;text-align:center">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;">⚠️</div>
-        <h3 style="font-weight:900;font-size:20px;color:var(--text);margin-bottom:8px">Delete Class Lesson</h3>
-        <p style="font-size:13.5px;color:var(--text2);line-height:1.5;margin-bottom:24px">
-            Are you sure you want to delete <strong id="delete_lesson_title_text" style="color:var(--red)"></strong>?
-        </p>
-        <form method="post" action="">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="delete_lesson">
-            <input type="hidden" name="lesson_id" id="delete_lesson_id">
-            <div style="display:flex;gap:12px;justify-content:center">
-                <button type="button" class="btn btn-outline" onclick="closeConfirmDeleteModal('deleteLessonModal')" style="flex:1">Cancel</button>
-                <button type="submit" class="btn" style="flex:1;background:var(--red);color:white;font-weight:800">🗑 Delete Class</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 </body>
 </html>
