@@ -88,14 +88,7 @@ if os.getenv('DATABASE_URL'):
             conn_health_checks=True,
         )
     }
-elif os.getenv('USE_SQLITE', 'False').lower() in ('true', '1'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
+elif os.getenv('DB_HOST') and os.getenv('DB_NAME'):
     DATABASES = {
         'default': {
             'ENGINE': DB_ENGINE,
@@ -105,9 +98,15 @@ else:
             'HOST': DB_HOST,
             'PORT': DB_PORT,
             'OPTIONS': {
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',
             },
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
