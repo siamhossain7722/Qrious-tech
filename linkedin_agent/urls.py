@@ -7,6 +7,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import logout as auth_logout
 from django.shortcuts import redirect
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 
 def logout_view(request):
@@ -98,6 +103,11 @@ urlpatterns = [
     path('api/notifications/<int:notification_id>/read/', accounts_views.notifications_api_read, name='notifications_api_read'),
     path('api/notifications/read-all/', accounts_views.notifications_api_read_all, name='notifications_api_read_all'),
     path('api/notifications/<int:notification_id>/delete/', accounts_views.notifications_api_delete, name='notifications_api_delete'),
+
+    # JWT Authentication REST API Endpoints
+    path('api/jwt/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/jwt/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/jwt/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     # Shortcuts
     path('logout/', logout_view),
