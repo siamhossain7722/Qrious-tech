@@ -10,14 +10,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linkedin_agent.settings')
 
 from django.core.wsgi import get_wsgi_application
 
-_django_app = get_wsgi_application()
-
-def app(environ, start_response):
-    path = environ.get('PATH_INFO', '')
-    if path == '/api/index' or path == '/api/index/':
-        environ['PATH_INFO'] = '/'
-    elif path.startswith('/api/index/'):
-        environ['PATH_INFO'] = path[10:]
-    return _django_app(environ, start_response)
-
+app = get_wsgi_application()
 application = app
