@@ -403,7 +403,13 @@ async function executeUserDeletion() {
     btn.textContent = 'Deleting...';
     
     try {
-        const res = await fetch(`/billing/admin/users/${userId}/delete/`, { method: 'POST' });
+        const res = await fetch(`/admin-users/${userId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Accept': 'application/json'
+            }
+        });
         const data = await res.json();
         closeDeleteModal();
         

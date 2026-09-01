@@ -686,21 +686,34 @@ def export_users_pdf(request):
     return response
 
 
+@csrf_exempt
 @login_required
 @user_passes_test(_is_superuser)
 def superadmin_delete_user(request, user_id):
-    """Super Admin: Delete registered user account."""
-    if request.method == 'POST':
-        if request.user.id == user_id:
-            messages.error(request, "You cannot delete your own superadmin account.")
-        else:
-            target_user = get_object_or_404(User, id=user_id)
-            if target_user.enrollments.filter(is_completed=True).exists():
-                messages.error(request, f"🔒 Cannot delete '{target_user.email}': Student has completed their course and earned a verified certificate. Certified student records are permanently protected.")
-            else:
-                user_email = target_user.email
-                target_user.delete()
-                messages.success(request, f"🗑️ User account '{user_email}' deleted successfully.")
+    """Super Admin: Delete registered user account (Supports Form POST & AJAX JSON)."""
+    is_json = 'application/json' in request.META.get('HTTP_ACCEPT', '') or request.content_type == 'application/json'
+
+    if request.user.id == user_id:
+        if is_json:
+            return JsonResponse({'success': False, 'error': 'You cannot delete your own superadmin account.'}, status=400)
+        messages.error(request, "You cannot delete your own superadmin account.")
+        return redirect('/admin-users/')
+
+    target_user = get_object_or_404(User, id=user_id)
+    if target_user.enrollments.filter(is_completed=True).exists():
+        err_msg = f"🔒 Cannot delete '{target_user.email}': Student has completed their course and earned a verified certificate."
+        if is_json:
+            return JsonResponse({'success': False, 'error': err_msg}, status=400)
+        messages.error(request, err_msg)
+        return redirect('/admin-users/')
+
+    user_email = target_user.email
+    target_user.delete()
+
+    if is_json:
+        return JsonResponse({'success': True, 'message': f"User account '{user_email}' deleted successfully."})
+
+    messages.success(request, f"🗑️ User account '{user_email}' deleted successfully.")
     return redirect('/admin-users/')
 
 
