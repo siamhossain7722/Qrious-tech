@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.cache import never_cache
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -1557,6 +1558,7 @@ def toggle_lesson_completion(request, lesson_id):
     return redirect(next_url)
 
 
+@never_cache
 @login_required
 @user_passes_test(_is_superuser)
 def admin_manage_modules(request):
@@ -1851,7 +1853,8 @@ def send_class_recording_notifications(live_class, request=None):
     return notifications_count, sent_emails_count
 
 
-@user_passes_test(lambda u: u.is_superuser, login_url='/auth/login/')
+@never_cache
+@user_passes_test(lambda u: u.is_superuser or u.is_staff, login_url='/auth/login/')
 def admin_manage_live_classes(request):
     """Super Admin Console to schedule live video class sessions and upload class recordings for target batches."""
     from .models import LiveClassSchedule, CourseBatch
