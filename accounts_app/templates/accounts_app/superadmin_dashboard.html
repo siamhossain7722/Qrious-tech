@@ -33,6 +33,24 @@
         .theme-toggle-btn:hover { transform: translateY(-1px); }
 
         /* Sidebar Fixed Position on Desktop */
+        .sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(204, 255, 0, 0.3) transparent;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(204, 255, 0, 0.25);
+            border-radius: 4px;
+        }
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(204, 255, 0, 0.6);
+        }
+
         @media(min-width: 901px) {
             .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; height: 100vh; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; overflow-y: auto; }
             .main { margin-left: 260px; flex: 1; min-height: 100vh; padding: 32px 40px; }
@@ -248,7 +266,7 @@
                 🌙 Dark
             </button>
 
-            <button type="button" class="theme-toggle-btn lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
+            <button type="button" class="lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
                 🇬🇧 English
             </button>
 
@@ -256,7 +274,9 @@
             <div class="topbar-profile" id="topbar-profile" style="position:relative">
                 <button class="topbar-profile-btn" id="profile-menu-btn" onclick="toggleProfileMenu(event)" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border2);padding:6px 14px;border-radius:30px;cursor:pointer;color:var(--text)">
                     <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;overflow:hidden">
-                        {% if request.user.profile.avatar %}
+                        {% if request.user.profile.avatar_src %}
+                        <img src="{{ request.user.profile.avatar_src }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% elif request.user.profile.avatar %}
                         <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
                         {% else %}
                         {{ request.user.email|first|upper }}
