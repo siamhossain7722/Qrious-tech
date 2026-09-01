@@ -27,21 +27,21 @@ from dashboard.views import (
 )
 
 router = DefaultRouter()
-router.register(r'api/users', UserViewSet, basename='user')
-router.register(r'api/profiles', UserProfileViewSet, basename='userprofile')
-router.register(r'api/subscriptions', SubscriptionViewSet, basename='subscription')
-router.register(r'api/enrollments', StudentEnrollmentViewSet, basename='studentenrollment')
-router.register(r'api/payments', StudentPaymentViewSet, basename='studentpayment')
-router.register(r'api/modules', CourseModuleViewSet, basename='coursemodule')
-router.register(r'api/lessons', CourseLessonViewSet, basename='courselesson')
-router.register(r'api/user-notifications', NotificationViewSet, basename='usernotification')
-router.register(r'api/live-sessions', LiveClassScheduleViewSet, basename='liveclasssession')
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'profiles', UserProfileViewSet, basename='userprofile')
+router.register(r'subscriptions', SubscriptionViewSet, basename='subscription')
+router.register(r'enrollments', StudentEnrollmentViewSet, basename='studentenrollment')
+router.register(r'payments', StudentPaymentViewSet, basename='studentpayment')
+router.register(r'modules', CourseModuleViewSet, basename='coursemodule')
+router.register(r'lessons', CourseLessonViewSet, basename='courselesson')
+router.register(r'user-notifications', NotificationViewSet, basename='usernotification')
+router.register(r'live-sessions', LiveClassScheduleViewSet, basename='liveclasssession')
 
 # Dashboard & Agent ViewSets
-router.register(r'api/job-applications', JobApplicationViewSet, basename='jobapplication')
-router.register(r'api/agent-runs', AgentRunViewSet, basename='agentrun')
-router.register(r'api/linkedin-accounts', LinkedInAccountViewSet, basename='linkedinaccount')
-router.register(r'api/resumes', ResumeViewSet, basename='resume')
+router.register(r'job-applications', JobApplicationViewSet, basename='jobapplication')
+router.register(r'agent-runs', AgentRunViewSet, basename='agentrun')
+router.register(r'linkedin-accounts', LinkedInAccountViewSet, basename='linkedinaccount')
+router.register(r'resumes', ResumeViewSet, basename='resume')
 
 
 def logout_view(request):
@@ -140,7 +140,7 @@ urlpatterns = [
     path('api/jwt/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     # REST Framework ModelViewSet Router Endpoints
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
 
     # Shortcuts
     path('logout/', logout_view),
