@@ -14,6 +14,26 @@ from rest_framework_simplejwt.views import (
 )
 
 
+from rest_framework.routers import DefaultRouter
+from accounts_app.api_views import (
+    UserViewSet, UserProfileViewSet, SubscriptionViewSet,
+    StudentEnrollmentViewSet, StudentPaymentViewSet,
+    CourseModuleViewSet, CourseLessonViewSet,
+    NotificationViewSet, LiveClassScheduleViewSet
+)
+
+router = DefaultRouter()
+router.register(r'api/users', UserViewSet, basename='user')
+router.register(r'api/profiles', UserProfileViewSet, basename='userprofile')
+router.register(r'api/subscriptions', SubscriptionViewSet, basename='subscription')
+router.register(r'api/enrollments', StudentEnrollmentViewSet, basename='studentenrollment')
+router.register(r'api/payments', StudentPaymentViewSet, basename='studentpayment')
+router.register(r'api/modules', CourseModuleViewSet, basename='coursemodule')
+router.register(r'api/lessons', CourseLessonViewSet, basename='courselesson')
+router.register(r'api/user-notifications', NotificationViewSet, basename='usernotification')
+router.register(r'api/live-sessions', LiveClassScheduleViewSet, basename='liveclasssession')
+
+
 def logout_view(request):
     auth_logout(request)
     return redirect('/')
@@ -108,6 +128,9 @@ urlpatterns = [
     path('api/jwt/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/jwt/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/jwt/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    # REST Framework ModelViewSet Router Endpoints
+    path('', include(router.urls)),
 
     # Shortcuts
     path('logout/', logout_view),
