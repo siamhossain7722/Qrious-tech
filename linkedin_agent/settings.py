@@ -147,17 +147,18 @@ LOGIN_URL = '/auth/login/'
 # Permanent 30-Day Session Persistence Settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 30 * 24 * 60 * 60       # 30 Days persistence
-SESSION_SAVE_EVERY_REQUEST = True             # Auto-refresh 30-day session timer on every activity
+SESSION_SAVE_EVERY_REQUEST = True             # Auto-refresh session timer on activity
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False        # Keep logged in when browser closes & reopens
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_NAME = 'qrious_sessionid'       # Custom session cookie name
+SESSION_COOKIE_NAME = 'sessionid'              # Standard Django session cookie name
 
-# HTTPS Cookie Security for Vercel & Production
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Cookie Security & SSL Proxy Settings for Vercel
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # AllAuth Remember Me Always Active
 ACCOUNT_SESSION_REMEMBER = True

@@ -248,7 +248,7 @@ def profile_settings(request):
 # ─── SUPER ADMIN USER MANAGEMENT ─────────────────────────────────────────────
 
 def _is_superuser(user):
-    return user.is_authenticated and user.is_superuser
+    return user.is_authenticated and (user.is_superuser or user.is_staff)
 
 
 @user_passes_test(_is_superuser)
