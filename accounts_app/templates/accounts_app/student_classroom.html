@@ -111,6 +111,10 @@
             width: 360px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column;
             flex-shrink: 0; height: calc(100vh - 64px); position: sticky; top: 64px; overflow-y: auto; z-index: 90;
         }
+        .sidebar-modules::-webkit-scrollbar { width: 5px; }
+        .sidebar-modules::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-modules::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .sidebar-modules::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
 
         .sidebar-top-box { padding: 20px; border-bottom: 1px solid var(--border); }
         .progress-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -332,7 +336,7 @@
             {% for m in modules %}
             <div class="module-group {% if active_lesson and active_lesson.module.id == m.id %}expanded{% endif %}">
                 <div class="module-header" onclick="toggleModuleGroup(this)">
-                    <span>{{ m.title }}</span>
+                    <span>Module {{ forloop.counter }}: {{ m.title }}</span>
                     <span class="accordion-arrow">▼</span>
                 </div>
                 <div class="lesson-list">

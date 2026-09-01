@@ -1676,7 +1676,8 @@ def admin_manage_modules(request):
             (23, "Marketing Marathon & Real Budget Campaign (Capstone Marathon)", "Deploy live multi-channel marketing campaigns under mentor supervision.")
         ]
         for num, title, desc in default_modules:
-            CourseModule.objects.create(module_number=num, order=num, title=title, description=desc)
+            slug = 'web-development' if num <= 10 else 'digital-marketing'
+            CourseModule.objects.create(module_number=num, order=num, title=title, description=desc, course_slug=slug)
 
     batches = CourseBatch.objects.all()
     selected_batch_id = request.GET.get('batch_id')
