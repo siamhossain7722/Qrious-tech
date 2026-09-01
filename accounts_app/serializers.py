@@ -45,14 +45,13 @@ class CourseModuleSerializer(serializers.ModelSerializer):
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    completed_lessons = CourseLessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = StudentEnrollment
         fields = [
             'id', 'user', 'student_id', 'course_name', 'batch',
             'progress_percent', 'is_completed', 'certificate_id',
-            'created_at', 'completed_lessons'
+            'created_at'
         ]
 
 

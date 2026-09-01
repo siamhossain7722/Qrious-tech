@@ -68,8 +68,8 @@ class CourseLessonViewSet(viewsets.ModelViewSet):
 
 
 class StudentEnrollmentViewSet(viewsets.ModelViewSet):
-    """ModelViewSet for StudentEnrollment with select_related('user') and prefetch_related('completed_lessons')."""
-    queryset = StudentEnrollment.objects.select_related('user').prefetch_related('completed_lessons').order_by('-created_at')
+    """ModelViewSet for StudentEnrollment with select_related('user') and prefetch_related('lesson_progresses')."""
+    queryset = StudentEnrollment.objects.select_related('user').prefetch_related('lesson_progresses').order_by('-created_at')
     serializer_class = StudentEnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 

@@ -1341,7 +1341,7 @@ def recalculate_enrollment_progress(enrollment):
 @login_required
 def student_dashboard(request):
     """Dynamic Student Dashboard view for enrolled course students."""
-    enrollments = StudentEnrollment.objects.filter(user=request.user).select_related('user', 'batch').prefetch_related('completed_lessons')
+    enrollments = StudentEnrollment.objects.filter(user=request.user).select_related('user', 'batch').prefetch_related('lesson_progresses')
     for e in enrollments:
         recalculate_enrollment_progress(e)
 
