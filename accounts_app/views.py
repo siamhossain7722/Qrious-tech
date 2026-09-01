@@ -191,10 +191,19 @@ def profile_settings(request):
             if avatar_file.size > 5 * 1024 * 1024:
                 messages.error(request, 'Profile picture file size too large. Maximum 5MB allowed.')
                 return redirect('profile_settings')
-            profile.avatar = avatar_file
+            try:
+                import base64
+                file_bytes = avatar_file.read()
+                encoded = base64.b64encode(file_bytes).decode('utf-8')
+                mime = avatar_file.content_type or 'image/png'
+                profile.avatar_data = f"data:{mime};base64,{encoded}"
+                profile.avatar = avatar_file
+            except Exception as ex:
+                pass
 
         # Handle remove avatar
         if request.POST.get('remove_avatar') == 'true':
+            profile.avatar_data = ""
             if profile.avatar:
                 try:
                     profile.avatar.delete(save=False)
@@ -205,13 +214,11 @@ def profile_settings(request):
         try:
             profile.save()
         except OSError:
-            # If filesystem is read-only, clear avatar file handle and save profile fields
+            # If filesystem is read-only, clear avatar file handle and save profile base64 & fields
             profile.avatar = None
             profile.save()
-            messages.warning(request, 'Profile updated. Image upload restricted on serverless environment.')
-        else:
-            messages.success(request, 'Profile information updated successfully!')
 
+        messages.success(request, 'Profile information updated successfully!')
         return redirect('profile_settings')
 
     from dashboard.models import JobApplication, LinkedInAccount, Resume

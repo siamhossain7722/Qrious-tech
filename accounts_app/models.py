@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     """Extended user profile linked to Django's User model."""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    avatar_data = models.TextField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True)
     company = models.CharField(max_length=200, blank=True)
     bio = models.TextField(blank=True)
@@ -19,6 +20,17 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile: {self.user.email}"
+
+    @property
+    def avatar_src(self):
+        if self.avatar_data:
+            return self.avatar_data
+        if self.avatar:
+            try:
+                return self.avatar.url
+            except Exception:
+                pass
+        return None
 
     @property
     def is_over_7_days(self):
