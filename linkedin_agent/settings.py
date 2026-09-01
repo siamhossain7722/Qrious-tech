@@ -144,6 +144,24 @@ ACCOUNT_SIGNUP_REDIRECT_URL = '/auth/redirect/'
 LOGIN_REDIRECT_URL = '/auth/redirect/'
 LOGIN_URL = '/auth/login/'
 
+#  PERMANENT SESSION & REMEMBER ME PERSISTENCE 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 30 * 24 * 60 * 60  # 30 Days (Keep logged in for 1 month)
+SESSION_SAVE_EVERY_REQUEST = True        # Auto-refresh 30-day session timer on every activity
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False   # Keep logged in when browser closes & reopens
+SESSION_COOKIE_HTTPONLY = True
+
+# HTTPS Cookie Security for Vercel Serverless
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+
+# AllAuth Remember Me Always Active
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+
 # Google OAuth
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
