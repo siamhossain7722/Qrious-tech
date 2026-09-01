@@ -1758,9 +1758,73 @@ def send_live_class_notifications(live_class, request=None):
     return notifications_count, sent_emails_count
 
 
+def send_class_recording_notifications(live_class, request=None):
+    """
+    Dispatches real-time bell notifications AND sends HTML email notifications to all students enrolled in the target batch
+    when a class video recording is uploaded by superadmin.
+    """
+    from .models import StudentEnrollment
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
+    from django.conf import settings
+
+    batch = live_class.batch
+    enrollments = StudentEnrollment.objects.filter(batch=batch).select_related('user')
+
+    sent_emails_count = 0
+    notifications_count = 0
+
+    recording_link = live_class.recording_url or live_class.meeting_link
+
+    for e in enrollments:
+        student_user = e.user
+        student_name = student_user.get_full_name() or student_user.username or student_user.email
+
+        # 1. Real-time Dashboard Bell Notification
+        create_notification(
+            user=student_user,
+            title=f"🎥 Class Video Recording Available: {live_class.title}",
+            message=f"The video recording for '{live_class.title}' ({batch.name}) is now live! Click to watch recorded class video.",
+            notification_type="course",
+            category="info",
+            link=recording_link
+        )
+        notifications_count += 1
+
+        # 2. HTML Email Notification to Target Batch
+        try:
+            email_subject = f"[Class Recording Available] 🎥 {live_class.title} — {batch.name}"
+            
+            context = {
+                'student_name': student_name,
+                'batch_name': batch.name,
+                'class_title': live_class.title,
+                'instructor_name': live_class.instructor_name,
+                'agenda': live_class.agenda,
+                'recording_url': recording_link,
+            }
+
+            html_content = render_to_string('account/email/class_recording_notification.html', context)
+            text_content = f"Dear {student_name},\n\nThe class video recording for '{live_class.title}' ({batch.name}) is now available.\nWatch Video: {recording_link}\n\nQrious Tech Academy"
+
+            msg = EmailMultiAlternatives(
+                subject=email_subject,
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[student_user.email]
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=True)
+            sent_emails_count += 1
+        except Exception as ex:
+            print(f"Error sending class recording email to {student_user.email}: {ex}")
+
+    return notifications_count, sent_emails_count
+
+
 @user_passes_test(lambda u: u.is_superuser, login_url='/auth/login/')
 def admin_manage_live_classes(request):
-    """Super Admin Console to schedule live video class sessions and dispatch invitations to batch students."""
+    """Super Admin Console to schedule live video class sessions and upload class recordings for target batches."""
     from .models import LiveClassSchedule, CourseBatch
     from django.utils import timezone
     import datetime
@@ -1772,6 +1836,7 @@ def admin_manage_live_classes(request):
             batch_id = request.POST.get('batch_id')
             title = request.POST.get('title', '').strip()
             meeting_link = request.POST.get('meeting_link', '').strip()
+            recording_url = request.POST.get('recording_url', '').strip()
             scheduled_date_str = request.POST.get('scheduled_date', '').strip()
             scheduled_time_str = request.POST.get('scheduled_time', '').strip()
             duration = request.POST.get('duration', '1 Hour').strip()
@@ -1780,7 +1845,7 @@ def admin_manage_live_classes(request):
 
             batch = get_object_or_404(CourseBatch, pk=batch_id)
 
-            if title and meeting_link and scheduled_date_str and scheduled_time_str:
+            if title and (meeting_link or recording_url) and scheduled_date_str and scheduled_time_str:
                 try:
                     dt_str = f"{scheduled_date_str} {scheduled_time_str}"
                     scheduled_at = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
@@ -1789,24 +1854,51 @@ def admin_manage_live_classes(request):
                     live_class = LiveClassSchedule.objects.create(
                         batch=batch,
                         title=title,
-                        meeting_link=meeting_link,
+                        meeting_link=meeting_link or recording_url,
+                        recording_url=recording_url if recording_url else None,
+                        recorded_at=timezone.now() if recording_url else None,
                         scheduled_at=scheduled_at,
                         duration=duration,
                         instructor_name=instructor_name,
                         agenda=agenda
                     )
 
-                    notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
-                    messages.success(
-                        request,
-                        f"🎉 Live Class '{title}' scheduled for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
-                    )
+                    if recording_url:
+                        notif_cnt, email_cnt = send_class_recording_notifications(live_class, request)
+                        messages.success(
+                            request,
+                            f"🎉 Class Recording '{title}' published for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email notifications to all batch students."
+                        )
+                    else:
+                        notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
+                        messages.success(
+                            request,
+                            f"🎉 Live Class '{title}' scheduled for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
+                        )
                     # Redirect with created ID so template shows WhatsApp share modal
                     return redirect(f'/superadmin/live-classes/?created={live_class.id}')
                 except Exception as ex:
                     messages.error(request, f"Could not schedule live class: {ex}")
             else:
-                messages.error(request, "Please fill in all required fields (Batch, Title, Meeting Link, Date, Time).")
+                messages.error(request, "Please fill in all required fields (Batch, Title, Meeting/Recording Link, Date, Time).")
+
+        elif action == 'upload_class_recording':
+            class_id = request.POST.get('class_id')
+            recording_url = request.POST.get('recording_url', '').strip()
+
+            live_class = get_object_or_404(LiveClassSchedule, pk=class_id)
+            if recording_url:
+                live_class.recording_url = recording_url
+                live_class.recorded_at = timezone.now()
+                live_class.save()
+
+                notif_cnt, email_cnt = send_class_recording_notifications(live_class, request)
+                messages.success(
+                    request,
+                    f"🎉 Class Recording for '{live_class.title}' uploaded successfully! Emailed {email_cnt} students in {live_class.batch.name} & posted {notif_cnt} dashboard alerts."
+                )
+            else:
+                messages.error(request, "Please enter a valid video recording URL.")
 
         elif action == 'resend_invitation':
             class_id = request.POST.get('class_id')

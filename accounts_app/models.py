@@ -459,6 +459,8 @@ class LiveClassSchedule(models.Model):
     duration = models.CharField(max_length=50, default="1 Hour")
     agenda = models.TextField(blank=True, help_text="Class outline, topics covered, or mentor instructions")
     instructor_name = models.CharField(max_length=100, default="Qrious Tech Senior Mentor")
+    recording_url = models.URLField(max_length=500, blank=True, null=True, help_text="Recorded Class Video Link (Google Drive, YouTube, Vimeo, etc.)")
+    recorded_at = models.DateTimeField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
