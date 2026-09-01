@@ -403,7 +403,10 @@ def run_migrations_setup_view(request):
 
         try:
             from allauth.account.models import EmailAddress
-            EmailAddress.objects.get_or_create(user=admin_user, email=admin_email, defaults={'verified': True, 'primary': True})
+            ea, _ = EmailAddress.objects.get_or_create(user=admin_user, email=admin_email)
+            ea.verified = True
+            ea.primary = True
+            ea.save()
             logs.append("Verified Super Admin AllAuth email address!")
         except Exception as e:
             logs.append(f"EmailAddress warning: {e}")

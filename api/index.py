@@ -64,7 +64,10 @@ def ensure_db_and_admin():
         # Ensure AllAuth EmailAddress verified
         try:
             from allauth.account.models import EmailAddress
-            EmailAddress.objects.get_or_create(user=admin_user, email=admin_email, defaults={'verified': True, 'primary': True})
+            ea, _ = EmailAddress.objects.get_or_create(user=admin_user, email=admin_email)
+            ea.verified = True
+            ea.primary = True
+            ea.save()
         except Exception:
             pass
 
