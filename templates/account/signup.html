@@ -15,7 +15,7 @@
 {% endfor %}
 {% endif %}
 
-<form method="post" action="{% url 'account_signup' %}">
+<form method="post" action="{% url 'account_signup' %}" onsubmit="handleAuthSubmit(this, 'Loading... ⏳')">
     {% csrf_token %}
     {{ redirect_field }}
 
@@ -66,6 +66,23 @@
 
     <button type="submit" class="btn-submit">Create Free Account 🚀</button>
 </form>
+
+<script>
+function handleAuthSubmit(form, loadingText) {
+    const btn = form.querySelector('.btn-submit');
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.85';
+        btn.style.cursor = 'not-allowed';
+        btn.innerHTML = `<span style="display:inline-block;width:15px;height:15px;border:2.5px solid currentColor;border-top-color:transparent;border-radius:50%;animation:authSpin 0.6s linear infinite;margin-right:8px;vertical-align:middle"></span> ${loadingText}`;
+    }
+}
+</script>
+<style>
+@keyframes authSpin {
+    to { transform: rotate(360deg); }
+}
+</style>
 
 {% if socialaccount_providers %}
 <div class="divider">or continue with</div>
