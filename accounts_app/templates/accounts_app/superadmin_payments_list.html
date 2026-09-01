@@ -663,8 +663,8 @@
                                     <div style="font-size:11px;color:var(--text3)">{{ p.created_at|date:"h:i A" }}</div>
                                 </td>
                                 <td>
-                                    {% if p.payment_proof %}
-                                        <a href="{{ p.payment_proof.url }}" target="_blank" class="btn btn-outline" style="font-size:11px;padding:4px 10px;color:#0284c7">
+                                    {% if p.proof_image_src %}
+                                        <a href="{{ p.proof_image_src }}" target="_blank" class="btn btn-outline" style="font-size:11px;padding:4px 10px;color:#0284c7">
                                             🖼️ View Proof ↗
                                         </a>
                                     {% else %}
@@ -683,7 +683,7 @@
                                 <td>
                                     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
                                         <button type="button" class="btn btn-outline" style="font-size:11px;padding:5px 10px"
-                                                onclick="openPaymentDetailsModal('{{ p.id }}', '{{ p.invoice_id }}', '{{ p.enrollment.user.get_full_name|escapejs }}', '{{ p.enrollment.user.email|escapejs }}', '{{ p.enrollment.student_id }}', '{{ p.enrollment.course_name|escapejs }}', '{{ p.amount|floatformat:2 }}', '{{ p.payment_method }}', '{{ p.transaction_ref|default:"N/A"|escapejs }}', '{{ p.notes|default:"None"|escapejs }}', '{% if p.payment_proof %}{{ p.payment_proof.url }}{% endif %}', '{{ p.status }}', '{{ p.created_at|date:"M d, Y - h:i A" }}', '{{ p.admin_notes|default:""|escapejs }}')">
+                                                onclick="openPaymentDetailsModal('{{ p.id }}', '{{ p.invoice_id }}', '{{ p.enrollment.user.get_full_name|escapejs }}', '{{ p.enrollment.user.email|escapejs }}', '{{ p.enrollment.student_id }}', '{{ p.enrollment.course_name|escapejs }}', '{{ p.amount|floatformat:2 }}', '{{ p.payment_method }}', '{{ p.transaction_ref|default:"N/A"|escapejs }}', '{{ p.notes|default:"None"|escapejs }}', '{% if p.proof_image_src %}{{ p.proof_image_src }}{% endif %}', '{{ p.status }}', '{{ p.created_at|date:"M d, Y - h:i A" }}', '{{ p.admin_notes|default:""|escapejs }}')">
                                             👁️ Details
                                         </button>
 

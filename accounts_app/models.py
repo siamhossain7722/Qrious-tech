@@ -286,6 +286,7 @@ class StudentPayment(models.Model):
     payment_method = models.CharField(max_length=50, default='bKash')  # bKash, Nagad, Bank, Cash, Card
     transaction_ref = models.CharField(max_length=100, blank=True)
     payment_proof = models.FileField(upload_to='payment_proofs/', blank=True, null=True)
+    proof_image_data = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='approved')
     admin_notes = models.TextField(blank=True)
     verified_at = models.DateTimeField(blank=True, null=True)
@@ -294,6 +295,17 @@ class StudentPayment(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+    @property
+    def proof_image_src(self):
+        if self.proof_image_data:
+            return self.proof_image_data
+        if self.payment_proof:
+            try:
+                return self.payment_proof.url
+            except Exception:
+                pass
+        return None
 
     def save(self, *args, **kwargs):
         if not self.invoice_id:

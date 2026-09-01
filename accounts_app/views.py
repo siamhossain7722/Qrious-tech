@@ -2185,8 +2185,18 @@ def student_upload_payment(request):
             amount = Decimal(amount_raw)
             payment_method = request.POST.get('payment_method', 'bKash').strip()
             transaction_ref = request.POST.get('transaction_ref', '').strip()
-            notes = request.POST.get('notes', '').strip()
             payment_proof = request.FILES.get('payment_proof', None)
+            proof_image_data = None
+            if payment_proof:
+                try:
+                    import base64
+                    file_bytes = payment_proof.read()
+                    encoded = base64.b64encode(file_bytes).decode('utf-8')
+                    mime = getattr(payment_proof, 'content_type', None) or 'image/png'
+                    proof_image_data = f"data:{mime};base64,{encoded}"
+                    payment_proof.seek(0)
+                except Exception:
+                    pass
 
             if amount <= Decimal('0'):
                 messages.error(request, "Please enter a valid payment amount greater than 0.")
@@ -2199,6 +2209,7 @@ def student_upload_payment(request):
                 transaction_ref=transaction_ref,
                 notes=notes,
                 payment_proof=payment_proof,
+                proof_image_data=proof_image_data,
                 status='pending'
             )
 

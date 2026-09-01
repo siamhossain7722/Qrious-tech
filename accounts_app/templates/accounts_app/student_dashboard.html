@@ -485,8 +485,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if p.payment_proof %}
-                            <a href="{{ p.payment_proof.url }}" target="_blank" style="color:#0284c7;font-weight:800;font-size:12px;text-decoration:none">🖼️ View Proof ↗</a>
+                            {% if p.proof_image_src %}
+                            <a href="{{ p.proof_image_src }}" target="_blank" style="color:#0284c7;font-weight:800;font-size:12px;text-decoration:none">🖼️ View Proof ↗</a>
                             {% else %}
                             <span style="color:var(--text3);font-size:11px">—</span>
                             {% endif %}
@@ -547,10 +547,10 @@
                         <span class="payment-detail-val" style="font-family:monospace;color:#0284c7;font-weight:800">{{ p.transaction_ref }}</span>
                     </div>
                     {% endif %}
-                    {% if p.payment_proof %}
+                    {% if p.proof_image_src %}
                     <div class="payment-detail-item">
                         <span class="payment-detail-lbl">🖼️ Payment Proof</span>
-                        <span class="payment-detail-val"><a href="{{ p.payment_proof.url }}" target="_blank" style="color:#0284c7;font-weight:800">View File ↗</a></span>
+                        <span class="payment-detail-val"><a href="{{ p.proof_image_src }}" target="_blank" style="color:#0284c7;font-weight:800">View File ↗</a></span>
                     </div>
                     {% endif %}
                 </div>

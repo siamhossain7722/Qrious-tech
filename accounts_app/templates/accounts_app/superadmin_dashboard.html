@@ -609,8 +609,8 @@ function closeCredentialsModal() {
                             </td>
                             <td style="font-size:12px;color:var(--text2)">{{ p.created_at|date:"M d, Y — h:i A" }}</td>
                             <td>
-                                {% if p.payment_proof %}
-                                <a href="{{ p.payment_proof.url }}" target="_blank" class="btn btn-outline btn-sm" style="font-size:11px;padding:4px 8px">🖼️ View Proof ↗</a>
+                                {% if p.proof_image_src %}
+                                <a href="{{ p.proof_image_src }}" target="_blank" class="btn btn-outline btn-sm" style="font-size:11px;padding:4px 8px">🖼️ View Proof ↗</a>
                                 {% else %}
                                 <span style="font-size:11px;color:var(--text3)">No File</span>
                                 {% endif %}
