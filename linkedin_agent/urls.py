@@ -139,8 +139,11 @@ urlpatterns = [
     path('api/jwt/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/jwt/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
+    # Landing & Public pages (Must match root / first)
+    path('', include('landing.urls')),
+
     # REST Framework ModelViewSet Router Endpoints
-    path('api/', include(router.urls)),
+    path('api/v1/', include(router.urls)),
 
     # Shortcuts
     path('logout/', logout_view),
@@ -150,9 +153,6 @@ urlpatterns = [
     # Authentication (AllAuth)
     path('auth/redirect/', smart_login_redirect),
     path('auth/', include('allauth.urls')),
-
-    # Landing & Public pages
-    path('', include('landing.urls')),
 
     # Legacy Dashboard & Billing Redirection (Removed legacy job/LinkedIn pages & APIs)
     path('billing/', smart_login_redirect),
