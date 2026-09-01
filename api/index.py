@@ -21,11 +21,60 @@ if not os.path.exists(staticfiles_dir) and os.path.exists(static_dir):
 from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
 
-# Auto-migrate database tables on Vercel deployment startup
+_db_initialized = False
+
+def ensure_db_and_admin():
+    global _db_initialized
+    if _db_initialized:
+        return
+    _db_initialized = True
+    try:
+        call_command('migrate', interactive=False)
+        from django.contrib.auth.models import User
+        from accounts_app.models import UserProfile, Subscription
+
+        admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
+        admin_pass = os.getenv('ADMIN_PASSWORD', 'Admin123456!')
+
+        admin_user = User.objects.filter(email=admin_email).first()
+        if not admin_user:
+            admin_user = User.objects.filter(username=admin_email).first()
+        if not admin_user:
+            admin_user = User.objects.create_superuser(
+                username=admin_email,
+                email=admin_email,
+                password=admin_pass,
+                first_name='Super',
+                last_name='Admin'
+            )
+        else:
+            admin_user.is_superuser = True
+            admin_user.is_staff = True
+            admin_user.set_password(admin_pass)
+            admin_user.save()
+
+        # Ensure UserProfile & Subscription
+        profile, _ = UserProfile.objects.get_or_create(user=admin_user)
+        profile.role = 'super_admin'
+        profile.plan = 'enterprise'
+        profile.save()
+
+        Subscription.objects.get_or_create(user=admin_user, defaults={'plan': 'enterprise', 'status': 'active'})
+
+        # Ensure AllAuth EmailAddress verified
+        try:
+            from allauth.account.models import EmailAddress
+            EmailAddress.objects.get_or_create(user=admin_user, email=admin_email, defaults={'verified': True, 'primary': True})
+        except Exception:
+            pass
+
+    except Exception as e:
+        print(f"Auto DB/Admin setup info: {e}")
+
 try:
-    call_command('migrate', interactive=False)
-except Exception as e:
-    print(f"Auto-migration check: {e}")
+    ensure_db_and_admin()
+except Exception:
+    pass
 
 app = get_wsgi_application()
 application = app
