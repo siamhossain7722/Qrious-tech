@@ -453,7 +453,7 @@ function closeCredentialsModal() {
                 <button type="button" onclick="document.getElementById('create-user-form-box').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px">✕</button>
             </div>
 
-            <form method="post" action="/admin/student/create/">
+            <form method="post" action="/superadmin/student/create/">
                 {% csrf_token %}
                 <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 1fr;gap:16px;margin-bottom:16px" class="form-grid-responsive">
                     <div>

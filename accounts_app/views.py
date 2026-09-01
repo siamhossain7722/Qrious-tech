@@ -976,6 +976,7 @@ def export_payments_csv(request):
     return response
 
 
+@csrf_exempt
 @login_required
 @user_passes_test(_is_superuser)
 def admin_create_student_user(request):
@@ -1088,6 +1089,7 @@ def admin_create_student_user(request):
     return redirect('/superadmin/')
 
 
+@csrf_exempt
 @login_required
 @user_passes_test(_is_superuser)
 def admin_enroll_student(request):
