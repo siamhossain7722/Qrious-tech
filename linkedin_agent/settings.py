@@ -44,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'linkedin_agent.auto_setup.AutoSetupMiddleware',
 ]
 
 ROOT_URLCONF = 'linkedin_agent.urls'
