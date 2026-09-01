@@ -1438,6 +1438,9 @@ def student_classroom(request, lesson_id=None):
     if student_batch:
         lesson_filter &= (Q(batch=student_batch) | Q(batch__isnull=True))
 
+    if not request.user.is_superuser:
+        lesson_filter &= (Q(is_published=True) | Q(scheduled_at__lte=timezone.now()) | Q(scheduled_at__isnull=True))
+
     all_lessons = list(CourseLesson.objects.filter(lesson_filter).select_related('module', 'batch').all())
     modules = CourseModule.objects.filter(course_slug=course_slug).prefetch_related(
         Prefetch('lessons', queryset=CourseLesson.objects.filter(lesson_filter))
@@ -1606,16 +1609,41 @@ def admin_manage_modules(request):
             video_url = request.POST.get('video_url', '').strip()
             duration = request.POST.get('duration', '01:00:00').strip()
             notes = request.POST.get('notes', '').strip()
+            scheduled_at_str = request.POST.get('scheduled_at', '').strip()
 
             batch = get_object_or_404(CourseBatch, pk=batch_id) if batch_id else None
+
+            scheduled_at = None
+            is_published = True
+            if scheduled_at_str:
+                try:
+                    from django.utils.dateparse import parse_datetime
+                    scheduled_at = parse_datetime(scheduled_at_str)
+                    if scheduled_at and timezone.is_naive(scheduled_at):
+                        scheduled_at = timezone.make_aware(scheduled_at)
+                    if scheduled_at and scheduled_at > timezone.now():
+                        is_published = False
+                except Exception as dt_err:
+                    print(f"Error parsing scheduled_at: {dt_err}")
 
             if module_id and title and video_url:
                 module = get_object_or_404(CourseModule, pk=module_id)
                 new_lesson = CourseLesson.objects.create(
-                    module=module, batch=batch, title=title, video_url=video_url, duration=duration, notes=notes
+                    module=module,
+                    batch=batch,
+                    title=title,
+                    video_url=video_url,
+                    duration=duration,
+                    notes=notes,
+                    scheduled_at=scheduled_at,
+                    is_published=is_published,
+                    auto_email_sent=is_published
                 )
-                messages.success(request, f"Recorded Class '{title}' uploaded to Module '{module.title}' for {batch.name if batch else 'All Batches'}!")
-                notify_students_new_lesson(new_lesson)
+                if is_published:
+                    messages.success(request, f"Recorded Class '{title}' uploaded & published to Module '{module.title}' for {batch.name if batch else 'All Batches'}!")
+                    notify_students_new_lesson(new_lesson)
+                else:
+                    messages.success(request, f"Recorded Class '{title}' scheduled for auto-publishing on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}!")
 
         elif action == 'edit_lesson':
             lesson_id = request.POST.get('lesson_id')
@@ -2688,4 +2716,69 @@ def notifications_hub_view(request):
         'filter_status': filter_status,
     }
     return render(request, 'accounts_app/notifications.html', context)
+
+
+@csrf_exempt
+def process_scheduled_classes_cron(request):
+    """
+    Vercel Cron / Scheduled Job Endpoint.
+    Automatically executes every 1 minute:
+    1. Publishes scheduled recorded video class lessons whose scheduled_at <= now.
+    2. Sends automated HTML email notifications & dashboard alerts to target batch students.
+    3. Activates and emails scheduled live class sessions whose scheduled_at <= now.
+    """
+    import os
+    cron_token = request.GET.get('token') or request.headers.get('Authorization', '')
+    expected_token = os.getenv('CRON_SECRET', 'qrious_tech_cron_secret_2026')
+
+    is_vercel_cron = request.headers.get('X-Vercel-Cron') == '1' or request.headers.get('x-vercel-cron') == '1'
+    if not is_vercel_cron and cron_token != expected_token and cron_token != f"Bearer {expected_token}":
+        return JsonResponse({'error': 'Unauthorized cron request'}, status=401)
+
+    from .models import CourseLesson, LiveClassSchedule
+    from django.utils import timezone
+
+    now = timezone.now()
+    published_lessons_count = 0
+    lesson_emails_sent = 0
+    live_classes_activated = 0
+
+    # 1. Process Scheduled Recorded Lessons
+    pending_lessons = CourseLesson.objects.filter(
+        is_published=False,
+        scheduled_at__isnull=False,
+        scheduled_at__lte=now
+    )
+
+    for lesson in pending_lessons:
+        lesson.is_published = True
+        lesson.save()
+        published_lessons_count += 1
+
+        if not lesson.auto_email_sent:
+            sent = notify_students_new_lesson(lesson)
+            lesson.auto_email_sent = True
+            lesson.save()
+            lesson_emails_sent += sent
+
+    # 2. Process Scheduled Live Class Meetings
+    pending_live_classes = LiveClassSchedule.objects.filter(
+        is_active=True,
+        scheduled_at__lte=now,
+        auto_email_sent=False
+    )
+
+    for lc in pending_live_classes:
+        sent = send_class_recording_notifications(lc)
+        lc.auto_email_sent = True
+        lc.save()
+        live_classes_activated += 1
+
+    return JsonResponse({
+        'status': 'success',
+        'timestamp': now.strftime('%Y-%m-%d %H:%M:%S'),
+        'published_lessons_count': published_lessons_count,
+        'lesson_emails_sent': lesson_emails_sent,
+        'live_classes_activated': live_classes_activated
+    })
 

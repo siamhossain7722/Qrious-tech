@@ -293,15 +293,21 @@
                     <label class="form-label">Video URL (YouTube / Vimeo / GDrive / MP4)</label>
                     <input type="url" name="video_url" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Video Duration (e.g., 01:15:00)</label>
-                    <input type="text" name="duration" class="form-input" value="01:15:00" required>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="form-group">
+                        <label class="form-label">Video Duration (e.g., 01:15:00)</label>
+                        <input type="text" name="duration" class="form-input" value="01:15:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📅 Scheduled Publish Date & Time (Optional)</label>
+                        <input type="datetime-local" name="scheduled_at" class="form-input" placeholder="Leave empty for immediate publish">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Class Notes & Key Takeaways</label>
                     <textarea name="notes" class="form-textarea" rows="2" placeholder="Summary notes for students..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-cyan">🚀 Upload & Publish Class</button>
+                <button type="submit" class="btn btn-cyan">🚀 Upload & Schedule / Publish Class</button>
             </form>
         </div>
     </div>
@@ -336,9 +342,14 @@
                 <div>
                     {% for l in m.lessons.all %}
                     <div class="lesson-row">
-                        <div style="display:flex;align-items:center;gap:10px">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                             <span class="badge badge-cyan">🎬 Video</span>
                             <span class="badge badge-amber">🏷️ {{ l.batch.name|default:"Batch 01" }}</span>
+                            {% if not l.is_published %}
+                            <span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)">🕒 Scheduled: {{ l.scheduled_at|date:"M d, Y @ h:i A" }}</span>
+                            {% else %}
+                            <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)">🟢 Live / Published</span>
+                            {% endif %}
                             <strong style="font-size:13.5px;color:var(--text)">{{ l.title }}</strong>
                             <span style="font-size:11.5px;color:var(--text3)">({{ l.duration }})</span>
                         </div>

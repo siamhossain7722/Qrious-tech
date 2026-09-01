@@ -352,6 +352,9 @@ class CourseLesson(models.Model):
     notes = models.TextField(blank=True)
     resources_url = models.URLField(max_length=500, blank=True)
     is_free_preview = models.BooleanField(default=False)
+    scheduled_at = models.DateTimeField(blank=True, null=True, help_text="Optional future date and time to auto-publish this lesson")
+    is_published = models.BooleanField(default=True)
+    auto_email_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -462,6 +465,7 @@ class LiveClassSchedule(models.Model):
     recording_url = models.URLField(max_length=500, blank=True, null=True, help_text="Recorded Class Video Link (Google Drive, YouTube, Vimeo, etc.)")
     recorded_at = models.DateTimeField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    auto_email_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
