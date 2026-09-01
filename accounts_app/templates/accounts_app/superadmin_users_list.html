@@ -563,8 +563,11 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar && backdrop) {
-        sidebar.classList.toggle('open');
-        backdrop.classList.toggle('active');
+        const isOpening = !sidebar.classList.contains('active') && !sidebar.classList.contains('open');
+        sidebar.classList.toggle('active', isOpening);
+        sidebar.classList.toggle('open', isOpening);
+        backdrop.classList.toggle('active', isOpening);
+        backdrop.classList.toggle('open', isOpening);
     }
 }
 

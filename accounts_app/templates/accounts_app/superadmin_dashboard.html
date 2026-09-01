@@ -139,35 +139,35 @@
             transition: all 0.2s;
         }
         .topbar-dropdown-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-
         .btn-toggle-sidebar {
             display: none; background: var(--bg2); border: 1px solid var(--border2); color: var(--text);
             padding: 8px 12px; border-radius: 10px; font-size: 18px; cursor: pointer;
-            align-items: center; justify-content: center;
+            align-items: center; justify-content: center; z-index: 1000;
         }
 
         .sidebar-backdrop {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
-            z-index: 9998; opacity: 0; transition: opacity 0.3s ease;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
+            z-index: 99998 !important; opacity: 0; transition: opacity 0.3s ease;
         }
-        .sidebar-backdrop.active { display: block !important; opacity: 1 !important; }
+        .sidebar-backdrop.active, .sidebar-backdrop.open { display: block !important; opacity: 1 !important; }
 
         @media(max-width: 900px) {
             body { flex-direction: column; overflow-x: hidden; }
             .btn-toggle-sidebar { display: inline-flex !important; }
             .desktop-table-view { display: none !important; }
-            .mobile-cards-view { display: flex !important; flex-direction: column; gap: 14px; }
-            .main { margin-left: 0 !important; padding: 16px !important; width: 100% !important; }
+            .mobile-cards-view { display: flex !important; flex-direction: column; gap: 14px; width: 100%; }
+            .main { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; padding: 16px !important; flex: 1; overflow-x: hidden; }
 
             .sidebar {
-                position: fixed !important; top: 0 !important; bottom: 0 !important; left: -290px !important;
+                position: fixed !important; top: 0 !important; bottom: 0 !important; left: -300px !important;
                 width: 280px !important; height: 100vh !important; background: #0d1322 !important;
-                border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px !important;
+                border-right: 1px solid rgba(255,255,255,0.12) !important; padding: 24px 16px !important;
                 display: flex !important; flex-direction: column !important; justify-content: space-between !important;
-                z-index: 99999 !important; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                overflow-y: auto !important; box-shadow: 10px 0 30px rgba(0,0,0,0.6) !important;
+                z-index: 999999 !important; transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                overflow-y: auto !important; box-shadow: 15px 0 35px rgba(0,0,0,0.8) !important;
+                transform: translateX(0) !important; visibility: visible !important;
             }
-            .sidebar.active { left: 0 !important; }
+            .sidebar.open, .sidebar.active { left: 0 !important; transform: translateX(0) !important; }
         }
 
         @media(max-width: 600px) {
@@ -1011,8 +1011,11 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar && backdrop) {
-        sidebar.classList.toggle('open');
-        backdrop.classList.toggle('active');
+        const isOpening = !sidebar.classList.contains('active') && !sidebar.classList.contains('open');
+        sidebar.classList.toggle('active', isOpening);
+        sidebar.classList.toggle('open', isOpening);
+        backdrop.classList.toggle('active', isOpening);
+        backdrop.classList.toggle('open', isOpening);
     }
 }
 
