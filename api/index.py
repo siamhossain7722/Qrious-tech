@@ -8,6 +8,16 @@ if root_dir not in sys.path:
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linkedin_agent.settings')
 
+# Ensure staticfiles directory exists and contains all static assets on serverless startup
+staticfiles_dir = os.path.join(root_dir, 'staticfiles')
+static_dir = os.path.join(root_dir, 'static')
+if not os.path.exists(staticfiles_dir) and os.path.exists(static_dir):
+    try:
+        import shutil
+        shutil.copytree(static_dir, staticfiles_dir)
+    except Exception:
+        pass
+
 from django.core.wsgi import get_wsgi_application
 
 app = get_wsgi_application()

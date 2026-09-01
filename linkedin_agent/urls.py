@@ -104,12 +104,12 @@ urlpatterns = [
     path('login/', lambda request: redirect('/auth/login/')),
     path('signup/', lambda request: redirect('/auth/signup/')),
 
-    # Landing & Public pages
-    path('', include('landing.urls')),
-
     # Authentication (AllAuth)
     path('auth/redirect/', smart_login_redirect),
     path('auth/', include('allauth.urls')),
+
+    # Landing & Public pages
+    path('', include('landing.urls')),
 
     # Legacy Dashboard & Billing Redirection (Removed legacy job/LinkedIn pages & APIs)
     path('billing/', smart_login_redirect),
