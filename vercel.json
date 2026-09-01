@@ -1,15 +1,8 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "linkedin_agent/wsgi.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "linkedin_agent/wsgi.py"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
