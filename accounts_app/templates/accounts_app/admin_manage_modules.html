@@ -256,15 +256,15 @@
                             <option value="" disabled selected>-- Select Target Module --</option>
                             <optgroup label="💻 Web Development & AI Engineering">
                                 {% for m in modules %}
-                                    {% if m.module_number <= 10 %}
+                                    {% if m.course_slug == 'web-development' %}
                                     <option value="{{ m.id }}">Module {{ m.module_number }}: {{ m.title }}</option>
                                     {% endif %}
                                 {% endfor %}
                             </optgroup>
-                            <optgroup label="📈 Digital Marketing & Growth Hacking">
+                            <optgroup label="🚀 Digital Marketing & Growth Hacking">
                                 {% for m in modules %}
-                                    {% if m.module_number > 10 %}
-                                    <option value="{{ m.id }}">Module {{ m.module_number|add:"-10" }}: {{ m.title }}</option>
+                                    {% if m.course_slug == 'digital-marketing' %}
+                                    <option value="{{ m.id }}">Module {{ m.module_number }}: {{ m.title }}</option>
                                     {% endif %}
                                 {% endfor %}
                             </optgroup>
@@ -385,15 +385,15 @@
                 <select name="module_id" id="edit_module_id" class="form-select" required>
                     <optgroup label="💻 Web Development & AI Engineering">
                         {% for m in modules %}
-                            {% if m.module_number <= 10 %}
+                            {% if m.course_slug == 'web-development' %}
                             <option value="{{ m.id }}">Module {{ m.module_number }}: {{ m.title }}</option>
                             {% endif %}
                         {% endfor %}
                     </optgroup>
-                    <optgroup label="📈 Digital Marketing & Growth Hacking">
+                    <optgroup label="🚀 Digital Marketing & Growth Hacking">
                         {% for m in modules %}
-                            {% if m.module_number > 10 %}
-                            <option value="{{ m.id }}">Module {{ m.module_number|add:"-10" }}: {{ m.title }}</option>
+                            {% if m.course_slug == 'digital-marketing' %}
+                            <option value="{{ m.id }}">Module {{ m.module_number }}: {{ m.title }}</option>
                             {% endif %}
                         {% endfor %}
                     </optgroup>

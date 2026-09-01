@@ -1685,7 +1685,7 @@ def admin_manage_modules(request):
     if selected_batch_id:
         active_batch = get_object_or_404(CourseBatch, pk=selected_batch_id)
 
-    modules = CourseModule.objects.prefetch_related('lessons').all()
+    modules = CourseModule.objects.prefetch_related('lessons').order_by('course_slug', 'order', 'module_number').all()
     return render(request, 'accounts_app/admin_manage_modules.html', {
         'modules': modules,
         'batches': batches,
