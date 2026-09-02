@@ -2315,6 +2315,86 @@ Qrious Tech Academy Billing & Support Team
         return False
 
 
+def send_admin_payment_notification_email_helper(payment, request=None):
+    """
+    Sends an automated HTML email alert to Super Admin(s) when a student submits a payment for verification,
+    complete with payment details, student info, and direct link to the admin verification console route.
+    """
+    try:
+        from django.contrib.auth.models import User
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        from django.conf import settings
+
+        enrollment = payment.enrollment
+        student_user = enrollment.user
+
+        # Admin verification URL (with query filter so admin sees this specific payment)
+        if request:
+            admin_verify_url = request.build_absolute_uri(f'/admin-payments/?q={payment.invoice_id}')
+        else:
+            admin_verify_url = f"https://qrious-tech.vercel.app/admin-payments/?q={payment.invoice_id}"
+
+        # Target superadmins / staff users
+        admin_emails = list(
+            User.objects.filter(is_active=True, is_superuser=True)
+            .exclude(email='')
+            .values_list('email', flat=True)
+        )
+        if not admin_emails:
+            admin_emails = ['mdsiamh77@gmail.com']
+
+        email_subject = f"[Action Required] 💳 New Payment Submission #{payment.invoice_id} — {student_user.get_full_name() or student_user.email}"
+        
+        submitted_at_str = payment.created_at.strftime('%A, %b %d, %Y at %I:%M %p')
+
+        context = {
+            'student_name': student_user.get_full_name() or student_user.username or student_user.email,
+            'student_email': student_user.email,
+            'student_id': enrollment.student_id,
+            'course_name': enrollment.course_name,
+            'batch_name': enrollment.batch.name if enrollment.batch else 'Batch 01',
+            'invoice_id': payment.invoice_id,
+            'amount': payment.amount,
+            'payment_method': payment.payment_method,
+            'transaction_ref': payment.transaction_ref,
+            'submitted_at': submitted_at_str,
+            'student_notes': payment.notes,
+            'admin_verify_url': admin_verify_url,
+        }
+
+        html_body = render_to_string('account/email/admin_payment_submission_alert.html', context)
+        text_body = f"""New Payment Submission Pending Verification:
+Invoice ID: #{payment.invoice_id}
+Student: {student_user.get_full_name() or student_user.email} ({student_user.email})
+Amount: BDT {payment.amount:,.2f}
+Method: {payment.payment_method}
+TrxID: {payment.transaction_ref or 'N/A'}
+Date: {submitted_at_str}
+
+Verify Payment in Admin Console: {admin_verify_url}
+"""
+
+        for admin_email in set(admin_emails):
+            try:
+                msg = EmailMultiAlternatives(
+                    subject=email_subject,
+                    body=text_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[admin_email]
+                )
+                msg.attach_alternative(html_body, "text/html")
+                msg.send(fail_silently=False)
+                print(f"[OK] Sent admin payment notification email to {admin_email}")
+            except Exception as ex:
+                print(f"[ERROR] Error sending payment notification email to admin {admin_email}: {ex}")
+
+        return True
+    except Exception as ex:
+        print(f"[ERROR] Error in send_admin_payment_notification_email_helper: {ex}")
+        return False
+
+
 @login_required
 def student_upload_payment(request):
     """Student: Upload payment proof screenshot / record transaction for verification."""
@@ -2329,6 +2409,7 @@ def student_upload_payment(request):
             amount = Decimal(amount_raw)
             payment_method = request.POST.get('payment_method', 'bKash').strip()
             transaction_ref = request.POST.get('transaction_ref', '').strip()
+            notes = request.POST.get('notes', '').strip()
             payment_proof = request.FILES.get('payment_proof', None)
             proof_image_data = None
             if payment_proof:
@@ -2356,6 +2437,9 @@ def student_upload_payment(request):
                 proof_image_data=proof_image_data,
                 status='pending'
             )
+
+            # 📧 Send Automated Email Notification to Super Admin for Verification
+            send_admin_payment_notification_email_helper(payment, request)
 
             # Notifications
             create_notification(
