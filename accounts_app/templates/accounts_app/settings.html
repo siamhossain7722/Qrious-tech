@@ -246,29 +246,22 @@
         <button type="button" onclick="toggleMobileSidebar()" class="sidebar-close-btn">✕</button>
     </div>
     <nav class="sidebar-nav">
-        {% if request.user.enrollments.exists %}
-        <div class="nav-label">Student Portal</div>
-        <a href="/student/dashboard/" class="nav-item">🎓 My Student Dashboard</a>
-        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal ↗</a>
-        <a href="/student/dashboard/#invoices" class="nav-item">📜 Tuition & Invoices</a>
-        <div class="nav-label">Account</div>
-        <a href="/settings/" class="nav-item active">⚙️ Profile Settings</a>
-        <a href="/student/dashboard/" class="nav-item">📊 Student Dashboard</a>
-        {% if request.user.is_superuser %}
-        <a href="/superadmin/" class="nav-item">👑 Super Admin Console</a>
-        {% endif %}
-        <a href="/logout/" class="nav-item">🚪 Logout</a>
-        {% else %}
-        <div class="nav-label">Portal</div>
-        <a href="/student/dashboard/" class="nav-item">🎓 Student Dashboard</a>
+        {% if request.user.enrollments.exists         <div class="nav-label">Student Menu</div>
+        <a href="/student/dashboard/" class="nav-item">🎓 Overview & Progress</a>
         <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal</a>
-        <div class="nav-label">Account</div>
+        <a href="/student/dashboard/#live-classes" class="nav-item">🎥 Live Class Sessions</a>
+        <a href="/student/invoices/" class="nav-item">📜 Tuition & Invoices</a>
+        <a href="/student/assignments/" class="nav-item">📚 Homework & Exams</a>
+        <a href="/student/dashboard/#curriculum" class="nav-item">📚 Course Curriculum</a>
+        <a href="/student/dashboard/#certificate" class="nav-item">🎓 Verified Certificate</a>
+
+        <div class="nav-label">Services & Profile</div>
+        <a href="/notifications/" class="nav-item">🔔 Notification Hub</a>
         <a href="/settings/" class="nav-item active">⚙️ Profile Settings</a>
         {% if request.user.is_superuser %}
         <a href="/superadmin/" class="nav-item">👑 Super Admin Console</a>
         {% endif %}
         <a href="/logout/" class="nav-item">🚪 Logout</a>
-        {% endif %}
     </nav>
     <div class="sidebar-footer">
         <div class="user-pill">
@@ -300,6 +293,7 @@
                 </div>
             </a>
         </div>
+
         <div style="display:flex;align-items:center;gap:8px">
             {% include 'accounts_app/notification_bell.html' %}
             <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px;">
@@ -320,9 +314,6 @@
     <div class="topbar">
         <h1 class="page-title">⚙️ User Profile & Settings</h1>
         <div class="topbar-user-controls">
-            <button type="button" class="lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
-                🇬🇧 English
-            </button>
             {% if request.user.enrollments.exists %}
             <a href="/student/dashboard/" class="btn btn-outline">← Back to Student Dashboard</a>
             {% else %}
