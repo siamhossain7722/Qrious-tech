@@ -478,6 +478,7 @@ class LiveClassSchedule(models.Model):
 class CourseAssignment(models.Model):
     """Homework, Assignment & Exam Task created by Super Admin per Batch."""
     batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE, related_name='assignments')
+    week_number = models.IntegerField(default=1, help_text="Week number e.g. 1, 2, 3...")
     title = models.CharField(max_length=255)
     description = models.TextField(help_text="Homework questions, exam instructions, guidelines, and submission rules")
     due_date = models.DateTimeField(help_text="Deadline for student submissions")

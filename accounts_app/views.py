@@ -2844,6 +2844,112 @@ def notifications_hub_view(request):
     return render(request, 'accounts_app/notifications.html', context)
 
 
+def send_admin_submission_notification_email_helper(submission, request=None):
+    """Sends HTML email notification to superadmins when a student submits homework/exam answer script."""
+    try:
+        from django.contrib.auth.models import User
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        from django.conf import settings
+
+        enrollment = submission.enrollment
+        student_user = enrollment.user
+        assignment = submission.assignment
+
+        admin_grade_url = request.build_absolute_uri('/superadmin/assignments/') if request else "https://qrious-tech.vercel.app/superadmin/assignments/"
+
+        admin_emails = list(
+            User.objects.filter(is_active=True, is_superuser=True)
+            .exclude(email='')
+            .values_list('email', flat=True)
+        )
+        if not admin_emails:
+            admin_emails = ['mdsiamh77@gmail.com']
+
+        email_subject = f"[Homework Submission] 📝 {student_user.get_full_name() or student_user.email} — Week {assignment.week_number}: {assignment.title}"
+        submitted_at_str = submission.submitted_at.strftime('%A, %b %d, %Y at %I:%M %p')
+
+        context = {
+            'student_name': student_user.get_full_name() or student_user.username or student_user.email,
+            'student_email': student_user.email,
+            'student_id': enrollment.student_id,
+            'week_number': assignment.week_number,
+            'assignment_title': assignment.title,
+            'batch_name': assignment.batch.name if assignment.batch else 'Batch 01',
+            'submitted_at': submitted_at_str,
+            'submission_text': submission.submission_text,
+            'attachment_url': submission.attachment_url,
+            'admin_grade_url': admin_grade_url,
+        }
+
+        html_body = render_to_string('account/email/admin_submission_notification.html', context)
+        text_body = f"New Homework Submission from {student_user.email}:\nTitle: Week {assignment.week_number} - {assignment.title}\nSubmitted Answer:\n{submission.submission_text}\n"
+
+        for admin_email in set(admin_emails):
+            try:
+                msg = EmailMultiAlternatives(
+                    subject=email_subject,
+                    body=text_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[admin_email]
+                )
+                msg.attach_alternative(html_body, "text/html")
+                msg.send(fail_silently=False)
+                print(f"[OK] Sent admin submission notification email to {admin_email}")
+            except Exception as ex:
+                print(f"[ERROR] Failed to send submission email to admin {admin_email}: {ex}")
+        return True
+    except Exception as ex:
+        print(f"[ERROR] Error in send_admin_submission_notification_email_helper: {ex}")
+        return False
+
+
+def send_student_graded_notification_email_helper(submission, request=None):
+    """Sends HTML email notification to student when their homework/exam answer script is graded."""
+    try:
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        from django.conf import settings
+
+        enrollment = submission.enrollment
+        student_user = enrollment.user
+        assignment = submission.assignment
+
+        student_portal_url = request.build_absolute_uri('/student/assignments/') if request else "https://qrious-tech.vercel.app/student/assignments/"
+
+        percentage = int((submission.obtained_marks / max(1, assignment.total_marks)) * 100) if submission.obtained_marks else 0
+
+        email_subject = f"[Homework Evaluated] 🌟 Score Released: {submission.obtained_marks}/{assignment.total_marks} — Week {assignment.week_number}: {assignment.title}"
+
+        context = {
+            'student_name': student_user.get_full_name() or student_user.username or student_user.email,
+            'week_number': assignment.week_number,
+            'assignment_title': assignment.title,
+            'obtained_marks': submission.obtained_marks or 0,
+            'total_marks': assignment.total_marks,
+            'percentage': percentage,
+            'mentor_feedback': submission.mentor_feedback,
+            'student_portal_url': student_portal_url,
+        }
+
+        html_body = render_to_string('account/email/student_graded_notification.html', context)
+        text_body = f"Your submission for Week {assignment.week_number}: {assignment.title} was evaluated!\nScore: {submission.obtained_marks}/{assignment.total_marks} ({percentage}%)\nMentor Remarks: {submission.mentor_feedback}\n"
+
+        msg = EmailMultiAlternatives(
+            subject=email_subject,
+            body=text_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[student_user.email]
+        )
+        msg.attach_alternative(html_body, "text/html")
+        msg.send(fail_silently=False)
+        print(f"[OK] Sent graded notification email to student {student_user.email}")
+        return True
+    except Exception as ex:
+        print(f"[ERROR] Error sending graded email to student: {ex}")
+        return False
+
+
 @login_required
 @user_passes_test(_is_superuser)
 def admin_manage_assignments(request):
@@ -2855,6 +2961,7 @@ def admin_manage_assignments(request):
 
         if action == 'create_assignment':
             batch_id = request.POST.get('batch_id')
+            week_number = int(request.POST.get('week_number', 1))
             title = request.POST.get('title', '').strip()
             description = request.POST.get('description', '').strip()
             due_date_str = request.POST.get('due_date', '').strip()
@@ -2871,6 +2978,7 @@ def admin_manage_assignments(request):
 
                 assignment = CourseAssignment.objects.create(
                     batch=batch,
+                    week_number=week_number,
                     title=title,
                     description=description,
                     due_date=due_date,
@@ -2883,17 +2991,17 @@ def admin_manage_assignments(request):
                 for enr in enrolled_students:
                     create_notification(
                         user=enr.user,
-                        title=f"📚 New Homework Assignment Posted: {title}",
-                        message=f"New assignment for {batch.name} posted! Due date: {due_date.strftime('%b %d, %Y')}. Submit your text answer from your dashboard.",
+                        title=f"📚 Week {week_number} Homework Posted: {title}",
+                        message=f"New Week {week_number} assignment for {batch.name} posted! Due: {due_date.strftime('%b %d, %Y')}. Submit your answer on the homework portal.",
                         notification_type="course",
                         category="warning",
-                        link="/student/dashboard/#assignments"
+                        link="/student/assignments/"
                     )
                     notif_count += 1
 
                 messages.success(
                     request,
-                    f"🎉 Homework Assignment '{title}' created for {batch.name}! Sent {notif_count} student notifications."
+                    f"🎉 Homework Assignment (Week {week_number}) '{title}' created for {batch.name}! Sent {notif_count} student notifications."
                 )
             else:
                 messages.error(request, "Please fill in all required fields (Batch, Title, Instructions, Due Date).")
@@ -2915,14 +3023,17 @@ def admin_manage_assignments(request):
             submission.graded_at = timezone.now()
             submission.save()
 
-            # Notify student
+            # 📧 Send Automated Email Notification to Student
+            send_student_graded_notification_email_helper(submission, request)
+
+            # Notify student in dashboard
             create_notification(
                 user=submission.enrollment.user,
-                title=f"🌟 Homework Graded: {submission.assignment.title}",
+                title=f"🌟 Homework Graded: Week {submission.assignment.week_number} - {submission.assignment.title}",
                 message=f"Your submission for '{submission.assignment.title}' was evaluated! Score: {submission.obtained_marks} / {submission.assignment.total_marks}.",
                 notification_type="course",
                 category="success",
-                link="/student/dashboard/#assignments"
+                link="/student/assignments/"
             )
 
             messages.success(
@@ -2971,7 +3082,7 @@ def student_submit_assignment(request):
 
         if not submission_text:
             messages.error(request, "Please enter your text answer script / solution before submitting.")
-            return redirect('/student/dashboard/#assignments')
+            return redirect('/student/assignments/')
 
         submission, created = AssignmentSubmission.objects.get_or_create(
             assignment=assignment,
@@ -2990,20 +3101,23 @@ def student_submit_assignment(request):
             submission.submitted_at = timezone.now()
             submission.save()
 
+        # 📧 Send Automated Email Notification to Super Admin
+        send_admin_submission_notification_email_helper(submission, request)
+
         # Notify student
         create_notification(
             user=request.user,
-            title=f"📥 Homework Submitted: {assignment.title}",
+            title=f"📥 Homework Submitted: Week {assignment.week_number} - {assignment.title}",
             message=f"Your solution for '{assignment.title}' was received successfully. Your mentor will evaluate it shortly.",
             notification_type="course",
             category="info",
-            link="/student/dashboard/#assignments"
+            link="/student/assignments/"
         )
         # Notify admins
         create_notification(
             user=None,
             title=f"📥 New Homework Submission: {request.user.email}",
-            message=f"Student {request.user.get_full_name() or request.user.email} submitted homework for '{assignment.title}'.",
+            message=f"Student {request.user.get_full_name() or request.user.email} submitted homework for Week {assignment.week_number}: '{assignment.title}'.",
             notification_type="course",
             category="warning",
             link=f"/superadmin/assignments/?assignment_id={assignment.id}"
@@ -3011,10 +3125,73 @@ def student_submit_assignment(request):
 
         messages.success(
             request,
-            f"🎉 Homework for '{assignment.title}' submitted successfully! Your mentor will grade your text answer."
+            f"🎉 Homework for Week {assignment.week_number}: '{assignment.title}' submitted successfully! Your mentor will grade your text answer."
         )
 
-    return redirect('/student/dashboard/#assignments')
+    return redirect('/student/assignments/')
+
+
+@login_required
+def student_assignments_portal(request):
+    """Dedicated Student Homework & Exam Portal Page."""
+    from .models import StudentEnrollment, CourseAssignment, AssignmentSubmission
+
+    enrollments = StudentEnrollment.objects.filter(user=request.user).select_related('user', 'batch')
+    primary_enrollment = enrollments.first()
+
+    student_batch = primary_enrollment.batch if primary_enrollment and primary_enrollment.batch else None
+
+    if student_batch:
+        assignments_qs = CourseAssignment.objects.filter(batch=student_batch, is_active=True).select_related('batch')
+    else:
+        assignments_qs = CourseAssignment.objects.filter(is_active=True).select_related('batch')
+
+    selected_week = request.GET.get('week')
+    if selected_week:
+        try:
+            w_int = int(selected_week)
+            assignments_qs = assignments_qs.filter(week_number=w_int)
+        except ValueError:
+            pass
+
+    assignments_list = list(assignments_qs)
+
+    student_submissions_dict = {}
+    if primary_enrollment:
+        user_submissions = AssignmentSubmission.objects.filter(enrollment=primary_enrollment).select_related('assignment')
+        for sub in user_submissions:
+            student_submissions_dict[sub.assignment_id] = sub
+
+    for assign in assignments_list:
+        assign.user_submission = student_submissions_dict.get(assign.id, None)
+
+    week_numbers = list(range(1, 13))
+
+    context = {
+        'enrollments': enrollments,
+        'primary_enrollment': primary_enrollment,
+        'assignments': assignments_list,
+        'week_numbers': week_numbers,
+        'selected_week': int(selected_week) if selected_week and selected_week.isdigit() else None,
+    }
+    return render(request, 'accounts_app/student_assignments.html', context)
+
+
+@login_required
+def download_grade_card(request, submission_id):
+    """Renders high-res downloadable grade achievement card image for social media sharing."""
+    from .models import AssignmentSubmission
+    submission = get_object_or_404(AssignmentSubmission.objects.select_related('assignment', 'assignment__batch', 'enrollment', 'enrollment__user'), pk=submission_id)
+
+    # Permission check: Student can view their own card; superadmin can view any card
+    if submission.enrollment.user != request.user and not request.user.is_superuser:
+        messages.error(request, "Permission denied to view grade card.")
+        return redirect('/student/assignments/')
+
+    context = {
+        'submission': submission,
+    }
+    return render(request, 'accounts_app/grade_card_template.html', context)
 
 
 

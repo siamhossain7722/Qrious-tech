@@ -236,7 +236,7 @@
         <a href="#live-classes" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎥 Live Class Sessions</a>
         {% endif %}
         <a href="#invoices" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📜 Tuition & Invoices</a>
-        <a href="#assignments" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Homework & Exams</a>
+        <a href="/student/assignments/" class="nav-item">📚 Homework & Exams</a>
         <a href="#curriculum" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Course Curriculum</a>
         <a href="#certificate" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Verified Certificate</a>
 
@@ -594,110 +594,6 @@
                 </div>
             </div>
             {% endfor %}
-        </div>
-    </div>
-
-    <!-- SECTION 4.5: HOMEWORK, ASSIGNMENTS & EXAM SUBMISSIONS CARD -->
-    <div class="card" id="assignments">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-            <span>📚 Homework, Assignments & Exam Tasks</span>
-            <span style="font-size:12px;color:var(--text3)">Submit text answer scripts & code for mentor evaluation</span>
-        </div>
-
-        {% if assignments %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Assignment Title</th>
-                        <th>Deadline</th>
-                        <th>Total Marks</th>
-                        <th>My Submission Status</th>
-                        <th>Action & Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in assignments %}
-                    <tr>
-                        <td>
-                            <strong style="color:var(--text);font-size:14.5px;display:block">{{ a.title }}</strong>
-                            <div style="font-size:12.5px;color:var(--text2);margin-top:4px;white-space:pre-wrap">{{ a.description }}</div>
-                        </td>
-                        <td style="white-space:nowrap;font-size:13px;color:var(--amber);font-weight:700">
-                            📅 {{ a.due_date|date:"D, M d, Y @ h:i A" }}
-                        </td>
-                        <td style="white-space:nowrap;font-weight:800;color:var(--text)">{{ a.total_marks }} Marks</td>
-                        <td style="white-space:nowrap">
-                            {% if a.user_submission %}
-                                {% if a.user_submission.status == 'graded' %}
-                                <span style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800">
-                                    🟢 Graded: {{ a.user_submission.obtained_marks }} / {{ a.total_marks }}
-                                </span>
-                                {% else %}
-                                <span style="background:rgba(37,99,235,0.15);color:#38bdf8;border:1px solid rgba(37,99,235,0.3);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800">
-                                    📩 Submitted (Pending Review)
-                                </span>
-                                {% endif %}
-                            {% else %}
-                            <span style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800">
-                                ⏳ Pending Submission
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-cyan btn-sm" onclick="openSubmitHomeworkModal('{{ a.id }}', '{{ a.title|escapejs }}', '{{ a.total_marks }}', '{{ a.user_submission.submission_text|default:''|escapejs }}', '{{ a.user_submission.attachment_url|default:''|escapejs }}')">
-                                {% if a.user_submission %}📝 Edit Answer Script{% else %}✍️ Submit Answer Script{% endif %}
-                            </button>
-                            {% if a.user_submission and a.user_submission.mentor_feedback %}
-                            <div style="margin-top:8px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;font-size:12px;color:var(--text2)">
-                                💬 <strong>Mentor Feedback:</strong> {{ a.user_submission.mentor_feedback }}
-                            </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div style="padding:32px;text-align:center;color:var(--text3);font-size:14px">
-            📌 No active homework assignments or exam tasks assigned to your batch at this time.
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- SUBMIT HOMEWORK / EXAM ANSWER MODAL -->
-    <div id="submitHomeworkModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px">
-        <div style="background:var(--card);border:1.5px solid var(--border2);border-radius:24px;max-width:560px;width:100%;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,0.9);position:relative">
-            <button type="button" onclick="closeSubmitHomeworkModal()" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px">✕</button>
-
-            <div style="margin-bottom:20px">
-                <div style="font-size:11px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">✍️ HOMEWORK & EXAM ANSWER SUBMISSION</div>
-                <h3 style="font-weight:900;font-size:20px;color:var(--text)" id="hw-title-text">Submit Homework Solution</h3>
-                <div style="font-size:12.5px;color:var(--text2);margin-top:4px">Maximum Marks: <strong id="hw-marks-text" style="color:var(--lime)"></strong></div>
-            </div>
-
-            <form method="POST" action="/student/assignments/submit/">
-                {% csrf_token %}
-                <input type="hidden" name="assignment_id" id="hw-assignment-id" value="">
-
-                <div style="margin-bottom:16px">
-                    <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">📝 Text Answer Script / Solution Code *</label>
-                    <textarea name="submission_text" id="hw-text-input" rows="6" class="form-input" style="width:100%;padding:12px;border-radius:12px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-family:inherit;font-size:13.5px;outline:none" placeholder="Type your text answer script, essay response, strategy breakdown, or code solution here..." required></textarea>
-                </div>
-
-                <div style="margin-bottom:20px">
-                    <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">🔗 Project / Attachment Link (Optional)</label>
-                    <input type="url" name="attachment_url" id="hw-url-input" class="form-input" style="width:100%;padding:12px;border-radius:12px;background:var(--bg2);border:1px solid var(--border2);color:var(--text)" placeholder="https://github.com/... or https://drive.google.com/... or https://figma.com/...">
-                </div>
-
-                <div style="display:flex;gap:10px;justify-content:flex-end">
-                    <button type="button" class="btn btn-outline" onclick="closeSubmitHomeworkModal()" style="border-radius:12px;padding:10px 18px">Cancel</button>
-                    <button type="submit" class="btn btn-cyan" style="border-radius:12px;padding:10px 24px;font-weight:800">
-                        🚀 Submit Solution Script
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Evaluation Released — Qrious Tech Academy</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #070913; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #f8fafc; -webkit-font-smoothing: antialiased;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #070913; padding: 40px 10px;">
+        <tr>
+            <td align="center">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #0d1222; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+                    <!-- Top Accent Bar -->
+                    <tr>
+                        <td style="height: 5px; background: linear-gradient(90deg, #10b981, #38bdf8, #ccff00);"></td>
+                    </tr>
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 28px 32px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td>
+                                        <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td style="vertical-align: middle; padding-right: 12px;">
+                                                    <img src="https://qrious-tech.vercel.app/static/images/logo.png" alt="Qrious Tech Academy" width="38" height="38" style="width: 38px; height: 38px; display: block; border: 0; object-fit: contain;">
+                                                </td>
+                                                <td style="vertical-align: middle;">
+                                                    <div style="font-size: 20px; font-weight: 900; color: #ffffff; line-height: 1.2;">Qrious Tech <span style="color: #38bdf8; font-size: 13px; display: block; letter-spacing: 0.05em;">Academy</span></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td align="right" style="vertical-align: middle;">
+                                        <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 14px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.08em;">
+                                            🌟 EVALUATION RELEASED
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Main Body -->
+                    <tr>
+                        <td style="padding: 36px 32px;">
+                            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 14px 0; line-height: 1.3;">
+                                Homework Evaluated & Score Issued! 🌟
+                            </h1>
+                            <p style="font-size: 15px; color: #94a3b8; line-height: 1.6; margin: 0 0 24px 0;">
+                                Dear <strong style="color: #ffffff;">{{ student_name }}</strong>, your senior mentor has reviewed and evaluated your submission for <strong style="color: #38bdf8;">Week {{ week_number }}: {{ assignment_title }}</strong>.
+                            </p>
+
+                            <!-- Score Card -->
+                            <div style="background-color: #131b2e; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 26px;">
+                                <div style="font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                                    🏆 Your Assigned Score
+                                </div>
+                                <div style="font-size: 38px; font-weight: 900; color: #10b981; line-height: 1;">
+                                    {{ obtained_marks }} <span style="font-size: 20px; color: #64748b;">/ {{ total_marks }} Marks</span>
+                                </div>
+                                <div style="font-size: 13px; font-weight: 700; color: #ccff00; margin-top: 8px;">
+                                    Overall Performance: {{ percentage }}%
+                                </div>
+                            </div>
+
+                            {% if mentor_feedback %}
+                            <!-- Mentor Feedback Card -->
+                            <div style="background-color: #131b2e; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 20px; margin-bottom: 26px;">
+                                <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+                                    💬 Senior Mentor Remarks & Feedback
+                                </div>
+                                <div style="font-size: 14px; color: #f8fafc; line-height: 1.6; white-space: pre-wrap;">{{ mentor_feedback }}</div>
+                            </div>
+                            {% endif %}
+
+                            <!-- CTA Buttons -->
+                            <div align="center" style="margin-bottom: 30px;">
+                                <a href="{{ student_portal_url }}" target="_blank" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; text-decoration: none; padding: 16px 36px; border-radius: 14px; font-size: 15px; font-weight: 800; display: inline-block; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);">
+                                    🎓 View Homework Portal & Grade Card ↗
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 32px; background-color: #070913; text-align: center; font-size: 11px; color: #64748b;">
+                            Qrious Tech Academy Evaluation System | Support Email: mdsiamh77@gmail.com
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
