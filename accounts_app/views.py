@@ -3053,17 +3053,26 @@ def admin_manage_assignments(request):
 
         return redirect('/superadmin/assignments/')
 
-    assignments = CourseAssignment.objects.select_related('batch').prefetch_related('submissions', 'submissions__enrollment__user').all()
-    batches = CourseBatch.objects.all()
-    submissions = AssignmentSubmission.objects.select_related('assignment', 'assignment__batch', 'enrollment', 'enrollment__user').order_by('-submitted_at')
+    assignments = []
+    batches = []
+    submissions = []
+    try:
+        assignments = list(CourseAssignment.objects.select_related('batch').prefetch_related('submissions', 'submissions__enrollment__user').all())
+        batches = list(CourseBatch.objects.all())
+        submissions = list(AssignmentSubmission.objects.select_related('assignment', 'assignment__batch', 'enrollment', 'enrollment__user').order_by('-submitted_at'))
+    except Exception as ex:
+        print(f"[WARN] admin_manage_assignments query info: {ex}")
+
+    pending_submissions_count = sum(1 for s in submissions if getattr(s, 'status', '') == 'submitted')
+    graded_submissions_count = sum(1 for s in submissions if getattr(s, 'status', '') == 'graded')
 
     context = {
         'assignments': assignments,
         'batches': batches,
         'submissions': submissions,
-        'total_assignments': assignments.count(),
-        'pending_submissions_count': submissions.filter(status='submitted').count(),
-        'graded_submissions_count': submissions.filter(status='graded').count(),
+        'total_assignments': len(assignments),
+        'pending_submissions_count': pending_submissions_count,
+        'graded_submissions_count': graded_submissions_count,
     }
     return render(request, 'accounts_app/admin_manage_assignments.html', context)
 
@@ -3144,31 +3153,37 @@ def student_assignments_portal(request):
 
     student_batch = primary_enrollment.batch if primary_enrollment and primary_enrollment.batch else None
 
-    if student_batch:
-        assignments_qs = CourseAssignment.objects.filter(batch=student_batch, is_active=True).select_related('batch')
-    else:
-        assignments_qs = CourseAssignment.objects.filter(is_active=True).select_related('batch')
-
-    selected_week = request.GET.get('week')
-    if selected_week:
-        try:
-            w_int = int(selected_week)
-            assignments_qs = assignments_qs.filter(week_number=w_int)
-        except ValueError:
-            pass
-
-    assignments_list = list(assignments_qs)
-
+    assignments_list = []
     student_submissions_dict = {}
-    if primary_enrollment:
-        user_submissions = AssignmentSubmission.objects.filter(enrollment=primary_enrollment).select_related('assignment')
-        for sub in user_submissions:
-            student_submissions_dict[sub.assignment_id] = sub
 
-    for assign in assignments_list:
-        assign.user_submission = student_submissions_dict.get(assign.id, None)
+    try:
+        if student_batch:
+            assignments_qs = CourseAssignment.objects.filter(batch=student_batch, is_active=True).select_related('batch')
+        else:
+            assignments_qs = CourseAssignment.objects.filter(is_active=True).select_related('batch')
+
+        selected_week = request.GET.get('week')
+        if selected_week:
+            try:
+                w_int = int(selected_week)
+                assignments_qs = assignments_qs.filter(week_number=w_int)
+            except ValueError:
+                pass
+
+        assignments_list = list(assignments_qs)
+
+        if primary_enrollment:
+            user_submissions = AssignmentSubmission.objects.filter(enrollment=primary_enrollment).select_related('assignment')
+            for sub in user_submissions:
+                student_submissions_dict[sub.assignment_id] = sub
+
+        for assign in assignments_list:
+            assign.user_submission = student_submissions_dict.get(assign.id, None)
+    except Exception as ex:
+        print(f"[WARN] student_assignments_portal fetch info: {ex}")
 
     week_numbers = list(range(1, 13))
+    selected_week = request.GET.get('week')
 
     context = {
         'enrollments': enrollments,
@@ -3206,8 +3221,11 @@ def student_invoices_portal(request):
     primary_enrollment = enrollments.first()
     
     payments = []
-    if primary_enrollment:
-        payments = list(primary_enrollment.payments.all())
+    try:
+        if primary_enrollment:
+            payments = list(primary_enrollment.payments.all())
+    except Exception as ex:
+        print(f"[WARN] student_invoices_portal query info: {ex}")
 
     context = {
         'enrollments': enrollments,
