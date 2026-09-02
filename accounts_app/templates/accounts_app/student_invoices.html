@@ -1,0 +1,276 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuition Fees & Invoices Portal — Qrious Tech Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19; --bg2: #111827; --card: #1f2937; --card-hover: #374151;
+            --cyan: #0284c7; --purple: #7c3aed; --lime: #ccff00; --green: #059669; --amber: #d97706; --red: #dc2626;
+            --text: #f9fafb; --text2: #e5e7eb; --text3: #9ca3af;
+            --border: #374151; --border2: #4b5563;
+        }
+        body.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+
+        .sidebar { width: 260px; background: #0d1322 !important; border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 0 8px; }
+        .nav-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b !important; margin: 16px 8px 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08) !important; color: #ffffff !important; }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; font-weight: 700 !important; }
+
+        .main { margin-left: 260px; flex: 1; min-height: 100vh; padding: 32px 40px; overflow-y: auto; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+        .page-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 28px; }
+        .card-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-cyan { background: #0284c7; color: white; }
+        .btn-green { background: #059669; color: white; }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+
+        .table-wrap { width: 100%; overflow-x: auto; margin-top: 16px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 14px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); }
+        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; color: var(--text); vertical-align: middle; }
+
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; display: inline-block; }
+        .badge-approved { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-pending { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-rejected { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#38bdf8;text-transform:uppercase;">Academy</span>
+            </div>
+        </div>
+
+        <div class="nav-label">Student Menu</div>
+        <a href="/student/dashboard/" class="nav-item">🎓 Overview & Progress</a>
+        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal</a>
+        <a href="/student/assignments/" class="nav-item">📚 Homework & Exams</a>
+        <a href="/student/invoices/" class="nav-item active">📜 Tuition & Invoices</a>
+        <a href="/notifications/" class="nav-item">🔔 Notification Hub</a>
+        <a href="/settings/" class="nav-item">⚙️ Profile Settings</a>
+    </div>
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div>
+            <h1 class="page-title">📜 Tuition Fees, Invoices & Payment Ledger</h1>
+            <div style="font-size:13.5px;color:var(--text2);margin-top:2px">Manage course tuition fee structure, view verified payment receipts & submit installment verifications.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <a href="/student/dashboard/" class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div style="margin-bottom:24px">
+        {% for message in messages %}
+        <div style="padding:14px 18px;border-radius:12px;margin-bottom:10px;font-size:14px;font-weight:600;
+            {% if message.tags == 'error' %}background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);
+            {% else %}background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if primary_enrollment %}
+    <!-- Financial Metrics Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:18px;margin-bottom:28px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Total Tuition Fee</div>
+            <div style="font-size:26px;font-weight:900;color:var(--text);margin-top:4px">৳{{ primary_enrollment.total_fee|floatformat:2 }} BDT</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Verified Amount Paid</div>
+            <div style="font-size:26px;font-weight:900;color:var(--green);margin-top:4px">৳{{ primary_enrollment.total_paid|floatformat:2 }} BDT</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Remaining Due Balance</div>
+            <div style="font-size:26px;font-weight:900;color:{% if primary_enrollment.due_amount > 0 %}var(--red){% else %}var(--green){% endif %};margin-top:4px">
+                ৳{{ primary_enrollment.due_amount|floatformat:2 }} BDT
+            </div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">Payment Account Status</div>
+            <div style="margin-top:8px">
+                {% if primary_enrollment.payment_status == 'paid' %}
+                <span class="badge badge-approved" style="font-size:13px;padding:6px 14px">🟢 Paid in Full</span>
+                {% elif primary_enrollment.payment_status == 'partial' %}
+                <span class="badge badge-pending" style="font-size:13px;padding:6px 14px">🟡 Installment Plan</span>
+                {% else %}
+                <span class="badge badge-rejected" style="font-size:13px;padding:6px 14px">🔴 Unpaid</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Ledger & Action Box -->
+    <div class="card">
+        <div class="card-title">
+            <span>💳 Payment Ledger & Official Invoices</span>
+            <button type="button" class="btn btn-cyan" onclick="openUploadPaymentModal()" style="font-weight:800;border-radius:12px;padding:10px 20px">
+                💳 Submit Payment Details ↗
+            </button>
+        </div>
+
+        {% if payments %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Payment Date</th>
+                        <th>Amount Paid</th>
+                        <th>Method & Transaction Ref</th>
+                        <th>Verification Status</th>
+                        <th style="text-align:right">Official Invoice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td>
+                            <strong style="color:var(--cyan);font-family:monospace;font-size:14px">{{ p.invoice_id }}</strong>
+                        </td>
+                        <td style="color:var(--text2);font-weight:600">
+                            📅 {{ p.created_at|date:"M d, Y" }}<br>
+                            <span style="font-size:11.5px;color:var(--text3)">at {{ p.created_at|date:"h:i A" }}</span>
+                        </td>
+                        <td>
+                            <strong style="color:var(--green);font-size:15px">৳{{ p.amount|floatformat:2 }} BDT</strong>
+                        </td>
+                        <td>
+                            <strong style="color:var(--text);display:block">{{ p.payment_method }}</strong>
+                            <span style="font-family:monospace;font-size:12px;color:var(--cyan);font-weight:700">{{ p.transaction_ref|default:"—" }}</span>
+                        </td>
+                        <td>
+                            {% if p.status == 'pending' %}
+                            <span class="badge badge-pending">⏳ Pending Verification</span>
+                            {% elif p.status == 'approved' %}
+                            <span class="badge badge-approved">✅ Verified</span>
+                            {% else %}
+                            <span class="badge badge-rejected">❌ Declined</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right">
+                            {% if p.status == 'approved' %}
+                            <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="padding:6px 14px;font-size:12px;color:var(--cyan);border-color:var(--cyan)">📄 View Invoice</a>
+                            <a href="/invoice/{{ p.invoice_id }}/pdf/" class="btn btn-cyan" style="padding:6px 14px;font-size:12px;margin-left:6px">📥 Download PDF</a>
+                            {% else %}
+                            <span style="font-size:12px;color:var(--text3)">Verification Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:14px">
+            📌 No payment transactions submitted yet. Click <strong>"Submit Payment Details"</strong> above to record your installment.
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center;padding:60px 20px">
+        <h3 style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px">No Course Enrollment Record Found</h3>
+        <p style="font-size:14px;color:var(--text2);margin-bottom:20px">You are not currently enrolled in any active course track.</p>
+        <a href="/" class="btn btn-cyan">Browse Academy Courses</a>
+    </div>
+    {% endif %}
+</main>
+
+<!-- SUBMIT PAYMENT DETAILS MODAL -->
+<div id="uploadPaymentModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1.5px solid var(--border2);border-radius:24px;max-width:540px;width:100%;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,0.9);position:relative">
+        <button type="button" onclick="closeUploadPaymentModal()" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px">✕</button>
+
+        <div style="margin-bottom:20px">
+            <div style="font-size:11px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">💳 SUBMIT PAYMENT VERIFICATION</div>
+            <h3 style="font-weight:900;font-size:20px;color:var(--text)">Submit Installment Payment Details</h3>
+            <div style="font-size:12.5px;color:var(--text2);margin-top:4px">Submit your bKash, Nagad, or Bank transaction details for instant admin verification.</div>
+        </div>
+
+        <form method="POST" action="/student/upload-payment/">
+            {% csrf_token %}
+
+            <div style="margin-bottom:14px">
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Amount Paid (BDT) *</label>
+                <input type="number" step="0.01" name="amount" class="form-input" style="width:100%;padding:12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:15px;font-weight:700" placeholder="e.g. 5000" required>
+            </div>
+
+            <div style="margin-bottom:14px">
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Payment Method *</label>
+                <select name="payment_method" style="width:100%;padding:12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:13.5px" required>
+                    <option value="bKash">bKash Personal / Merchant</option>
+                    <option value="Nagad">Nagad Personal / Merchant</option>
+                    <option value="Rocket">Rocket</option>
+                    <option value="Bank Transfer">Direct Bank Transfer</option>
+                    <option value="Cash / Manual">Cash Payment</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:14px">
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Transaction Reference ID / Sender Number *</label>
+                <input type="text" name="transaction_ref" class="form-input" style="width:100%;padding:12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:monospace;font-size:13.5px" placeholder="e.g. TRX98273614 / 017XXXXXXXX" required>
+            </div>
+
+            <div style="margin-bottom:20px">
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)">Notes / Remarks (Optional)</label>
+                <textarea name="notes" class="form-input" rows="2" style="width:100%;padding:12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:13px" placeholder="e.g. Sent 2nd installment for Digital Marketing masterclass."></textarea>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <button type="button" class="btn btn-outline" onclick="closeUploadPaymentModal()" style="padding:10px 18px">Cancel</button>
+                <button type="submit" class="btn btn-cyan" style="font-weight:800;padding:10px 22px">
+                    📤 Submit Payment for Verification
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openUploadPaymentModal() {
+    const modal = document.getElementById('uploadPaymentModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeUploadPaymentModal() {
+    const modal = document.getElementById('uploadPaymentModal');
+    if (modal) modal.style.display = 'none';
+}
+</script>
+
+</body>
+</html>

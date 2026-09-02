@@ -3197,5 +3197,27 @@ def download_grade_card(request, submission_id):
     return render(request, 'accounts_app/grade_card_template.html', context)
 
 
+@login_required
+def student_invoices_portal(request):
+    """Dedicated Standalone Student Tuition & Invoices Portal Page."""
+    from .models import StudentEnrollment, StudentPayment
+    
+    enrollments = StudentEnrollment.objects.filter(user=request.user).select_related('user', 'batch')
+    primary_enrollment = enrollments.first()
+    
+    payments = []
+    if primary_enrollment:
+        payments = list(primary_enrollment.payments.all())
+
+    context = {
+        'enrollments': enrollments,
+        'primary_enrollment': primary_enrollment,
+        'payments': payments,
+        'profile': getattr(request.user, 'profile', None),
+    }
+    return render(request, 'accounts_app/student_invoices.html', context)
+
+
+
 
 
