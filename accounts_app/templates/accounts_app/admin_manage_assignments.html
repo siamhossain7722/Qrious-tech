@@ -213,55 +213,45 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Student</th>
-                        <th>Assignment</th>
-                        <th>Student Text Answer Script</th>
-                        <th>Submitted On</th>
-                        <th>Status</th>
-                        <th>Grade & Action</th>
+                        <th>Student Info</th>
+                        <th>Assignment & Week</th>
+                        <th>Submitted Date</th>
+                        <th>Evaluation Status</th>
+                        <th style="text-align:right">Action & Evaluation</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sub in submissions %}
                     <tr>
                         <td>
-                            <strong style="color:var(--text);display:block">{{ sub.enrollment.user.get_full_name|default:sub.enrollment.user.email }}</strong>
-                            <span style="font-size:11px;color:var(--cyan);font-family:monospace">{{ sub.enrollment.student_id }}</span>
+                            <strong style="color:var(--text);font-size:14px;display:block">{{ sub.enrollment.user.get_full_name|default:sub.enrollment.user.email }}</strong>
+                            <span style="font-size:12px;color:var(--text2)">{{ sub.enrollment.user.email }}</span>
+                            <div style="margin-top:4px"><span style="font-size:11px;background:rgba(56,189,248,0.12);color:var(--cyan);border:1px solid rgba(56,189,248,0.25);padding:2px 8px;border-radius:12px;font-family:monospace;font-weight:700">🆔 {{ sub.enrollment.student_id }}</span></div>
                         </td>
                         <td>
-                            <strong style="color:var(--text);display:block">Week {{ sub.assignment.week_number }}: {{ sub.assignment.title }}</strong>
-                            <div style="font-size:11.5px;color:var(--amber)">📡 {{ sub.assignment.batch.name }}</div>
+                            <span style="font-size:11px;font-weight:800;color:var(--lime);background:rgba(204,255,0,0.1);padding:2px 8px;border-radius:10px;border:1px solid rgba(204,255,0,0.2);display:inline-block;margin-bottom:4px">🗓 Week {{ sub.assignment.week_number }} Task</span>
+                            <strong style="color:var(--text);font-size:14px;display:block">{{ sub.assignment.title }}</strong>
+                            <span style="font-size:11.5px;color:var(--amber);font-weight:700">📡 {{ sub.assignment.batch.name }}</span>
                         </td>
-                        <td style="max-width:320px">
-                            <div class="text-answer-preview">{{ sub.submission_text }}</div>
-                            {% if sub.attachment_url %}
-                            <a href="{{ sub.attachment_url }}" target="_blank" style="color:var(--cyan);font-size:12px;font-weight:700;display:inline-block;margin-top:4px">🔗 View Attachment Link ↗</a>
-                            {% endif %}
+                        <td style="white-space:nowrap;font-size:13px;color:var(--text2)">
+                            📅 {{ sub.submitted_at|date:"D, M d, Y" }}<br>
+                            <span style="font-size:11.5px;color:var(--text3)">at {{ sub.submitted_at|date:"h:i A" }}</span>
                         </td>
-                        <td style="white-space:nowrap;font-size:12.5px;color:var(--text2)">
-                            {{ sub.submitted_at|date:"D, M d, Y" }}<br>
-                            <span style="font-size:11px;color:var(--text3)">at {{ sub.submitted_at|date:"h:i A" }}</span>
-                        </td>
-                        <td>
+                        <td style="white-space:nowrap">
                             {% if sub.status == 'graded' %}
-                            <span class="badge badge-graded">🟢 Graded: {{ sub.obtained_marks }}/{{ sub.assignment.total_marks }}</span>
+                            <span class="badge badge-graded" style="font-size:12px;padding:6px 14px;border-radius:20px">
+                                🟢 Graded: {{ sub.obtained_marks }} / {{ sub.assignment.total_marks }}
+                            </span>
                             {% else %}
-                            <span class="badge badge-pending">⏳ Pending Review</span>
+                            <span class="badge badge-pending" style="font-size:12px;padding:6px 14px;border-radius:20px">
+                                ⏳ Pending Review
+                            </span>
                             {% endif %}
                         </td>
-                        <td>
-                            <form method="POST" action="/superadmin/assignments/" style="display:flex;flex-direction:column;gap:8px;min-width:200px">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="grade_submission">
-                                <input type="hidden" name="submission_id" value="{{ sub.id }}">
-                                
-                                <div style="display:flex;align-items:center;gap:6px">
-                                    <input type="number" name="obtained_marks" value="{{ sub.obtained_marks|default:sub.assignment.total_marks }}" min="0" max="{{ sub.assignment.total_marks }}" style="width:70px;padding:6px;border-radius:6px;background:var(--bg2);border:1px solid var(--border2);color:var(--text)" required>
-                                    <span style="font-size:12px;color:var(--text2)">/ {{ sub.assignment.total_marks }}</span>
-                                </div>
-                                <input type="text" name="mentor_feedback" value="{{ sub.mentor_feedback }}" placeholder="Mentor feedback/remarks..." style="padding:6px 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:12px">
-                                <button type="submit" class="btn btn-cyan" style="padding:6px 12px;font-size:12px">Grade & Save</button>
-                            </form>
+                        <td style="white-space:nowrap;text-align:right">
+                            <button type="button" class="btn btn-cyan" onclick="openEvaluateModal('{{ sub.id }}', '{{ sub.enrollment.user.get_full_name|default:sub.enrollment.user.email|escapejs }}', '{{ sub.enrollment.user.email|escapejs }}', '{{ sub.enrollment.student_id|escapejs }}', '{{ sub.assignment.batch.name|escapejs }}', '{{ sub.assignment.week_number }}', '{{ sub.assignment.title|escapejs }}', '{{ sub.assignment.total_marks }}', '{{ sub.submission_text|escapejs }}', '{{ sub.attachment_url|default:''|escapejs }}', '{{ sub.obtained_marks|default:sub.assignment.total_marks }}', '{{ sub.mentor_feedback|default:''|escapejs }}', '{{ sub.status }}')" style="font-weight:800;border-radius:10px;padding:8px 16px">
+                                📝 Evaluate & Grade Script
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -275,7 +265,7 @@
         {% endif %}
     </div>
 
-    <!-- Active Assignments List -->
+    <!-- Published Assignments List -->
     <div class="card">
         <div class="card-title">📋 Published Homework Assignments</div>
         {% if assignments %}
@@ -323,6 +313,83 @@
     </div>
 </main>
 
+<!-- EVALUATE & GRADE SUBMISSION MODAL -->
+<div id="evaluateSubmissionModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1.5px solid var(--border2);border-radius:24px;max-width:740px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;box-shadow:0 25px 60px rgba(0,0,0,0.9);position:relative">
+        <button type="button" onclick="closeEvaluateModal()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:36px;height:36px;border-radius:12px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">✕</button>
+
+        <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+            <div style="font-size:11px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">📝 STUDENT SOLUTION SCRIPT EVALUATION</div>
+            <h2 style="font-size:22px;font-weight:900;color:var(--text)" id="eval-student-name">Student Name</h2>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap">
+                <span style="font-size:13px;color:var(--text2)" id="eval-student-email">email@domain.com</span>
+                <span style="font-size:11.5px;background:rgba(56,189,248,0.12);color:var(--cyan);border:1px solid rgba(56,189,248,0.25);padding:2px 10px;border-radius:12px;font-family:monospace;font-weight:700" id="eval-student-id">🆔 QS-STU-0000</span>
+                <span style="font-size:11.5px;background:rgba(245,158,11,0.15);color:var(--amber);padding:2px 10px;border-radius:12px;font-weight:700" id="eval-batch-name">Batch 01</span>
+            </div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:18px;margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="font-size:11px;font-weight:800;color:var(--lime);background:rgba(204,255,0,0.1);padding:2px 8px;border-radius:10px;border:1px solid rgba(204,255,0,0.2)" id="eval-week-badge">🗓 Week 1 Task</span>
+                <span style="font-size:13px;font-weight:800;color:var(--text)">Max Score: <strong id="eval-max-marks" style="color:var(--cyan)">100 Marks</strong></span>
+            </div>
+            <h4 style="font-size:16px;font-weight:800;color:var(--text)" id="eval-assignment-title">Assignment Title</h4>
+        </div>
+
+        <!-- Student Text Answer Script -->
+        <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <label style="font-size:12px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:0.05em">📝 Submitted Solution Script / Code</label>
+                <button type="button" onclick="copyScriptText()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--cyan);padding:4px 12px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer">📋 Copy Script</button>
+            </div>
+            <div id="eval-script-text" style="background:#090d16;border:1px solid var(--border2);border-radius:14px;padding:18px;font-size:13.5px;color:#e2e8f0;line-height:1.65;white-space:pre-wrap;max-height:260px;overflow-y:auto;font-family:inherit">
+                Script text content...
+            </div>
+        </div>
+
+        <!-- Attachment Link -->
+        <div id="eval-attachment-container" style="margin-bottom:24px;display:none">
+            <label style="font-size:12px;font-weight:800;color:var(--text);display:block;margin-bottom:6px;text-transform:uppercase">🔗 Project / Solution Attachment Link</label>
+            <a id="eval-attachment-link" href="#" target="_blank" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:8px;color:var(--cyan);border-color:var(--cyan);font-weight:700;padding:10px 18px;border-radius:12px">
+                🚀 Open Project / GitHub / Figma Link ↗
+            </a>
+        </div>
+
+        <!-- Grading Form -->
+        <form method="POST" action="/superadmin/assignments/">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="grade_submission">
+            <input type="hidden" name="submission_id" id="eval-submission-id" value="">
+
+            <div style="background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.2);border-radius:16px;padding:20px;margin-bottom:20px">
+                <div style="font-size:12px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">🎯 Mentor Evaluation & Marks Assignment</div>
+                
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:start">
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">Obtained Marks *</label>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <input type="number" name="obtained_marks" id="eval-obtained-marks" min="0" class="form-input" style="width:100%;padding:12px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:16px;font-weight:800" required>
+                            <span style="font-size:14px;font-weight:700;color:var(--text2);white-space:nowrap" id="eval-marks-max-suffix">/ 100</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">Mentor Remarks / Feedback *</label>
+                        <textarea name="mentor_feedback" id="eval-mentor-feedback" rows="3" class="form-input" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:13px" placeholder="Provide constructive mentor feedback, strengths & areas of improvement..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <button type="button" class="btn btn-outline" onclick="closeEvaluateModal()" style="border-radius:12px;padding:10px 20px">Cancel</button>
+                <button type="submit" class="btn btn-cyan" style="border-radius:12px;padding:10px 24px;font-weight:800">
+                    🚀 Save Evaluation & Send Email Alert to Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function toggleTheme() {
         const isLight = document.body.classList.toggle('light-theme');
@@ -333,6 +400,52 @@
             document.body.classList.add('light-theme');
         }
     });
+
+    function openEvaluateModal(submissionId, studentName, studentEmail, studentId, batchName, weekNum, assignmentTitle, totalMarks, scriptText, attachmentUrl, obtainedMarks, feedback, status) {
+        document.getElementById('eval-submission-id').value = submissionId;
+        document.getElementById('eval-student-name').innerText = studentName;
+        document.getElementById('eval-student-email').innerText = studentEmail;
+        document.getElementById('eval-student-id').innerText = '🆔 ' + studentId;
+        document.getElementById('eval-batch-name').innerText = batchName;
+        document.getElementById('eval-week-badge').innerText = '🗓 Week ' + weekNum + ' Task';
+        document.getElementById('eval-assignment-title').innerText = assignmentTitle;
+        document.getElementById('eval-max-marks').innerText = totalMarks + ' Marks';
+        document.getElementById('eval-marks-max-suffix').innerText = '/ ' + totalMarks;
+        
+        document.getElementById('eval-script-text').innerText = scriptText || 'No text answer script provided.';
+        
+        const obtainedInput = document.getElementById('eval-obtained-marks');
+        obtainedInput.value = (obtainedMarks !== undefined && obtainedMarks !== '') ? obtainedMarks : totalMarks;
+        obtainedInput.max = totalMarks;
+
+        document.getElementById('eval-mentor-feedback').value = feedback || '';
+
+        const attachContainer = document.getElementById('eval-attachment-container');
+        const attachLink = document.getElementById('eval-attachment-link');
+        if (attachmentUrl && attachmentUrl.trim() !== '') {
+            attachLink.href = attachmentUrl;
+            attachContainer.style.display = 'block';
+        } else {
+            attachContainer.style.display = 'none';
+        }
+
+        const modal = document.getElementById('evaluateSubmissionModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeEvaluateModal() {
+        const modal = document.getElementById('evaluateSubmissionModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function copyScriptText() {
+        const scriptText = document.getElementById('eval-script-text').innerText;
+        navigator.clipboard.writeText(scriptText).then(() => {
+            alert('📋 Solution script copied to clipboard!');
+        }).catch(err => {
+            console.error('Copy failed: ', err);
+        });
+    }
 </script>
 
 </body>
