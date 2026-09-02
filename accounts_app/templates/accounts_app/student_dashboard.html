@@ -296,7 +296,7 @@
             <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme">
                 🌙 Dark
             </button>
-            <button type="button" class="theme-toggle-btn lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
+            <button type="button" class="lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
                 🇬🇧 English
             </button>
             <div class="user-pill">
@@ -777,15 +777,15 @@ function toggleTheme() {
 }
 
 function updateThemeToggleUI(theme) {
-    const btns = document.querySelectorAll('.theme-toggle-btn');
+    const btns = document.querySelectorAll('.theme-toggle-btn:not(.lang-toggle-btn)');
     btns.forEach(btn => {
         if (theme === 'light') {
-            btn.innerHTML = '☀️ Light';
+            btn.innerHTML = btn.innerText.includes('Dark') || btn.innerText.includes('Light') ? '☀️ Light' : '☀️';
             btn.style.background = '#e2e8f0';
             btn.style.color = '#0f172a';
             btn.style.borderColor = '#cbd5e1';
         } else {
-            btn.innerHTML = '🌙 Dark';
+            btn.innerHTML = btn.innerText.includes('Dark') || btn.innerText.includes('Light') ? '🌙 Dark' : '🌙';
             btn.style.background = 'rgba(255,255,255,0.08)';
             btn.style.color = '#f8fafc';
             btn.style.borderColor = 'rgba(255,255,255,0.15)';
