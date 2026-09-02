@@ -15,7 +15,6 @@ class AutoSetupMiddleware:
         if not _setup_done:
             _setup_done = True
             try:
-                call_command('migrate', '--fake-initial', interactive=False)
                 self._seed_superusers()
             except Exception as ex:
                 print(f"AutoSetupMiddleware notice: {ex}")

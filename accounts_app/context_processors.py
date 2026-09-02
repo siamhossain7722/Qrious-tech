@@ -6,12 +6,12 @@ from django.conf import settings
 
 def subscription_context(request):
     """Inject subscription details into every template."""
-    if not request.user.is_authenticated:
-        return {'plan': 'free', 'plan_limits': settings.PLAN_LIMITS['free']}
-
     try:
-        sub = request.user.subscription
-        plan = sub.plan if sub.is_active else 'free'
+        if not getattr(request, 'user', None) or not request.user.is_authenticated:
+            return {'plan': 'free', 'plan_limits': settings.PLAN_LIMITS['free']}
+
+        sub = getattr(request.user, 'subscription', None)
+        plan = sub.plan if sub and sub.is_active else 'free'
     except Exception:
         plan = 'free'
 
@@ -19,7 +19,7 @@ def subscription_context(request):
         'current_plan': plan,
         'plan_limits': settings.PLAN_LIMITS.get(plan, settings.PLAN_LIMITS['free']),
         'all_plans': settings.PLAN_LIMITS,
-        'applications_remaining': _get_remaining(request.user, plan),
+        'applications_remaining': _get_remaining(getattr(request, 'user', None), plan),
     }
 
 
