@@ -29,7 +29,7 @@ def ensure_db_and_admin():
         return
     _db_initialized = True
     try:
-        call_command('migrate', '--fake-initial', interactive=False)
+        call_command('migrate', interactive=False)
         from django.contrib.auth.models import User
         from accounts_app.models import UserProfile, Subscription
 

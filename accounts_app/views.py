@@ -1383,24 +1383,27 @@ def student_dashboard(request):
     assignments_list = []
     student_submissions_dict = {}
 
-    if student_batch or request.user.is_superuser:
-        from .models import LiveClassSchedule, CourseAssignment, AssignmentSubmission
-        if student_batch:
-            upcoming_live_classes = list(LiveClassSchedule.objects.filter(batch=student_batch, is_active=True).select_related('batch'))
-            assignments_qs = CourseAssignment.objects.filter(batch=student_batch, is_active=True).select_related('batch')
-        else:
-            assignments_qs = CourseAssignment.objects.filter(is_active=True).select_related('batch')
-        
-        assignments_list = list(assignments_qs)
+    try:
+        if student_batch or request.user.is_superuser:
+            from .models import LiveClassSchedule, CourseAssignment, AssignmentSubmission
+            if student_batch:
+                upcoming_live_classes = list(LiveClassSchedule.objects.filter(batch=student_batch, is_active=True).select_related('batch'))
+                assignments_qs = CourseAssignment.objects.filter(batch=student_batch, is_active=True).select_related('batch')
+            else:
+                assignments_qs = CourseAssignment.objects.filter(is_active=True).select_related('batch')
+            
+            assignments_list = list(assignments_qs)
 
-        primary_enrollment = enrollments.first()
-        if primary_enrollment:
-            user_submissions = AssignmentSubmission.objects.filter(enrollment=primary_enrollment).select_related('assignment')
-            for sub in user_submissions:
-                student_submissions_dict[sub.assignment_id] = sub
+            primary_enrollment = enrollments.first()
+            if primary_enrollment:
+                user_submissions = AssignmentSubmission.objects.filter(enrollment=primary_enrollment).select_related('assignment')
+                for sub in user_submissions:
+                    student_submissions_dict[sub.assignment_id] = sub
 
-    for assign in assignments_list:
-        assign.user_submission = student_submissions_dict.get(assign.id, None)
+        for assign in assignments_list:
+            assign.user_submission = student_submissions_dict.get(assign.id, None)
+    except Exception as ex:
+        print(f"[WARN] student_dashboard assignments fetch info: {ex}")
 
     context = {
         'enrollments': enrollments,
