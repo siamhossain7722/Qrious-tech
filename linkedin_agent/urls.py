@@ -139,9 +139,6 @@ urlpatterns = [
     path('api/jwt/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/jwt/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-    # Automated Scheduled Publishing & Email Notification Cron Job API
-    path('api/cron/process-scheduled-classes/', accounts_views.process_scheduled_classes_cron, name='process_scheduled_classes_cron'),
-
     # Landing & Public pages (Must match root / first)
     path('', include('landing.urls')),
 

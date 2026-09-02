@@ -1917,7 +1917,7 @@ def admin_manage_live_classes(request):
                             live_class.save()
                             messages.success(
                                 request,
-                                f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! Student email invitations will be auto-dispatched by Vercel Cron at the scheduled date & time."
+                                f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}!"
                             )
                     # Redirect with created ID so template shows WhatsApp share modal
                     return redirect(f'/superadmin/live-classes/?created={live_class.id}')
@@ -2733,67 +2733,5 @@ def notifications_hub_view(request):
     return render(request, 'accounts_app/notifications.html', context)
 
 
-@csrf_exempt
-def process_scheduled_classes_cron(request):
-    """
-    Vercel Cron / Scheduled Job Endpoint.
-    Automatically executes every 1 minute:
-    1. Publishes scheduled recorded video class lessons whose scheduled_at <= now.
-    2. Sends automated HTML email notifications & dashboard alerts to target batch students.
-    3. Activates and emails scheduled live class sessions whose scheduled_at <= now.
-    """
-    import os
-    cron_token = request.GET.get('token') or request.headers.get('Authorization', '')
-    expected_token = os.getenv('CRON_SECRET', 'qrious_tech_cron_secret_2026')
 
-    is_vercel_cron = request.headers.get('X-Vercel-Cron') == '1' or request.headers.get('x-vercel-cron') == '1'
-    if not is_vercel_cron and cron_token != expected_token and cron_token != f"Bearer {expected_token}":
-        return JsonResponse({'error': 'Unauthorized cron request'}, status=401)
-
-    from .models import CourseLesson, LiveClassSchedule
-    from django.utils import timezone
-
-    now = timezone.now()
-    published_lessons_count = 0
-    lesson_emails_sent = 0
-    live_classes_activated = 0
-
-    # 1. Process Scheduled Recorded Lessons
-    pending_lessons = CourseLesson.objects.filter(
-        is_published=False,
-        scheduled_at__isnull=False,
-        scheduled_at__lte=now
-    )
-
-    for lesson in pending_lessons:
-        lesson.is_published = True
-        lesson.save()
-        published_lessons_count += 1
-
-        if not lesson.auto_email_sent:
-            sent = notify_students_new_lesson(lesson)
-            lesson.auto_email_sent = True
-            lesson.save()
-            lesson_emails_sent += sent
-
-    # 2. Process Scheduled Live Class Meetings
-    pending_live_classes = LiveClassSchedule.objects.filter(
-        is_active=True,
-        scheduled_at__lte=now,
-        auto_email_sent=False
-    )
-
-    for lc in pending_live_classes:
-        notif_cnt, sent = send_live_class_notifications(lc)
-        lc.auto_email_sent = True
-        lc.save()
-        live_classes_activated += 1
-
-    return JsonResponse({
-        'status': 'success',
-        'timestamp': now.strftime('%Y-%m-%d %H:%M:%S'),
-        'published_lessons_count': published_lessons_count,
-        'lesson_emails_sent': lesson_emails_sent,
-        'live_classes_activated': live_classes_activated
-    })
 
