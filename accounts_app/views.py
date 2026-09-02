@@ -1380,15 +1380,34 @@ def student_dashboard(request):
 
     student_batch = enrollments.first().batch if enrollments.exists() and enrollments.first().batch else None
     upcoming_live_classes = []
-    if student_batch:
-        from .models import LiveClassSchedule
-        upcoming_live_classes = list(LiveClassSchedule.objects.filter(batch=student_batch, is_active=True).select_related('batch'))
+    assignments_list = []
+    student_submissions_dict = {}
+
+    if student_batch or request.user.is_superuser:
+        from .models import LiveClassSchedule, CourseAssignment, AssignmentSubmission
+        if student_batch:
+            upcoming_live_classes = list(LiveClassSchedule.objects.filter(batch=student_batch, is_active=True).select_related('batch'))
+            assignments_qs = CourseAssignment.objects.filter(batch=student_batch, is_active=True).select_related('batch')
+        else:
+            assignments_qs = CourseAssignment.objects.filter(is_active=True).select_related('batch')
+        
+        assignments_list = list(assignments_qs)
+
+        primary_enrollment = enrollments.first()
+        if primary_enrollment:
+            user_submissions = AssignmentSubmission.objects.filter(enrollment=primary_enrollment).select_related('assignment')
+            for sub in user_submissions:
+                student_submissions_dict[sub.assignment_id] = sub
+
+    for assign in assignments_list:
+        assign.user_submission = student_submissions_dict.get(assign.id, None)
 
     context = {
         'enrollments': enrollments,
         'dm_modules': dm_modules,
         'profile': getattr(request.user, 'profile', None),
         'upcoming_live_classes': upcoming_live_classes,
+        'assignments': assignments_list,
     }
     return render(request, 'accounts_app/student_dashboard.html', context)
 
@@ -2823,6 +2842,179 @@ def notifications_hub_view(request):
         'filter_status': filter_status,
     }
     return render(request, 'accounts_app/notifications.html', context)
+
+
+@login_required
+@user_passes_test(_is_superuser)
+def admin_manage_assignments(request):
+    """Super Admin Console: Create homework assignments per batch & grade student text submissions."""
+    from .models import CourseBatch, CourseAssignment, AssignmentSubmission, StudentEnrollment
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'create_assignment':
+            batch_id = request.POST.get('batch_id')
+            title = request.POST.get('title', '').strip()
+            description = request.POST.get('description', '').strip()
+            due_date_str = request.POST.get('due_date', '').strip()
+            total_marks = int(request.POST.get('total_marks', 100))
+
+            batch = get_object_or_404(CourseBatch, pk=batch_id)
+
+            if title and description and due_date_str:
+                try:
+                    due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%dT%H:%M")
+                    due_date = timezone.make_aware(due_date)
+                except Exception:
+                    due_date = timezone.now() + datetime.timedelta(days=7)
+
+                assignment = CourseAssignment.objects.create(
+                    batch=batch,
+                    title=title,
+                    description=description,
+                    due_date=due_date,
+                    total_marks=total_marks
+                )
+
+                # Send notifications to students in batch
+                enrolled_students = StudentEnrollment.objects.filter(batch=batch).select_related('user')
+                notif_count = 0
+                for enr in enrolled_students:
+                    create_notification(
+                        user=enr.user,
+                        title=f"📚 New Homework Assignment Posted: {title}",
+                        message=f"New assignment for {batch.name} posted! Due date: {due_date.strftime('%b %d, %Y')}. Submit your text answer from your dashboard.",
+                        notification_type="course",
+                        category="warning",
+                        link="/student/dashboard/#assignments"
+                    )
+                    notif_count += 1
+
+                messages.success(
+                    request,
+                    f"🎉 Homework Assignment '{title}' created for {batch.name}! Sent {notif_count} student notifications."
+                )
+            else:
+                messages.error(request, "Please fill in all required fields (Batch, Title, Instructions, Due Date).")
+
+        elif action == 'grade_submission':
+            submission_id = request.POST.get('submission_id')
+            submission = get_object_or_404(AssignmentSubmission, pk=submission_id)
+            
+            try:
+                obtained_marks = int(request.POST.get('obtained_marks', 0))
+            except Exception:
+                obtained_marks = 0
+
+            mentor_feedback = request.POST.get('mentor_feedback', '').strip()
+            
+            submission.obtained_marks = min(submission.assignment.total_marks, max(0, obtained_marks))
+            submission.mentor_feedback = mentor_feedback
+            submission.status = 'graded'
+            submission.graded_at = timezone.now()
+            submission.save()
+
+            # Notify student
+            create_notification(
+                user=submission.enrollment.user,
+                title=f"🌟 Homework Graded: {submission.assignment.title}",
+                message=f"Your submission for '{submission.assignment.title}' was evaluated! Score: {submission.obtained_marks} / {submission.assignment.total_marks}.",
+                notification_type="course",
+                category="success",
+                link="/student/dashboard/#assignments"
+            )
+
+            messages.success(
+                request,
+                f"✅ Graded submission for {submission.enrollment.user.email}! Score: {submission.obtained_marks}/{submission.assignment.total_marks}."
+            )
+
+        elif action == 'delete_assignment':
+            assignment_id = request.POST.get('assignment_id')
+            assignment = get_object_or_404(CourseAssignment, pk=assignment_id)
+            title = assignment.title
+            assignment.delete()
+            messages.success(request, f"🗑 Assignment '{title}' deleted successfully.")
+
+        return redirect('/superadmin/assignments/')
+
+    assignments = CourseAssignment.objects.select_related('batch').prefetch_related('submissions', 'submissions__enrollment__user').all()
+    batches = CourseBatch.objects.all()
+    submissions = AssignmentSubmission.objects.select_related('assignment', 'assignment__batch', 'enrollment', 'enrollment__user').order_by('-submitted_at')
+
+    context = {
+        'assignments': assignments,
+        'batches': batches,
+        'submissions': submissions,
+        'total_assignments': assignments.count(),
+        'pending_submissions_count': submissions.filter(status='submitted').count(),
+        'graded_submissions_count': submissions.filter(status='graded').count(),
+    }
+    return render(request, 'accounts_app/admin_manage_assignments.html', context)
+
+
+@login_required
+def student_submit_assignment(request):
+    """Student view: Submit text homework/exam answer script."""
+    if request.method == 'POST':
+        assignment_id = request.POST.get('assignment_id')
+        submission_text = request.POST.get('submission_text', '').strip()
+        attachment_url = request.POST.get('attachment_url', '').strip()
+
+        assignment = get_object_or_404(CourseAssignment, pk=assignment_id)
+        enrollment = StudentEnrollment.objects.filter(user=request.user).first()
+
+        if not enrollment:
+            messages.error(request, "Enrollment required to submit homework.")
+            return redirect('/student/dashboard/')
+
+        if not submission_text:
+            messages.error(request, "Please enter your text answer script / solution before submitting.")
+            return redirect('/student/dashboard/#assignments')
+
+        submission, created = AssignmentSubmission.objects.get_or_create(
+            assignment=assignment,
+            enrollment=enrollment,
+            defaults={
+                'submission_text': submission_text,
+                'attachment_url': attachment_url if attachment_url else None,
+                'status': 'submitted'
+            }
+        )
+        if not created:
+            submission.submission_text = submission_text
+            if attachment_url:
+                submission.attachment_url = attachment_url
+            submission.status = 'submitted'
+            submission.submitted_at = timezone.now()
+            submission.save()
+
+        # Notify student
+        create_notification(
+            user=request.user,
+            title=f"📥 Homework Submitted: {assignment.title}",
+            message=f"Your solution for '{assignment.title}' was received successfully. Your mentor will evaluate it shortly.",
+            notification_type="course",
+            category="info",
+            link="/student/dashboard/#assignments"
+        )
+        # Notify admins
+        create_notification(
+            user=None,
+            title=f"📥 New Homework Submission: {request.user.email}",
+            message=f"Student {request.user.get_full_name() or request.user.email} submitted homework for '{assignment.title}'.",
+            notification_type="course",
+            category="warning",
+            link=f"/superadmin/assignments/?assignment_id={assignment.id}"
+        )
+
+        messages.success(
+            request,
+            f"🎉 Homework for '{assignment.title}' submitted successfully! Your mentor will grade your text answer."
+        )
+
+    return redirect('/student/dashboard/#assignments')
 
 
 

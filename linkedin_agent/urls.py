@@ -117,6 +117,8 @@ urlpatterns = [
     path('invoice/<str:invoice_id>/pdf/', accounts_views.download_invoice_pdf, name='download_invoice_pdf'),
     path('student/upload-payment/', accounts_views.student_upload_payment, name='student_upload_payment'),
     path('superadmin/payment/<int:payment_id>/verify/', accounts_views.superadmin_verify_payment, name='superadmin_verify_payment'),
+    path('superadmin/assignments/', accounts_views.admin_manage_assignments, name='admin_manage_assignments'),
+    path('student/assignments/submit/', accounts_views.student_submit_assignment, name='student_submit_assignment'),
 
     # Student Portal (Clean Root URLs without /billing/)
     path('student/dashboard/', accounts_views.student_dashboard, name='student_dashboard'),

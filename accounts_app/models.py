@@ -475,3 +475,47 @@ class LiveClassSchedule(models.Model):
         return f"{self.batch.name} - {self.title} ({self.scheduled_at.strftime('%b %d, %Y %I:%M %p')})"
 
 
+class CourseAssignment(models.Model):
+    """Homework, Assignment & Exam Task created by Super Admin per Batch."""
+    batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE, related_name='assignments')
+    title = models.CharField(max_length=255)
+    description = models.TextField(help_text="Homework questions, exam instructions, guidelines, and submission rules")
+    due_date = models.DateTimeField(help_text="Deadline for student submissions")
+    total_marks = models.IntegerField(default=100)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-due_date']
+
+    def __str__(self):
+        return f"{self.batch.name} - {self.title} (Due: {self.due_date.strftime('%b %d, %Y')})"
+
+
+class AssignmentSubmission(models.Model):
+    """Student Homework / Exam Submission Script."""
+    STATUS_CHOICES = (
+        ('submitted', 'Pending Grading'),
+        ('graded', 'Graded & Evaluated'),
+        ('resubmit', 'Needs Revision'),
+    )
+
+    assignment = models.ForeignKey(CourseAssignment, on_delete=models.CASCADE, related_name='submissions')
+    enrollment = models.ForeignKey(StudentEnrollment, on_delete=models.CASCADE, related_name='submissions')
+    submission_text = models.TextField(help_text="Student text response, code solution, essay, or answer script")
+    attachment_url = models.URLField(max_length=500, blank=True, null=True, help_text="Optional link to GitHub, Google Drive, Figma, etc.")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+    obtained_marks = models.IntegerField(blank=True, null=True)
+    mentor_feedback = models.TextField(blank=True, help_text="Mentor feedback, corrections, and evaluation notes")
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    graded_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-submitted_at']
+        unique_together = ('assignment', 'enrollment')
+
+    def __str__(self):
+        return f"{self.enrollment.user.email} - {self.assignment.title} ({self.status.upper()})"
+
+
+

@@ -1,0 +1,316 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework & Exam Assignments — Qrious Tech Academy Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070913; --bg2: #0d1222; --card: #131b2e; --card-hover: #1a243d;
+            --cyan: #0284c7; --purple: #8b5cf6; --lime: #ccff00; --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+            --text: #f8fafc; --text2: #94a3b8; --text3: #64748b;
+            --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+        }
+        body.light-theme {
+            --bg: #f8fafc; --bg2: #ffffff; --card: #ffffff; --card-hover: #f1f5f9;
+            --text: #0f172a; --text2: #334155; --text3: #64748b;
+            --border: #e2e8f0; --border2: #cbd5e1;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+
+        .sidebar { width: 260px; background: #0d1222 !important; border-right: 1px solid rgba(255,255,255,0.08) !important; padding: 24px 16px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 0 8px; }
+        .nav-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b !important; margin: 16px 8px 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #cbd5e1 !important; text-decoration: none; font-size: 13.5px; font-weight: 600; transition: all 0.2s; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08) !important; color: #ffffff !important; }
+        .nav-item.active { background: #2563eb !important; color: #ffffff !important; border: 1px solid #3b82f6 !important; font-weight: 700 !important; }
+
+        .main { margin-left: 260px; flex: 1; min-height: 100vh; padding: 32px 40px; overflow-y: auto; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+        .page-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .stat-val { font-size: 28px; font-weight: 900; color: var(--text); margin-top: 4px; }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 28px; }
+        .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 12px 14px;
+            color: var(--text); font-family: inherit; font-size: 13.5px; outline: none; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--cyan); }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-cyan { background: linear-gradient(135deg, #0284c7, #38bdf8); color: white; }
+        .btn-cyan:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(2,132,199,0.4); }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); }
+        .btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 12px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); }
+        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; color: var(--text); vertical-align: middle; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-block; }
+        .badge-pending { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-graded { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+
+        .text-answer-preview { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--text2); max-height: 90px; overflow-y: auto; white-space: pre-wrap; margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div>
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;">Academy</span>
+            </div>
+        </div>
+
+        <div class="nav-label">Master Controls</div>
+        <a href="/superadmin/" class="nav-item">📊 Dashboard & Courses</a>
+        <a href="/admin-users/" class="nav-item">👥 Users & Subscriptions</a>
+        <a href="/admin-payments/" class="nav-item">💳 Payment Verifications</a>
+        <a href="/admin-bookings/" class="nav-item">📅 Service Bookings</a>
+        <a href="/notifications/" class="nav-item">🔔 Notification Center</a>
+        <a href="/superadmin/live-classes/" class="nav-item">🎥 Live Class Meetings</a>
+        <a href="/superadmin/assignments/" class="nav-item active">📚 Homework & Exams</a>
+        <a href="/student/classroom/admin/" class="nav-item">🎬 Upload Recorded Classes</a>
+        <a href="/student/classroom/" class="nav-item">▶️ Student Video Classroom</a>
+    </div>
+    <div>
+        <a href="/logout/" class="nav-item">🚪 Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div>
+            <h1 class="page-title">📚 Homework & Exam Assignment Manager</h1>
+            <div style="font-size:13px;color:var(--text2);margin-top:2px">Publish batch homework, review student text answer scripts, and assign marks & feedback.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="btn btn-outline" id="themeBtn" onclick="toggleTheme()">☀️ Theme</button>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div style="margin-bottom:24px">
+        {% for message in messages %}
+        <div style="padding:14px 18px;border-radius:12px;margin-bottom:10px;font-size:14px;font-weight:600;
+            {% if message.tags == 'error' %}background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);
+            {% elif message.tags == 'warning' %}background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);
+            {% else %}background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Metrics Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase">Total Active Assignments</div>
+            <div class="stat-val" style="color:var(--cyan)">{{ total_assignments }}</div>
+        </div>
+        <div class="stat-card">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase">Pending Submissions to Grade</div>
+            <div class="stat-val" style="color:var(--amber)">{{ pending_submissions_count }}</div>
+        </div>
+        <div class="stat-card">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase">Graded Submissions</div>
+            <div class="stat-val" style="color:var(--green)">{{ graded_submissions_count }}</div>
+        </div>
+    </div>
+
+    <!-- Create Assignment Form -->
+    <div class="card">
+        <div class="card-title">📝 Post New Homework Assignment / Exam Task</div>
+        <form method="POST" action="/superadmin/assignments/">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_assignment">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Target Student Batch *</label>
+                    <select name="batch_id" required>
+                        <option value="">-- Select Batch --</option>
+                        {% for b in batches %}
+                        <option value="{{ b.id }}">{{ b.name }}{% if b.course %} ({{ b.course.title }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Assignment / Exam Title *</label>
+                    <input type="text" name="title" placeholder="e.g. Copywriting & FB Ads Campaign Strategy Homework" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Due Date & Deadline *</label>
+                    <input type="datetime-local" name="due_date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Total Maximum Marks *</label>
+                    <input type="number" name="total_marks" value="100" min="1" required>
+                </div>
+
+                <div class="form-group full">
+                    <label>Homework Instructions, Questions & Guidelines *</label>
+                    <textarea name="description" rows="4" placeholder="Write detailed homework instructions, questions, essay prompt, or answer format requirements..." required></textarea>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                <button type="submit" class="btn btn-cyan">🚀 Publish Homework to Batch Students</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Student Submissions Grading Console -->
+    <div class="card">
+        <div class="card-title">📥 Student Submissions & Grading Console</div>
+        {% if submissions %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Assignment</th>
+                        <th>Student Text Answer Script</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th>Grade & Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                    <tr>
+                        <td>
+                            <strong style="color:var(--text);display:block">{{ sub.enrollment.user.get_full_name|default:sub.enrollment.user.email }}</strong>
+                            <span style="font-size:11px;color:var(--cyan);font-family:monospace">{{ sub.enrollment.student_id }}</span>
+                        </td>
+                        <td>
+                            <strong style="color:var(--text)">{{ sub.assignment.title }}</strong>
+                            <div style="font-size:11.5px;color:var(--amber)">📡 {{ sub.assignment.batch.name }}</div>
+                        </td>
+                        <td style="max-width:320px">
+                            <div class="text-answer-preview">{{ sub.submission_text }}</div>
+                            {% if sub.attachment_url %}
+                            <a href="{{ sub.attachment_url }}" target="_blank" style="color:var(--cyan);font-size:12px;font-weight:700;display:inline-block;margin-top:4px">🔗 View Attachment Link ↗</a>
+                            {% endif %}
+                        </td>
+                        <td style="white-space:nowrap;font-size:12.5px;color:var(--text2)">
+                            {{ sub.submitted_at|date:"D, M d, Y" }}<br>
+                            <span style="font-size:11px;color:var(--text3)">at {{ sub.submitted_at|date:"h:i A" }}</span>
+                        </td>
+                        <td>
+                            {% if sub.status == 'graded' %}
+                            <span class="badge badge-graded">🟢 Graded: {{ sub.obtained_marks }}/{{ sub.assignment.total_marks }}</span>
+                            {% else %}
+                            <span class="badge badge-pending">⏳ Pending Review</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="/superadmin/assignments/" style="display:flex;flex-direction:column;gap:8px;min-width:200px">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="grade_submission">
+                                <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                                
+                                <div style="display:flex;align-items:center;gap:6px">
+                                    <input type="number" name="obtained_marks" value="{{ sub.obtained_marks|default:sub.assignment.total_marks }}" min="0" max="{{ sub.assignment.total_marks }}" style="width:70px;padding:6px;border-radius:6px;background:var(--bg2);border:1px solid var(--border2);color:var(--text)" required>
+                                    <span style="font-size:12px;color:var(--text2)">/ {{ sub.assignment.total_marks }}</span>
+                                </div>
+                                <input type="text" name="mentor_feedback" value="{{ sub.mentor_feedback }}" placeholder="Mentor feedback/remarks..." style="padding:6px 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:12px">
+                                <button type="submit" class="btn btn-cyan" style="padding:6px 12px;font-size:12px">Grade & Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding:40px;text-align:center;color:var(--text3);font-size:14px">
+            📥 No student homework submissions received yet.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Active Assignments List -->
+    <div class="card">
+        <div class="card-title">📋 Published Homework Assignments</div>
+        {% if assignments %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Assignment Title</th>
+                        <th>Due Date</th>
+                        <th>Total Marks</th>
+                        <th>Submissions</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in assignments %}
+                    <tr>
+                        <td><strong style="color:var(--cyan)">{{ a.batch.name }}</strong></td>
+                        <td>
+                            <strong style="color:var(--text);display:block">{{ a.title }}</strong>
+                            <span style="font-size:12px;color:var(--text2);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">{{ a.description }}</span>
+                        </td>
+                        <td style="white-space:nowrap;font-size:13px;color:var(--amber);font-weight:700">
+                            📅 {{ a.due_date|date:"D, M d, Y @ h:i A" }}
+                        </td>
+                        <td><strong>{{ a.total_marks }} Marks</strong></td>
+                        <td><span class="badge badge-graded">{{ a.submissions.count }} Submitted</span></td>
+                        <td>
+                            <form method="POST" action="/superadmin/assignments/" onsubmit="return confirm('Delete assignment {{ a.title|escapejs }}?')" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_assignment">
+                                <input type="hidden" name="assignment_id" value="{{ a.id }}">
+                                <button type="submit" class="btn btn-danger" style="padding:6px 12px;font-size:12px">🗑 Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding:30px;text-align:center;color:var(--text3)">No published assignments found. Create your first assignment above!</div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+    function toggleTheme() {
+        const isLight = document.body.classList.toggle('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+        }
+    });
+</script>
+
+</body>
+</html>
