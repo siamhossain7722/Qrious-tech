@@ -318,12 +318,7 @@
 
                         <div class="form-group">
                             <label>Meeting Link (Google Meet / Zoom / Teams) *</label>
-                            <input type="url" name="meeting_link" placeholder="https://meet.google.com/abc-def-ghi">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Class Video Recording Link (Optional — Auto Emails Batch)</label>
-                            <input type="url" name="recording_url" placeholder="https://drive.google.com/... or https://youtube.com/...">
+                            <input type="url" name="meeting_link" placeholder="https://meet.google.com/abc-def-ghi" required>
                         </div>
 
                         <div class="form-group">
@@ -391,9 +386,6 @@
                                     {% if lc.meeting_link %}
                                     <a href="{{ lc.meeting_link }}" target="_blank" style="color:var(--lime);font-size:12px;text-decoration:none;font-weight:700;word-break:break-all;display:block;margin-bottom:2px">🔗 Meet Link ↗</a>
                                     {% endif %}
-                                    {% if lc.recording_url %}
-                                    <a href="{{ lc.recording_url }}" target="_blank" style="color:#0284c7;font-size:12px;text-decoration:none;font-weight:800;word-break:break-all;display:inline-block;background:rgba(2,132,199,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(2,132,199,0.3)">🎥 Video Recording ↗</a>
-                                    {% endif %}
                                 </td>
                                 <td style="white-space:nowrap">
                                     <strong style="color:var(--text);display:block">{{ lc.scheduled_at|date:"D, M d, Y" }}</strong>
@@ -406,9 +398,6 @@
                                 </td>
                                 <td>
                                     <div class="action-group" style="display:flex;gap:6px;flex-wrap:wrap">
-                                        <button type="button" class="btn btn-cyan btn-sm" onclick="openUploadRecordingModal('{{ lc.id }}', '{{ lc.title|escapejs }}', '{{ lc.batch.name|escapejs }}', '{{ lc.recording_url|default:''|escapejs }}')">
-                                            🎥 {% if lc.recording_url %}Update Recording{% else %}Upload Recording{% endif %}
-                                        </button>
                                         <form method="POST" action="/superadmin/live-classes/" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="resend_invitation"><input type="hidden" name="class_id" value="{{ lc.id }}"><button type="submit" class="btn btn-outline btn-sm">📢 Resend</button></form>
                                         <form method="POST" action="/superadmin/live-classes/" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="toggle_status"><input type="hidden" name="class_id" value="{{ lc.id }}"><button type="submit" class="btn btn-outline btn-sm">{% if lc.is_active %}⏸ Cancel{% else %}▶ Activate{% endif %}</button></form>
                                         <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteLiveClassModal('{{ lc.id }}', '{{ lc.title|escapejs }}')">🗑 Delete</button>
@@ -601,22 +590,6 @@
         if (modal) modal.style.display = 'none';
     }
 
-    /* ─── UPLOAD RECORDING MODAL ───────────── */
-    function openUploadRecordingModal(classId, classTitle, batchName, existingUrl) {
-        document.getElementById('recording-class-id').value = classId;
-        document.getElementById('recording-title-text').innerText = classTitle;
-        document.getElementById('recording-batch-text').innerText = batchName;
-        const input = document.getElementById('recording-url-input');
-        if (input) input.value = existingUrl || '';
-        const modal = document.getElementById('uploadRecordingModal');
-        if (modal) modal.style.display = 'flex';
-    }
-
-    function closeUploadRecordingModal() {
-        const modal = document.getElementById('uploadRecordingModal');
-        if (modal) modal.style.display = 'none';
-    }
-
     /* ─── INIT ──────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
         // Restore theme
@@ -634,39 +607,6 @@
         {% endif %}
     });
 </script>
-
-<!-- UPLOAD CLASS RECORDING MODAL -->
-<div id="uploadRecordingModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px">
-    <div style="background:var(--card);border:1.5px solid var(--border2);border-radius:24px;max-width:480px;width:100%;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(2,132,199,0.2);position:relative">
-        <button type="button" onclick="closeUploadRecordingModal()" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px">✕</button>
-
-        <div style="margin-bottom:20px">
-            <div style="font-size:11px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">🎥 BATCH EMAIL NOTIFICATION SYSTEM</div>
-            <h3 style="font-weight:900;font-size:20px;color:var(--text)" id="recording-title-text">Upload Class Recording</h3>
-            <div style="font-size:12.5px;color:var(--text2);margin-top:4px">Target Batch: <strong id="recording-batch-text" style="color:var(--cyan)"></strong></div>
-        </div>
-
-        <form method="POST" action="/superadmin/live-classes/">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="upload_class_recording">
-            <input type="hidden" name="class_id" id="recording-class-id" value="">
-
-            <div style="margin-bottom:20px">
-                <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:8px">📹 Video Recording URL (Google Drive / YouTube / Vimeo) *</label>
-                <input type="url" name="recording_url" id="recording-url-input" class="form-input" style="width:100%;padding:12px 14px;border-radius:12px;background:var(--bg2);border:1px solid var(--border2);color:var(--text)" placeholder="https://drive.google.com/file/d/... or https://youtube.com/watch?v=..." required>
-                <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.4">
-                    ✉️ Submitting this form will <strong>automatically send HTML email notifications to all students enrolled in this batch</strong> with the video link & post a dashboard alert!
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-                <button type="button" class="btn btn-outline" onclick="closeUploadRecordingModal()" style="border-radius:12px;padding:10px 18px">Cancel</button>
-                <button type="submit" class="btn btn-cyan" style="border-radius:12px;padding:10px 20px;font-weight:800">
-                    📧 Publish & Send Batch Emails ↗
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- DELETE LIVE CLASS CONFIRMATION MODAL -->
 <div id="deleteLiveClassModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px">

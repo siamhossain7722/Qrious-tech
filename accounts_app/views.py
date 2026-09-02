@@ -1903,7 +1903,7 @@ def admin_manage_live_classes(request):
 
             batch = get_object_or_404(CourseBatch, pk=batch_id)
 
-            if title and (meeting_link or recording_url) and scheduled_date_str and scheduled_time_str:
+            if title and meeting_link and scheduled_date_str and scheduled_time_str:
                 try:
                     dt_str = f"{scheduled_date_str} {scheduled_time_str}"
                     scheduled_at = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
@@ -1912,37 +1912,27 @@ def admin_manage_live_classes(request):
                     live_class = LiveClassSchedule.objects.create(
                         batch=batch,
                         title=title,
-                        meeting_link=meeting_link or recording_url,
-                        recording_url=recording_url if recording_url else None,
-                        recorded_at=timezone.now() if recording_url else None,
+                        meeting_link=meeting_link,
                         scheduled_at=scheduled_at,
                         duration=duration,
                         instructor_name=instructor_name,
                         agenda=agenda
                     )
 
-                    if recording_url:
-                        notif_cnt, email_cnt = send_class_recording_notifications(live_class, request)
-                        live_class.auto_email_sent = True
-                        live_class.save()
+                    notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
+                    live_class.auto_email_sent = True
+                    live_class.save()
+
+                    if email_cnt > 0:
                         messages.success(
                             request,
-                            f"🎉 Class Recording '{title}' published for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email notifications to all batch students."
+                            f"🚀 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
                         )
                     else:
-                        notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
-                        live_class.auto_email_sent = True
-                        live_class.save()
-                        if email_cnt > 0:
-                            messages.success(
-                                request,
-                                f"🚀 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
-                            )
-                        else:
-                            messages.success(
-                                request,
-                                f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! (Note: {notif_cnt} dashboard alerts sent, 0 email invitations sent — check if students are enrolled in {batch.name})."
-                            )
+                        messages.success(
+                            request,
+                            f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! (Note: {notif_cnt} dashboard alerts sent, 0 email invitations sent — check if students are enrolled in {batch.name})."
+                        )
 
                     if getattr(settings, 'EMAIL_BACKEND', '').endswith('console.EmailBackend'):
                         messages.warning(
@@ -1955,30 +1945,7 @@ def admin_manage_live_classes(request):
                 except Exception as ex:
                     messages.error(request, f"Could not schedule live class: {ex}")
             else:
-                messages.error(request, "Please fill in all required fields (Batch, Title, Meeting/Recording Link, Date, Time).")
-
-        elif action == 'upload_class_recording':
-            class_id = request.POST.get('class_id')
-            recording_url = request.POST.get('recording_url', '').strip()
-
-            live_class = get_object_or_404(LiveClassSchedule, pk=class_id)
-            if recording_url:
-                live_class.recording_url = recording_url
-                live_class.recorded_at = timezone.now()
-                live_class.save()
-
-                notif_cnt, email_cnt = send_class_recording_notifications(live_class, request)
-                messages.success(
-                    request,
-                    f"🎉 Class Recording for '{live_class.title}' uploaded successfully! Emailed {email_cnt} students in {live_class.batch.name} & posted {notif_cnt} dashboard alerts."
-                )
-                if getattr(settings, 'EMAIL_BACKEND', '').endswith('console.EmailBackend'):
-                    messages.warning(
-                        request,
-                        "⚠️ REAL EMAIL DELIVERY NOTICE: EMAIL_HOST_PASSWORD is missing in .env. Emails are printed to console only!"
-                    )
-            else:
-                messages.error(request, "Please enter a valid video recording URL.")
+                messages.error(request, "Please fill in all required fields (Batch, Title, Meeting Link, Date, Time).")
 
         elif action == 'resend_invitation':
             class_id = request.POST.get('class_id')
