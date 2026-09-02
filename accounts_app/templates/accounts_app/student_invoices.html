@@ -49,32 +49,94 @@
         .badge-approved { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
         .badge-pending { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
         .badge-rejected { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .sidebar-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px); z-index: 999; opacity: 0; transition: opacity 0.3s;
+        }
+        .sidebar-backdrop.active { display: block; opacity: 1; }
+        .sidebar-close-btn { display: none; }
+
+        @media (max-width: 992px) {
+            body { display: block; }
+            .sidebar-close-btn { display: flex !important; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text2); font-size: 16px; cursor: pointer; }
+            .sidebar {
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1000; box-shadow: 0 0 50px rgba(0,0,0,0.8); width: 270px; position: fixed; top: 0; bottom: 0; left: 0;
+            }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 20px 16px; width: 100%; min-height: 100vh; }
+            .mobile-top-header { display: flex; }
+            .topbar { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+            .page-title { font-size: 22px; }
+            .card { padding: 20px 16px; border-radius: 18px; }
+        }
+
+        /* Mobile Payment Cards View */
+        .mobile-payment-cards { display: none; flex-direction: column; gap: 14px; }
+        .payment-card-mobile {
+            background: var(--bg2); border: 1px solid var(--border); border-radius: 18px; padding: 18px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15); transition: all 0.2s;
+        }
+        .payment-card-mobile:hover { border-color: var(--border2); }
+        .payment-card-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+        .payment-invoice-id { font-weight: 800; color: var(--cyan); font-family: monospace; font-size: 14px; }
+        .payment-amount-paid { font-weight: 900; color: var(--green); font-size: 16px; }
+
+        .payment-card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .payment-detail-item { display: flex; flex-direction: column; gap: 3px; }
+        .payment-detail-lbl { font-size: 11px; font-weight: 700; color: var(--text3); }
+        .payment-detail-val { font-size: 13px; color: var(--text2); }
+
+        .payment-card-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        @media (max-width: 768px) {
+            .desktop-payment-table { display: none !important; }
+            .mobile-payment-cards { display: flex !important; }
+            .payment-card-body { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
+<!-- Mobile Drawer Backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
 <aside class="sidebar">
     <div>
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
-            <div style="display:flex;flex-direction:column;line-height:1.2">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;">Qrious Tech</span>
-                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#38bdf8;text-transform:uppercase;">Academy</span>
+        <div class="logo" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#38bdf8;text-transform:uppercase;">Academy</span>
+                </div>
             </div>
+            <button type="button" onclick="toggleMobileSidebar()" class="sidebar-close-btn">✕</button>
         </div>
 
         <div class="nav-label">Student Menu</div>
-        <a href="/student/dashboard/" class="nav-item">🎓 Overview & Progress</a>
-        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal</a>
-        <a href="/student/dashboard/#live-classes" class="nav-item">🎥 Live Class Sessions</a>
-        <a href="/student/invoices/" class="nav-item active">📜 Tuition & Invoices</a>
-        <a href="/student/assignments/" class="nav-item">📚 Homework & Exams</a>
-        <a href="/student/dashboard/#curriculum" class="nav-item">📚 Course Curriculum</a>
-        <a href="/student/dashboard/#certificate" class="nav-item">🎓 Verified Certificate</a>
+        <a href="/student/dashboard/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Overview & Progress</a>
+        <a href="/student/classroom/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎬 Video Classroom Portal</a>
+        <a href="/student/dashboard/#live-classes" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎥 Live Class Sessions</a>
+        <a href="/student/invoices/" class="nav-item active" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📜 Tuition & Invoices</a>
+        <a href="/student/assignments/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Homework & Exams</a>
+        <a href="/student/dashboard/#curriculum" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Course Curriculum</a>
+        <a href="/student/dashboard/#certificate" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Verified Certificate</a>
 
         <div class="nav-label">Services & Profile</div>
-        <a href="/notifications/" class="nav-item">🔔 Notification Hub</a>
-        <a href="/settings/" class="nav-item">⚙️ Profile Settings</a>
+        <a href="/notifications/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🔔 Notification Hub</a>
+        <a href="/settings/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">⚙️ Profile Settings</a>
     </div>
     <div>
         <a href="/logout/" class="nav-item">🚪 Logout</a>
@@ -82,6 +144,28 @@
 </aside>
 
 <main class="main">
+    <!-- Mobile Top Header Bar (Visible on Screens <= 992px) -->
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:10px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:#38bdf8;text-transform:uppercase">Academy</span>
+                </div>
+            </a>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <a href="/settings/" style="text-decoration:none">
+                <div style="width:30px;height:30px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">
+                    {{ request.user.email|first|upper }}
+                </div>
+            </a>
+        </div>
+    </header>
+
     <div class="topbar">
         <div>
             <h1 class="page-title">📜 Tuition Fees, Invoices & Payment Ledger</h1>
@@ -149,7 +233,8 @@
         </div>
 
         {% if payments %}
-        <div class="table-wrap">
+        <!-- Desktop View Table -->
+        <div class="table-wrap desktop-payment-table">
             <table>
                 <thead>
                     <tr>
@@ -207,6 +292,70 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile View Sleek Cards -->
+        <div class="mobile-payment-cards">
+            {% for p in payments %}
+            <div class="payment-card-mobile">
+                <div class="payment-card-header">
+                    <div>
+                        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">INVOICE ID</div>
+                        <span class="payment-invoice-id">{{ p.invoice_id }}</span>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em">AMOUNT PAID</div>
+                        <span class="payment-amount-paid">৳{{ p.amount|floatformat:2 }} BDT</span>
+                    </div>
+                </div>
+
+                <div class="payment-card-body">
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">📅 Date & Time</span>
+                        <span class="payment-detail-val">{{ p.created_at|date:"M d, Y • h:i A" }}</span>
+                    </div>
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">💳 Payment Method</span>
+                        <span class="payment-detail-val" style="font-weight:700">{{ p.payment_method }}</span>
+                    </div>
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">⚡ Verification Status</span>
+                        <span class="payment-detail-val">
+                            {% if p.status == 'pending' %}
+                            <span class="badge badge-pending" style="font-size:11px;padding:3px 10px">⏳ Pending</span>
+                            {% elif p.status == 'approved' %}
+                            <span class="badge badge-approved" style="font-size:11px;padding:3px 10px">✅ Verified</span>
+                            {% else %}
+                            <span class="badge badge-rejected" style="font-size:11px;padding:3px 10px">❌ Declined</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if p.transaction_ref %}
+                    <div class="payment-detail-item">
+                        <span class="payment-detail-lbl">🔖 Ref Transaction ID</span>
+                        <span class="payment-detail-val" style="font-family:monospace;color:var(--cyan);font-weight:800">{{ p.transaction_ref }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="payment-card-actions">
+                    {% if p.status == 'approved' %}
+                    <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="flex:1;justify-content:center;font-size:12px;padding:8px;color:var(--cyan)">📄 View Invoice</a>
+                    <a href="/invoice/{{ p.invoice_id }}/pdf/" class="btn btn-cyan" style="flex:1;justify-content:center;font-size:12px;padding:8px">📥 Download PDF</a>
+                    {% else %}
+                    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                        <span style="font-size:12px;color:var(--text3)">{% if p.status == 'pending' %}Pending Review{% else %}Declined{% endif %}</span>
+                        <form method="POST" action="/student/payment/{{ p.id }}/delete/" onsubmit="return confirm('Remove transaction record #{{ p.invoice_id }} from your ledger history?')" style="display:inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:11.5px;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px">
+                                🗑 Clear Record
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
         {% else %}
         <div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:14px">
@@ -274,6 +423,13 @@
 </div>
 
 <script>
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.toggle('mobile-open');
+    if (backdrop) backdrop.classList.toggle('active');
+}
+
 function openUploadPaymentModal() {
     const modal = document.getElementById('uploadPaymentModal');
     if (modal) modal.style.display = 'flex';

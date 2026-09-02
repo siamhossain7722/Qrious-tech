@@ -45,32 +45,69 @@
         .btn-cyan { background: #0284c7; color: white; }
         .btn-green { background: #059669; color: white; }
         .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .sidebar-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px); z-index: 999; opacity: 0; transition: opacity 0.3s;
+        }
+        .sidebar-backdrop.active { display: block; opacity: 1; }
+        .sidebar-close-btn { display: none; }
+
+        @media (max-width: 992px) {
+            body { display: block; }
+            .sidebar-close-btn { display: flex !important; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text2); font-size: 16px; cursor: pointer; }
+            .sidebar {
+                transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 1000; box-shadow: 0 0 50px rgba(0,0,0,0.8); width: 270px; position: fixed; top: 0; bottom: 0; left: 0;
+            }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 20px 16px; width: 100%; min-height: 100vh; }
+            .mobile-top-header { display: flex; }
+            .topbar { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+            .page-title { font-size: 22px; }
+            .assignment-card { padding: 20px 16px; border-radius: 18px; }
+        }
     </style>
 </head>
 <body>
 
+<!-- Mobile Drawer Backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
 <aside class="sidebar">
     <div>
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
-            <div style="display:flex;flex-direction:column;line-height:1.2">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;">Qrious Tech</span>
-                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#38bdf8;text-transform:uppercase;">Academy</span>
+        <div class="logo" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#38bdf8;text-transform:uppercase;">Academy</span>
+                </div>
             </div>
+            <button type="button" onclick="toggleMobileSidebar()" class="sidebar-close-btn">✕</button>
         </div>
 
         <div class="nav-label">Student Menu</div>
-        <a href="/student/dashboard/" class="nav-item">🎓 Overview & Progress</a>
-        <a href="/student/classroom/" class="nav-item">🎬 Video Classroom Portal</a>
-        <a href="/student/dashboard/#live-classes" class="nav-item">🎥 Live Class Sessions</a>
-        <a href="/student/invoices/" class="nav-item">📜 Tuition & Invoices</a>
-        <a href="/student/assignments/" class="nav-item active">📚 Homework & Exams</a>
-        <a href="/student/dashboard/#curriculum" class="nav-item">📚 Course Curriculum</a>
-        <a href="/student/dashboard/#certificate" class="nav-item">🎓 Verified Certificate</a>
+        <a href="/student/dashboard/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Overview & Progress</a>
+        <a href="/student/classroom/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎬 Video Classroom Portal</a>
+        <a href="/student/dashboard/#live-classes" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎥 Live Class Sessions</a>
+        <a href="/student/invoices/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📜 Tuition & Invoices</a>
+        <a href="/student/assignments/" class="nav-item active" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Homework & Exams</a>
+        <a href="/student/dashboard/#curriculum" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">📚 Course Curriculum</a>
+        <a href="/student/dashboard/#certificate" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🎓 Verified Certificate</a>
 
         <div class="nav-label">Services & Profile</div>
-        <a href="/notifications/" class="nav-item">🔔 Notification Hub</a>
-        <a href="/settings/" class="nav-item">⚙️ Profile Settings</a>
+        <a href="/notifications/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">🔔 Notification Hub</a>
+        <a href="/settings/" class="nav-item" onclick="if(window.innerWidth<=992)toggleMobileSidebar()">⚙️ Profile Settings</a>
     </div>
     <div>
         <a href="/logout/" class="nav-item">🚪 Logout</a>
@@ -78,6 +115,28 @@
 </aside>
 
 <main class="main">
+    <!-- Mobile Top Header Bar (Visible on Screens <= 992px) -->
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:10px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:#38bdf8;text-transform:uppercase">Academy</span>
+                </div>
+            </a>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <a href="/settings/" style="text-decoration:none">
+                <div style="width:30px;height:30px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">
+                    {{ request.user.email|first|upper }}
+                </div>
+            </a>
+        </div>
+    </header>
+
     <div class="topbar">
         <div>
             <h1 class="page-title">📚 Weekly Homework & Exam Portal</h1>
@@ -235,6 +294,13 @@
 </div>
 
 <script>
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.toggle('mobile-open');
+    if (backdrop) backdrop.classList.toggle('active');
+}
+
 function openSubmitHomeworkModal(assignmentId, title, totalMarks, existingText, existingUrl) {
     document.getElementById('hw-assignment-id').value = assignmentId;
     document.getElementById('hw-title-text').innerText = title;
