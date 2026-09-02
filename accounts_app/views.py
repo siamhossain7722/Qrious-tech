@@ -3236,6 +3236,29 @@ def student_invoices_portal(request):
     return render(request, 'accounts_app/student_invoices.html', context)
 
 
+@login_required
+def student_delete_payment(request, payment_id):
+    """Student View: Delete unverified/declined payment record from invoice ledger."""
+    from .models import StudentPayment
+    payment = get_object_or_404(StudentPayment.objects.select_related('enrollment'), pk=payment_id)
+
+    # Permission check: Must belong to current student (or superuser)
+    if payment.enrollment.user != request.user and not request.user.is_superuser:
+        messages.error(request, "Permission denied.")
+        return redirect('/student/invoices/')
+
+    # Strict Rule: Verified approved payments CANNOT be deleted by student!
+    if payment.status == 'approved' and not request.user.is_superuser:
+        messages.error(request, "⛔ CANNOT DELETE VERIFIED INVOICE! Approved payments are part of your official course financial ledger and cannot be deleted.")
+        return redirect('/student/invoices/')
+
+    invoice_id = payment.invoice_id
+    payment.delete()
+    messages.success(request, f"🗑 Removed transaction record #{invoice_id} from your tuition ledger.")
+    return redirect('/student/invoices/')
+
+
+
 
 
 
