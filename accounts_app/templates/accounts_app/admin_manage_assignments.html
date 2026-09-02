@@ -356,7 +356,7 @@
         </div>
 
         <!-- Grading Form -->
-        <form method="POST" action="/superadmin/assignments/">
+        <form method="POST" action="/superadmin/assignments/" onsubmit="handleEvaluationSubmit(this)">
             {% csrf_token %}
             <input type="hidden" name="action" value="grade_submission">
             <input type="hidden" name="submission_id" id="eval-submission-id" value="">
@@ -381,14 +381,20 @@
             </div>
 
             <div style="display:flex;gap:12px;justify-content:flex-end">
-                <button type="button" class="btn btn-outline" onclick="closeEvaluateModal()" style="border-radius:12px;padding:10px 20px">Cancel</button>
-                <button type="submit" class="btn btn-cyan" style="border-radius:12px;padding:10px 24px;font-weight:800">
+                <button type="button" id="eval-cancel-btn" class="btn btn-outline" onclick="closeEvaluateModal()" style="border-radius:12px;padding:10px 20px">Cancel</button>
+                <button type="submit" id="eval-submit-btn" class="btn btn-cyan" style="border-radius:12px;padding:10px 24px;font-weight:800">
                     🚀 Save Evaluation & Send Email Alert to Student
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+@keyframes spinDelete {
+    to { transform: rotate(360deg); }
+}
+</style>
 
 <script>
     function toggleTheme() {
@@ -445,6 +451,17 @@
         }).catch(err => {
             console.error('Copy failed: ', err);
         });
+    }
+
+    function handleEvaluationSubmit(form) {
+        const btn = document.getElementById('eval-submit-btn');
+        const cancelBtn = document.getElementById('eval-cancel-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spinDelete 0.8s linear infinite;display:inline-block;margin-right:8px;vertical-align:middle"></div> Saving Evaluation...`;
+            btn.style.opacity = '0.85';
+        }
+        if (cancelBtn) cancelBtn.style.display = 'none';
     }
 </script>
 
