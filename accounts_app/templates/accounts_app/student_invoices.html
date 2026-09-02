@@ -279,9 +279,9 @@
                             {% else %}
                             <div style="display:inline-flex;align-items:center;gap:8px">
                                 <span style="font-size:12px;color:var(--text3)">{% if p.status == 'pending' %}Pending Review{% else %}Declined{% endif %}</span>
-                                <form method="POST" action="/student/payment/{{ p.id }}/delete/" onsubmit="return confirm('Remove transaction record #{{ p.invoice_id }} from your ledger history?')" style="display:inline">
+                                <form id="delete-form-{{ p.id }}" method="POST" action="/student/payment/{{ p.id }}/delete/" style="display:inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:11.5px;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px">
+                                    <button type="button" class="btn btn-outline" onclick="openDeleteConfirmationModal('{{ p.id }}', '{{ p.invoice_id }}')" style="padding:6px 12px;font-size:11.5px;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px">
                                         🗑 Clear Record
                                     </button>
                                 </form>
@@ -345,9 +345,9 @@
                     {% else %}
                     <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
                         <span style="font-size:12px;color:var(--text3)">{% if p.status == 'pending' %}Pending Review{% else %}Declined{% endif %}</span>
-                        <form method="POST" action="/student/payment/{{ p.id }}/delete/" onsubmit="return confirm('Remove transaction record #{{ p.invoice_id }} from your ledger history?')" style="display:inline">
+                        <form id="delete-form-mobile-{{ p.id }}" method="POST" action="/student/payment/{{ p.id }}/delete/" style="display:inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:11.5px;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px">
+                            <button type="button" class="btn btn-outline" onclick="openDeleteConfirmationModal('mobile-{{ p.id }}', '{{ p.invoice_id }}')" style="padding:6px 12px;font-size:11.5px;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);border-radius:8px">
                                 🗑 Clear Record
                             </button>
                         </form>
@@ -422,7 +422,71 @@
     </div>
 </div>
 
+<!-- CUSTOM GLASSMORPHISM DELETE CONFIRMATION & LOADING MODAL -->
+<div id="confirmDeleteModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--card);border:1.5px solid rgba(239,68,68,0.35);border-radius:24px;max-width:440px;width:100%;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,0.9);position:relative;text-align:center">
+        <button type="button" onclick="closeConfirmDeleteModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px">✕</button>
+
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,0.15);color:var(--red);border:2px solid rgba(239,68,68,0.3);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px;box-shadow:0 0 20px rgba(239,68,68,0.2)">
+            🗑️
+        </div>
+
+        <h3 style="font-weight:900;font-size:20px;color:var(--text);margin-bottom:6px">Delete Payment Record?</h3>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5">
+            Are you sure you want to permanently remove transaction record <strong id="delete-modal-invoice-id" style="color:var(--cyan);font-family:monospace"></strong> from your tuition ledger history?
+        </p>
+
+        <!-- Buttons Row -->
+        <div id="deleteModalButtonsRow" style="display:flex;gap:12px;justify-content:center;margin-top:20px">
+            <button type="button" class="btn btn-outline" onclick="closeConfirmDeleteModal()" style="padding:10px 20px;border-radius:12px;font-weight:700;flex:1">
+                Cancel
+            </button>
+            <button type="button" class="btn" onclick="executeDeleteWithSpinner()" style="padding:10px 20px;border-radius:12px;font-weight:800;background:var(--red);color:white;flex:1">
+                🗑️ Confirm & Delete
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="deleteModalLoadingState" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-top:20px;padding:10px 0">
+            <div style="width:38px;height:38px;border:3px solid rgba(239,68,68,0.2);border-top-color:var(--red);border-radius:50%;animation:spinDelete 0.8s linear infinite"></div>
+            <span style="font-size:13.5px;font-weight:800;color:var(--red)">Deleting transaction record...</span>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spinDelete {
+    to { transform: rotate(360deg); }
+}
+</style>
+
 <script>
+let activeDeleteFormId = null;
+
+function openDeleteConfirmationModal(targetId, invoiceId) {
+    activeDeleteFormId = targetId;
+    document.getElementById('delete-modal-invoice-id').innerText = '#' + invoiceId;
+    document.getElementById('deleteModalButtonsRow').style.display = 'flex';
+    document.getElementById('deleteModalLoadingState').style.display = 'none';
+    const modal = document.getElementById('confirmDeleteModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeConfirmDeleteModal() {
+    const modal = document.getElementById('confirmDeleteModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function executeDeleteWithSpinner() {
+    document.getElementById('deleteModalButtonsRow').style.display = 'none';
+    document.getElementById('deleteModalLoadingState').style.display = 'flex';
+
+    setTimeout(() => {
+        const form = document.getElementById('delete-form-' + activeDeleteFormId);
+        if (form) form.submit();
+    }, 600);
+}
+
 function toggleMobileSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const backdrop = document.getElementById('sidebarBackdrop');
