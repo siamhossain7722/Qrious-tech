@@ -1726,9 +1726,10 @@ def admin_manage_modules(request):
 
 def send_live_class_notifications(live_class, request=None):
     """
-    Dispatches real-time bell notifications AND sends HTML email invitations to all students enrolled in the target batch.
+    Dispatches real-time bell notifications AND sends HTML email invitations to target batch students or registered students.
     """
     from .models import StudentEnrollment
+    from django.contrib.auth.models import User
     from django.core.mail import EmailMultiAlternatives
     from django.template.loader import render_to_string
     from django.conf import settings
@@ -1736,25 +1737,37 @@ def send_live_class_notifications(live_class, request=None):
     batch = live_class.batch
     enrollments = StudentEnrollment.objects.filter(batch=batch).select_related('user')
 
+    target_users = []
+    if enrollments.exists():
+        for e in enrollments:
+            if e.user and e.user.email and e.user not in target_users:
+                target_users.append(e.user)
+
+    # Fallback: If no specific enrollments exist for this batch, notify active student users
+    if not target_users:
+        target_users = list(User.objects.filter(is_active=True, is_superuser=False).exclude(email=''))
+
     sent_emails_count = 0
     notifications_count = 0
 
     formatted_time = live_class.scheduled_at.strftime('%A, %b %d, %Y at %I:%M %p')
 
-    for e in enrollments:
-        student_user = e.user
+    for student_user in target_users:
         student_name = student_user.get_full_name() or student_user.username or student_user.email
 
         # 1. Real-time Dashboard Bell & Hub Notification
-        create_notification(
-            user=student_user,
-            title=f"🎥 Live Class Scheduled: {live_class.title}",
-            message=f"Live class session for '{batch.name}' is scheduled on {formatted_time}. Click to join Google Meet / Zoom!",
-            notification_type="course",
-            category="info",
-            link=live_class.meeting_link
-        )
-        notifications_count += 1
+        try:
+            create_notification(
+                user=student_user,
+                title=f"🎥 Live Class Scheduled: {live_class.title}",
+                message=f"Live class session for '{batch.name}' is scheduled on {formatted_time}. Click to join Google Meet / Zoom!",
+                notification_type="course",
+                category="info",
+                link=live_class.meeting_link
+            )
+            notifications_count += 1
+        except Exception as ex:
+            print(f"Error creating notification for {student_user.email}: {ex}")
 
         # 2. HTML Email Invitation
         try:
@@ -1781,20 +1794,21 @@ def send_live_class_notifications(live_class, request=None):
                 to=[student_user.email]
             )
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            msg.send(fail_silently=False)
             sent_emails_count += 1
+            print(f"[OK] Successfully sent live class invitation email to {student_user.email}")
         except Exception as ex:
-            print(f"Error sending live class email to {student_user.email}: {ex}")
+            print(f"[ERROR] Error sending live class email to {student_user.email}: {ex}")
 
     return notifications_count, sent_emails_count
 
 
 def send_class_recording_notifications(live_class, request=None):
     """
-    Dispatches real-time bell notifications AND sends HTML email notifications to all students enrolled in the target batch
-    when a class video recording is uploaded by superadmin.
+    Dispatches real-time bell notifications AND sends HTML email notifications to target batch students or registered students.
     """
     from .models import StudentEnrollment
+    from django.contrib.auth.models import User
     from django.core.mail import EmailMultiAlternatives
     from django.template.loader import render_to_string
     from django.conf import settings
@@ -1802,25 +1816,36 @@ def send_class_recording_notifications(live_class, request=None):
     batch = live_class.batch
     enrollments = StudentEnrollment.objects.filter(batch=batch).select_related('user')
 
+    target_users = []
+    if enrollments.exists():
+        for e in enrollments:
+            if e.user and e.user.email and e.user not in target_users:
+                target_users.append(e.user)
+
+    if not target_users:
+        target_users = list(User.objects.filter(is_active=True, is_superuser=False).exclude(email=''))
+
     sent_emails_count = 0
     notifications_count = 0
 
     recording_link = live_class.recording_url or live_class.meeting_link
 
-    for e in enrollments:
-        student_user = e.user
+    for student_user in target_users:
         student_name = student_user.get_full_name() or student_user.username or student_user.email
 
         # 1. Real-time Dashboard Bell Notification
-        create_notification(
-            user=student_user,
-            title=f"🎥 Class Video Recording Available: {live_class.title}",
-            message=f"The video recording for '{live_class.title}' ({batch.name}) is now live! Click to watch recorded class video.",
-            notification_type="course",
-            category="info",
-            link=recording_link
-        )
-        notifications_count += 1
+        try:
+            create_notification(
+                user=student_user,
+                title=f"🎥 Class Video Recording Available: {live_class.title}",
+                message=f"The video recording for '{live_class.title}' ({batch.name}) is now live! Click to watch recorded class video.",
+                notification_type="course",
+                category="info",
+                link=recording_link
+            )
+            notifications_count += 1
+        except Exception as ex:
+            print(f"Error creating notification for {student_user.email}: {ex}")
 
         # 2. HTML Email Notification to Target Batch
         try:
@@ -1845,10 +1870,11 @@ def send_class_recording_notifications(live_class, request=None):
                 to=[student_user.email]
             )
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            msg.send(fail_silently=False)
             sent_emails_count += 1
+            print(f"[OK] Successfully sent class recording email to {student_user.email}")
         except Exception as ex:
-            print(f"Error sending class recording email to {student_user.email}: {ex}")
+            print(f"[ERROR] Error sending class recording email to {student_user.email}: {ex}")
 
     return notifications_count, sent_emails_count
 
@@ -1904,21 +1930,26 @@ def admin_manage_live_classes(request):
                             f"🎉 Class Recording '{title}' published for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email notifications to all batch students."
                         )
                     else:
-                        if scheduled_at <= timezone.now():
-                            notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
-                            live_class.auto_email_sent = True
-                            live_class.save()
+                        notif_cnt, email_cnt = send_live_class_notifications(live_class, request)
+                        live_class.auto_email_sent = True
+                        live_class.save()
+                        if email_cnt > 0:
                             messages.success(
                                 request,
-                                f"🎉 Live Class '{title}' published for {batch.name}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
+                                f"🚀 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! Sent {notif_cnt} dashboard alerts & {email_cnt} HTML email invitations."
                             )
                         else:
-                            live_class.auto_email_sent = False
-                            live_class.save()
                             messages.success(
                                 request,
-                                f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}!"
+                                f"📅 Live Class '{title}' scheduled for {batch.name} on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}! (Note: {notif_cnt} dashboard alerts sent, 0 email invitations sent — check if students are enrolled in {batch.name})."
                             )
+
+                    if getattr(settings, 'EMAIL_BACKEND', '').endswith('console.EmailBackend'):
+                        messages.warning(
+                            request,
+                            "⚠️ REAL EMAIL DELIVERY NOTICE: Emails are currently printed in server terminal because EMAIL_HOST_PASSWORD is not set in .env. To send real emails to Gmail inboxes, set EMAIL_HOST_PASSWORD=your_app_password in .env!"
+                        )
+
                     # Redirect with created ID so template shows WhatsApp share modal
                     return redirect(f'/superadmin/live-classes/?created={live_class.id}')
                 except Exception as ex:
@@ -1941,6 +1972,11 @@ def admin_manage_live_classes(request):
                     request,
                     f"🎉 Class Recording for '{live_class.title}' uploaded successfully! Emailed {email_cnt} students in {live_class.batch.name} & posted {notif_cnt} dashboard alerts."
                 )
+                if getattr(settings, 'EMAIL_BACKEND', '').endswith('console.EmailBackend'):
+                    messages.warning(
+                        request,
+                        "⚠️ REAL EMAIL DELIVERY NOTICE: EMAIL_HOST_PASSWORD is missing in .env. Emails are printed to console only!"
+                    )
             else:
                 messages.error(request, "Please enter a valid video recording URL.")
 
@@ -1952,6 +1988,11 @@ def admin_manage_live_classes(request):
                 request,
                 f"📢 Re-sent invitations for '{live_class.title}'! Dispatched {notif_cnt} notifications & {email_cnt} HTML emails."
             )
+            if getattr(settings, 'EMAIL_BACKEND', '').endswith('console.EmailBackend'):
+                messages.warning(
+                    request,
+                    "⚠️ REAL EMAIL DELIVERY NOTICE: Real emails were NOT delivered to Gmail inboxes because EMAIL_HOST_PASSWORD is missing in your .env file (emails printed to terminal instead). Add EMAIL_HOST_PASSWORD=your_gmail_app_password to .env to send real emails!"
+                )
 
         elif action == 'toggle_status':
             class_id = request.POST.get('class_id')
