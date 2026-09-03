@@ -73,6 +73,7 @@
             .main { margin-left: 0; padding: 20px 16px; width: 100%; min-height: 100vh; }
             .mobile-top-header { display: flex; }
             .topbar { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+            .topbar-user-controls { display: none !important; }
             .page-title { font-size: 22px; }
             .assignment-card { padding: 20px 16px; border-radius: 18px; }
         }
@@ -129,22 +130,23 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px">
             {% include 'accounts_app/notification_bell.html' %}
-            <a href="/settings/" style="text-decoration:none">
-                <div style="width:30px;height:30px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">
-                    {{ request.user.email|first|upper }}
-                </div>
-            </a>
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
+                🌙 Dark
+            </button>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </header>
 
     <div class="topbar">
         <div>
-            <h1 class="page-title">📚 Weekly Homework & Exam Portal</h1>
-            <div style="font-size:13.5px;color:var(--text2);margin-top:2px">View weekly assignments, submit text answer scripts, and track mentor evaluations.</div>
+            <h1 class="page-title">📚 Student Homework & Exam Submissions</h1>
+            <div style="font-size:13.5px;color:var(--text2);margin-top:2px">View weekly homework tasks, submit solution scripts & check mentor grades & feedback.</div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
+        <div class="topbar-user-controls" style="display:flex;align-items:center;gap:12px">
             {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="theme-toggle-btn btn btn-outline" onclick="toggleTheme()">🌙 Dark</button>
             <a href="/student/dashboard/" class="btn btn-outline">← Back to Dashboard</a>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </div>
 

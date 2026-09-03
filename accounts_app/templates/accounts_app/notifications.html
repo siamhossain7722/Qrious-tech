@@ -199,6 +199,11 @@
             padding-bottom: 12px;
             margin-bottom: 24px;
             border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-item {
@@ -426,10 +431,36 @@
             font-family: inherit;
         }
 
-        .modal-btn-cancel {
-            background: transparent;
-            border: 1px solid var(--border2, rgba(255,255,255,0.15));
-            color: var(--text, #f8fafc);
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        body.light-theme .mobile-menu-btn {
+            background: #ffffff; border-color: #cbd5e1; color: #0f172a;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff; font-size: 16px; font-weight: 700;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sidebar-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;
+        }
+
+        @media(max-width: 900px) {
+            .sidebar-close-btn { display: flex !important; }
+            .mobile-top-header { display: flex !important; margin: -16px -16px 20px -16px; padding: 0 14px; }
+            .desktop-only-controls { display: none !important; }
         }
         .modal-btn-cancel:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -458,12 +489,15 @@
 <!-- Side Navbar Drawer -->
 <aside class="sidebar" id="sidebar">
     <div>
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
-            <div style="display:flex;flex-direction:column;line-height:1.2">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
-                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#0284c7;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+        <div class="logo" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <div style="display:flex;align-items:center;gap:10px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#0284c7;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+                </div>
             </div>
+            <button type="button" class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close sidebar">✕</button>
         </div>
 
         {% if request.user.is_superuser %}
@@ -504,38 +538,49 @@
 
 <!-- Main Workspace -->
 <main class="main">
-    <!-- Topbar Header -->
-    <div class="topbar">
-        <div style="display:flex;align-items:center;gap:14px">
-            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
-                ☰
-            </button>
-            <div>
-                <h1 class="page-title">
-                    🔔 Notification Center
-                    {% if unread_count > 0 %}
-                        <span style="font-size: 0.8rem; background: #ef4444; color: white; padding: 2px 10px; border-radius: 12px; font-weight: 800;">
-                            {{ unread_count }} Unread
-                        </span>
-                    {% endif %}
-                </h1>
-                <div style="font-size:12px;color:var(--text2);margin-top:2px">Real-time alerts for payments, bookings, course updates, and AI agent tasks</div>
-            </div>
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:10px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:var(--cyan);text-transform:uppercase">Academy</span>
+                </div>
+            </a>
         </div>
 
-        <!-- Topbar Controls -->
-        <div style="display:flex;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px">
             {% include 'accounts_app/notification_bell.html' %}
-
-            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Theme">
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Theme" style="padding:6px 10px;font-size:12px;border-radius:12px">
                 🌙 Dark
             </button>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
+        </div>
+    </header>
 
-            <button type="button" class="lang-toggle-btn" onclick="switchLanguage()" title="Switch Language">
-                🇬🇧 English
-            </button>
+    <!-- Topbar Header -->
+    <div class="topbar">
+        <div>
+            <h1 class="page-title">
+                🔔 Notification Center
+                {% if unread_count > 0 %}
+                    <span style="font-size: 0.8rem; background: #ef4444; color: white; padding: 2px 10px; border-radius: 12px; font-weight: 800;">
+                        {{ unread_count }} Unread
+                    </span>
+                {% endif %}
+            </h1>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">Real-time alerts for payments, bookings, course updates, and AI agent tasks</div>
+        </div>
 
-            <button onclick="markAllRead()" class="btn-mark-all">✓ Mark All Read</button>
+        <div style="display:flex;align-items:center;gap:8px">
+            <button onclick="markAllRead()" class="btn-mark-all" style="font-size:12px;padding:8px 14px">✓ Mark All Read</button>
+            <div class="desktop-only-controls" style="display:flex;align-items:center;gap:8px">
+                <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:8px 14px;font-size:12px;border-radius:10px">
+                    🌙 Dark
+                </button>
+                {% include 'accounts_app/user_profile_dropdown.html' %}
+            </div>
         </div>
     </div>
 
@@ -629,17 +674,23 @@
 
     function toggleTheme() {
         document.body.classList.toggle('light-theme');
+        document.documentElement.classList.toggle('light-theme');
         const isLight = document.body.classList.contains('light-theme');
-        const btn = document.getElementById('themeToggleBtn');
-        if (btn) btn.innerText = isLight ? '☀️ Light' : '🌙 Dark';
+        const btns = document.querySelectorAll('.theme-toggle-btn');
+        btns.forEach(btn => {
+            btn.innerText = isLight ? '☀️ Light' : '🌙 Dark';
+        });
         localStorage.setItem('theme', isLight ? 'light' : 'dark');
     }
 
     // Restore theme on load
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-theme');
-        const btn = document.getElementById('themeToggleBtn');
-        if (btn) btn.innerText = '☀️ Light';
+        document.documentElement.classList.add('light-theme');
+        const btns = document.querySelectorAll('.theme-toggle-btn');
+        btns.forEach(btn => {
+            btn.innerText = '☀️ Light';
+        });
     }
 
     function switchLanguage() {
@@ -689,9 +740,33 @@
             .catch(err => {
                 console.error(err);
                 closeDeleteModal();
-                if (btn) btn.innerText = "🗑️ Yes, Delete";
             });
     }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar && backdrop) {
+            const isOpening = !sidebar.classList.contains('active') && !sidebar.classList.contains('open');
+            sidebar.classList.toggle('active', isOpening);
+            sidebar.classList.toggle('open', isOpening);
+            backdrop.classList.toggle('active', isOpening);
+            backdrop.classList.toggle('open', isOpening);
+        }
+    }
+
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar && backdrop) {
+            sidebar.classList.remove('active', 'open');
+            backdrop.classList.remove('active', 'open');
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+    });
 </script>
 </body>
 </html>

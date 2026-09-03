@@ -433,11 +433,13 @@ def superadmin_master_dashboard(request):
     from django.db.models import Sum, Value, DecimalField
     from django.db.models.functions import Coalesce
 
-    users = User.objects.all().order_by('-date_joined')
-    enrollments_qs = StudentEnrollment.objects.all().select_related('user', 'user__profile').annotate(
+    total_users_count = User.objects.count()
+    total_bookings_count = ServiceBooking.objects.count()
+    users = User.objects.select_related('profile').order_by('-date_joined')[:10]
+    enrollments_qs = StudentEnrollment.objects.all().select_related('user', 'user__profile', 'batch').annotate(
         paid_sum=Coalesce(Sum('payments__amount'), Value(0.0), output_field=DecimalField())
     ).order_by('-created_at')
-    bookings = ServiceBooking.objects.all().order_by('-created_at')
+    bookings = ServiceBooking.objects.all().order_by('-created_at')[:10]
 
     # Search & Filter Query Params
     q_search = request.GET.get('q', '').strip()
@@ -477,10 +479,10 @@ def superadmin_master_dashboard(request):
     enrollments_page = paginator.get_page(page_number)
 
     context = {
-        'total_users': users.count(),
+        'total_users': total_users_count,
         'total_enrollments': StudentEnrollment.objects.count(),
         'completed_certificates': StudentEnrollment.objects.filter(is_completed=True).count(),
-        'total_bookings': bookings.count(),
+        'total_bookings': total_bookings_count,
         'total_applications': JobApplication.objects.count(),
         'users': users,
         'enrollments': enrollments_page,
@@ -508,11 +510,11 @@ def superadmin_users_list(request):
     from .models import Subscription, UserProfile
 
     q_search = request.GET.get('q', '').strip()
-    plan_filter = request.GET.get('plan', '').strip()
+    enrollment_filter = request.GET.get('enrollment', '').strip()
     date_filter = request.GET.get('date_joined', '').strip()
     status_filter = request.GET.get('contact_status', '').strip()
 
-    users_qs = User.objects.all().select_related('profile').order_by('-date_joined')
+    users_qs = User.objects.all().select_related('profile').prefetch_related('enrollments', 'enrollments__batch').order_by('-date_joined')
 
     seven_days_ago = timezone.now() - timedelta(days=7)
 
@@ -525,8 +527,10 @@ def superadmin_users_list(request):
             Q(profile__phone__icontains=q_search)
         )
 
-    if plan_filter:
-        users_qs = users_qs.filter(subscription__plan=plan_filter)
+    if enrollment_filter == 'enrolled':
+        users_qs = users_qs.filter(enrollments__isnull=False).distinct()
+    elif enrollment_filter == 'not_enrolled':
+        users_qs = users_qs.filter(enrollments__isnull=True)
 
     if date_filter == 'over_7_days':
         users_qs = users_qs.filter(date_joined__lte=seven_days_ago)
@@ -547,7 +551,7 @@ def superadmin_users_list(request):
     context = {
         'users_page': users_page,
         'q_search': q_search,
-        'plan_filter': plan_filter,
+        'enrollment_filter': enrollment_filter,
         'date_filter': date_filter,
         'status_filter': status_filter,
         'total_users_count': User.objects.count(),
@@ -587,11 +591,11 @@ def export_users_csv(request):
     from datetime import timedelta
 
     q_search = request.GET.get('q', '').strip()
-    plan_filter = request.GET.get('plan', '').strip()
+    enrollment_filter = request.GET.get('enrollment', '').strip()
     date_filter = request.GET.get('date_joined', '').strip()
     status_filter = request.GET.get('contact_status', '').strip()
 
-    users_qs = User.objects.all().select_related('profile').order_by('-date_joined')
+    users_qs = User.objects.all().select_related('profile').prefetch_related('enrollments', 'enrollments__batch').order_by('-date_joined')
     seven_days_ago = timezone.now() - timedelta(days=7)
 
     if q_search:
@@ -603,8 +607,10 @@ def export_users_csv(request):
             Q(profile__phone__icontains=q_search)
         )
 
-    if plan_filter:
-        users_qs = users_qs.filter(subscription__plan=plan_filter)
+    if enrollment_filter == 'enrolled':
+        users_qs = users_qs.filter(enrollments__isnull=False).distinct()
+    elif enrollment_filter == 'not_enrolled':
+        users_qs = users_qs.filter(enrollments__isnull=True)
 
     if date_filter == 'over_7_days':
         users_qs = users_qs.filter(date_joined__lte=seven_days_ago)
@@ -621,18 +627,19 @@ def export_users_csv(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     writer = csv.writer(response)
-    writer.writerow(['#', 'User ID', 'Full Name', 'Email', 'Phone/WhatsApp', 'Plan', 'Date Joined', 'Over 7 Days', 'Contact Status'])
+    writer.writerow(['#', 'User ID', 'Full Name', 'Email', 'Phone/WhatsApp', 'Enrolled Batch', 'Date Joined', 'Over 7 Days', 'Contact Status'])
 
     for idx, u in enumerate(users_qs, 1):
         is_over = u.date_joined <= seven_days_ago
         c_status = "Completed" if u.profile.is_contacted else ("Need Contact (>7D)" if is_over else "New (<7D)")
+        batch_names = ", ".join([e.batch.name if e.batch else e.course_name for e in u.enrollments.all()]) or "Not Enrolled"
         writer.writerow([
             idx,
             u.id,
             u.get_full_name() or u.email,
             u.email,
             u.profile.phone or 'N/A',
-            u.profile.plan.upper(),
+            batch_names,
             u.date_joined.strftime('%Y-%m-%d %H:%M'),
             'YES' if is_over else 'NO',
             c_status
@@ -651,11 +658,11 @@ def export_users_pdf(request):
     from .pdf_utils import generate_users_report_pdf
 
     q_search = request.GET.get('q', '').strip()
-    plan_filter = request.GET.get('plan', '').strip()
+    enrollment_filter = request.GET.get('enrollment', '').strip()
     date_filter = request.GET.get('date_joined', '').strip()
     status_filter = request.GET.get('contact_status', '').strip()
 
-    users_qs = User.objects.all().select_related('profile').order_by('-date_joined')
+    users_qs = User.objects.all().select_related('profile').prefetch_related('enrollments', 'enrollments__batch').order_by('-date_joined')
     seven_days_ago = timezone.now() - timedelta(days=7)
 
     if q_search:
@@ -667,8 +674,10 @@ def export_users_pdf(request):
             Q(profile__phone__icontains=q_search)
         )
 
-    if plan_filter:
-        users_qs = users_qs.filter(subscription__plan=plan_filter)
+    if enrollment_filter == 'enrolled':
+        users_qs = users_qs.filter(enrollments__isnull=False).distinct()
+    elif enrollment_filter == 'not_enrolled':
+        users_qs = users_qs.filter(enrollments__isnull=True)
 
     if date_filter == 'over_7_days':
         users_qs = users_qs.filter(date_joined__lte=seven_days_ago)
@@ -975,6 +984,56 @@ def export_payments_csv(request):
         ])
 
     return response
+
+
+@login_required
+@user_passes_test(_is_superuser)
+def export_payments_pdf(request):
+    """Export filtered student payments & verifications as PDF document."""
+    from django.http import HttpResponse
+    from django.utils import timezone
+    from .models import StudentPayment
+    from .pdf_utils import generate_payments_report_pdf
+
+    q_search = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
+    payments_qs = StudentPayment.objects.select_related('enrollment', 'enrollment__user').order_by('-created_at')
+
+    if q_search:
+        payments_qs = payments_qs.filter(
+            Q(invoice_id__icontains=q_search) |
+            Q(transaction_ref__icontains=q_search) |
+            Q(enrollment__user__email__icontains=q_search) |
+            Q(enrollment__student_id__icontains=q_search)
+        )
+    if status_filter:
+        payments_qs = payments_qs.filter(status=status_filter)
+
+    pdf_binary = generate_payments_report_pdf(payments_qs)
+    filename = f"payments_report_{timezone.now().strftime('%Y%m%d_%H%M')}.pdf"
+    response = HttpResponse(pdf_binary, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(_is_superuser)
+def superadmin_delete_payment(request, payment_id):
+    """Super Admin: Delete payment verification record (Supports Form POST & AJAX JSON)."""
+    from .models import StudentPayment
+    payment = get_object_or_404(StudentPayment, pk=payment_id)
+    is_json = 'application/json' in request.META.get('HTTP_ACCEPT', '') or request.content_type == 'application/json'
+
+    invoice_id = payment.invoice_id
+    payment.delete()
+
+    if is_json:
+        return JsonResponse({'success': True, 'message': f"Deleted payment record #{invoice_id}"})
+
+    messages.success(request, f"🗑 Deleted payment record #{invoice_id} successfully.")
+    return redirect('/admin-payments/')
 
 
 @csrf_exempt
@@ -1633,22 +1692,8 @@ def admin_manage_modules(request):
             video_url = request.POST.get('video_url', '').strip()
             duration = request.POST.get('duration', '01:00:00').strip()
             notes = request.POST.get('notes', '').strip()
-            scheduled_at_str = request.POST.get('scheduled_at', '').strip()
 
             batch = get_object_or_404(CourseBatch, pk=batch_id) if batch_id else None
-
-            scheduled_at = None
-            is_published = True
-            if scheduled_at_str:
-                try:
-                    from django.utils.dateparse import parse_datetime
-                    scheduled_at = parse_datetime(scheduled_at_str)
-                    if scheduled_at and timezone.is_naive(scheduled_at):
-                        scheduled_at = timezone.make_aware(scheduled_at)
-                    if scheduled_at and scheduled_at > timezone.now():
-                        is_published = False
-                except Exception as dt_err:
-                    print(f"Error parsing scheduled_at: {dt_err}")
 
             if module_id and title and video_url:
                 module = get_object_or_404(CourseModule, pk=module_id)
@@ -1659,15 +1704,12 @@ def admin_manage_modules(request):
                     video_url=video_url,
                     duration=duration,
                     notes=notes,
-                    scheduled_at=scheduled_at,
-                    is_published=is_published,
-                    auto_email_sent=is_published
+                    scheduled_at=None,
+                    is_published=True,
+                    auto_email_sent=True
                 )
-                if is_published:
-                    messages.success(request, f"Recorded Class '{title}' uploaded & published to Module '{module.title}' for {batch.name if batch else 'All Batches'}!")
-                    notify_students_new_lesson(new_lesson)
-                else:
-                    messages.success(request, f"Recorded Class '{title}' scheduled for auto-publishing on {scheduled_at.strftime('%b %d, %Y @ %I:%M %p')}!")
+                messages.success(request, f"🎉 Recorded Class '{title}' uploaded & published! Enrolled students have been notified via email & dashboard.")
+                notify_students_new_lesson(new_lesson)
 
         elif action == 'edit_lesson':
             lesson_id = request.POST.get('lesson_id')

@@ -257,14 +257,23 @@
 
         <!-- Mobile sticky topbar -->
         <header class="mobile-topbar">
-            <button class="hamburger-btn" onclick="openSidebar()" aria-label="Open menu">☰</button>
-            <a href="/superadmin/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" style="height:30px;width:auto;object-fit:contain">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff">Qrious Tech</span>
-            </a>
+            <div style="display:flex;align-items:center;gap:10px">
+                <button class="hamburger-btn" onclick="openSidebar()" aria-label="Open menu">☰</button>
+                <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                    <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                    <div style="display:flex;flex-direction:column;line-height:1.1">
+                        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                        <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:var(--cyan);text-transform:uppercase">Academy</span>
+                    </div>
+                </a>
+            </div>
+
             <div style="display:flex;align-items:center;gap:8px">
                 {% include "accounts_app/notification_bell.html" %}
-                <button id="themeBtnMobile" onclick="toggleTheme()" class="hamburger-btn" style="font-size:15px">🌙</button>
+                <button type="button" class="theme-toggle-btn btn btn-outline" onclick="toggleTheme()" id="themeBtnMobile" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px">
+                    🌙 Dark
+                </button>
+                {% include 'accounts_app/user_profile_dropdown.html' %}
             </div>
         </header>
 
@@ -277,9 +286,10 @@
                     <h1 class="header-title">🎥 Live Class Schedule & Meeting Manager</h1>
                     <p class="header-sub">Schedule live video sessions, Google Meet/Zoom links, and automatically send dashboard alerts & email invitations to batch students.</p>
                 </div>
-                <div class="topbar-controls">
+                <div class="topbar-controls" style="display:flex;align-items:center;gap:10px">
                     {% include "accounts_app/notification_bell.html" %}
-                    <button id="themeBtn" onclick="toggleTheme()" class="btn btn-outline" style="padding:8px 14px">🌙 Dark</button>
+                    <button id="themeBtn" onclick="toggleTheme()" class="theme-toggle-btn btn btn-outline" style="padding:8px 14px">🌙 Dark</button>
+                    {% include 'accounts_app/user_profile_dropdown.html' %}
                 </div>
             </div>
 
@@ -534,15 +544,30 @@
 
     /* ─── SIDEBAR ───────────────────────────── */
     function openSidebar() {
-        document.getElementById('sidebar').classList.add('open');
-        document.getElementById('sidebarOverlay').classList.add('visible');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay') || document.getElementById('sidebar-backdrop');
+        if (sidebar) sidebar.classList.add('open', 'active');
+        if (overlay) overlay.classList.add('visible', 'active', 'open');
         document.body.style.overflow = 'hidden';
     }
     function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('visible');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay') || document.getElementById('sidebar-backdrop');
+        if (sidebar) sidebar.classList.remove('open', 'active');
+        if (overlay) overlay.classList.remove('visible', 'active', 'open');
         document.body.style.overflow = '';
     }
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+    });
 
     /* ─── WHATSAPP MODAL ────────────────────── */
     function closeWaModal() {

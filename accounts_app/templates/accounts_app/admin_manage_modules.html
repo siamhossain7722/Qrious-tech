@@ -134,13 +134,41 @@
             border: 1px solid var(--border2); background: var(--card); color: var(--text);
             transition: all 0.2s; font-family: 'Inter', sans-serif;
         }
-        .theme-toggle-btn:hover { border-color: var(--cyan); }
+        .mobile-top-header {
+            display: none;
+            height: 60px;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            width: calc(100% + 72px);
+            margin: -28px -36px 24px -36px;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff; font-size: 16px; font-weight: 700;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sidebar-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;
+        }
 
         @media (max-width: 992px) {
-            .sidebar { position: fixed; left: -280px; transition: left 0.3s; }
+            .sidebar-close-btn { display: flex !important; }
+            .sidebar { position: fixed; left: -280px; transition: left 0.3s; z-index: 1000; }
             .sidebar.open { left: 0; }
             .btn-toggle-sidebar { display: inline-block; }
             .main { padding: 20px 16px; }
+            .mobile-top-header { display: flex !important; width: calc(100% + 32px); margin: -20px -16px 20px -16px; }
+            .desktop-only-controls { display: none !important; }
         }
     </style>
 </head>
@@ -151,12 +179,15 @@
 <!-- Left Admin Sidebar -->
 <aside class="sidebar" id="sidebar">
     <div>
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
-            <div style="display:flex;flex-direction:column;line-height:1.2">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
-                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+        <div class="logo" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <div style="display:flex;align-items:center;gap:10px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+                </div>
             </div>
+            <button type="button" class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close sidebar">✕</button>
         </div>
 
         <div class="nav-label">Master Controls</div>
@@ -183,18 +214,43 @@
 
 <!-- Main Console Container -->
 <main class="main">
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:10px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:var(--cyan);text-transform:uppercase">Academy</span>
+                </div>
+            </a>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Theme" style="padding:6px 10px;font-size:12px;border-radius:12px">
+                🌙 Dark
+            </button>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
+        </div>
+    </header>
+
     <!-- Topbar Navigation -->
     <div class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
-            <button type="button" class="btn-toggle-sidebar" onclick="toggleSidebar()">☰</button>
-            <div>
-                <h1 class="page-title">🎬 LMS Recorded Class Manager</h1>
-                <div style="font-size:13px;color:var(--text2);margin-top:2px">Upload & Edit recorded video classes for Qrious Tech Academy</div>
-            </div>
+        <div>
+            <h1 class="page-title">🎬 LMS Recorded Class Manager</h1>
+            <div style="font-size:12.5px;color:var(--text2);margin-top:2px">Upload & Edit recorded video classes for Qrious Tech Academy</div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <a href="/student/classroom/" class="btn btn-cyan">▶ Open Student Classroom</a>
-            <a href="/superadmin/" class="btn btn-outline">← Back to Admin Console</a>
+
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <a href="/student/classroom/" class="btn btn-cyan" style="font-size:12px;padding:8px 14px">▶ Open Student Classroom</a>
+            <div class="desktop-only-controls" style="display:flex;align-items:center;gap:8px">
+                {% include 'accounts_app/notification_bell.html' %}
+                <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:8px 14px;font-size:12px;border-radius:10px;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
+                    🌙 Dark
+                </button>
+                {% include 'accounts_app/user_profile_dropdown.html' %}
+            </div>
         </div>
     </div>
 
@@ -294,21 +350,15 @@
                     <label class="form-label">Video URL (YouTube / Vimeo / GDrive / MP4)</label>
                     <input type="url" name="video_url" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-                    <div class="form-group">
-                        <label class="form-label">Video Duration (e.g., 01:15:00)</label>
-                        <input type="text" name="duration" class="form-input" value="01:15:00" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">📅 Scheduled Publish Date & Time (Optional)</label>
-                        <input type="datetime-local" name="scheduled_at" class="form-input" placeholder="Leave empty for immediate publish">
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Video Duration (e.g., 01:15:00)</label>
+                    <input type="text" name="duration" class="form-input" value="01:15:00" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Class Notes & Key Takeaways</label>
                     <textarea name="notes" class="form-textarea" rows="2" placeholder="Summary notes for students..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-cyan">🚀 Upload & Schedule / Publish Class</button>
+                <button type="submit" class="btn btn-cyan">🚀 Upload & Publish Video Class</button>
             </form>
         </div>
     </div>
@@ -451,9 +501,27 @@
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
-    sidebar.classList.toggle('open');
-    backdrop.classList.toggle('active');
+    if (sidebar && backdrop) {
+        const isOpening = !sidebar.classList.contains('active') && !sidebar.classList.contains('open');
+        sidebar.classList.toggle('active', isOpening);
+        sidebar.classList.toggle('open', isOpening);
+        backdrop.classList.toggle('active', isOpening);
+        backdrop.classList.toggle('open', isOpening);
+    }
 }
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+        sidebar.classList.remove('active', 'open');
+        backdrop.classList.remove('active', 'open');
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+});
 
 function toggleTheme() {
     document.body.classList.toggle('light-theme');

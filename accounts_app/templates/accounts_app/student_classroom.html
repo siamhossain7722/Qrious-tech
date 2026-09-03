@@ -198,33 +198,69 @@
 
         @media (min-width: 993px) {
             .top-navbar {
+                display: flex;
                 flex-direction: row;
                 align-items: center;
-                justify-content: space-between;
                 height: 64px;
                 padding: 0 24px;
-                flex-wrap: nowrap;
+                gap: 16px;
             }
-            .top-nav-main-row { width: auto; }
-            .top-nav-right { width: auto; justify-content: flex-end; flex-wrap: nowrap; }
+            .top-nav-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-shrink: 0;
+            }
+            .classroom-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-shrink: 0;
+                margin-left: 8px;
+            }
+            .top-nav-right-cluster {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-left: auto;
+                flex-shrink: 0;
+            }
         }
 
         @media (max-width: 992px) {
             .top-navbar {
-                flex-direction: column;
-                align-items: stretch;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
                 padding: 10px 14px;
                 gap: 10px;
                 height: auto;
             }
-            .top-nav-main-row { width: 100%; }
-            .top-nav-right {
+            .top-nav-left {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                order: 1;
+            }
+            .top-nav-right-cluster {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                order: 2;
+                margin-left: auto;
+            }
+            .classroom-actions {
                 width: 100%;
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
                 gap: 6px 8px;
                 justify-content: flex-start;
+                order: 3;
+                padding-top: 6px;
+                border-top: 1px solid var(--border);
             }
             .sidebar-modules {
                 position: fixed; left: 0; top: 0; bottom: 0; height: 100vh; z-index: 9999;
@@ -246,7 +282,6 @@
 
         @media (max-width: 500px) {
             .top-navbar { padding: 8px 10px; gap: 8px; }
-            .top-nav-right { gap: 6px; }
             .btn-header-action, .theme-toggle-btn { font-size: 11px; padding: 5px 10px; }
             .back-btn { width: 34px; height: 34px; font-size: 14px; }
         }
@@ -258,30 +293,22 @@
 
 <!-- Top Navigation Bar -->
 <header class="top-navbar">
-    <div class="top-nav-main-row">
-        <div class="top-nav-left">
-            <button type="button" class="back-btn mobile-toggle-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Modules Menu">☰</button>
-            <a href="/student/dashboard/" class="back-btn" title="Back to Student Dashboard">←</a>
-            <div class="brand-pill">
-                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-dark" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))">
-                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-light" style="height:44px;width:auto;object-fit:contain">
-                <div style="display:flex;flex-direction:column;line-height:1.2;margin-left:4px">
-                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
-                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:10px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
-                </div>
+    <!-- Desktop & Mobile Header Left (Logo & Back) -->
+    <div class="top-nav-left">
+        <button type="button" class="back-btn mobile-toggle-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Modules Menu">☰</button>
+        <a href="/student/dashboard/" class="back-btn" title="Back to Student Dashboard">←</a>
+        <div class="brand-pill">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-dark" style="height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))">
+            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy Logo" class="brand-logo-light" style="height:36px;width:auto;object-fit:contain">
+            <div style="display:flex;flex-direction:column;line-height:1.2;margin-left:4px">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--text);letter-spacing:-0.02em">Qrious Tech</span>
+                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9.5px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
             </div>
-            <div class="mobile-header-title">Academy</div>
         </div>
     </div>
 
-    <div class="top-nav-right">
-        {% include 'accounts_app/notification_bell.html' %}
-        <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px;">
-            🌙
-        </button>
-        <button type="button" class="lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
-            🇬🇧 English
-        </button>
+    <!-- Classroom Context Controls (Next to Logo) -->
+    <div class="classroom-actions">
         <span class="btn-header-action" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">
             🏷️ {{ student_batch.name|default:"Batch 01" }}
         </span>
@@ -308,6 +335,15 @@
             🎯 {{ completed_modules_count }}/{{ total_modules }} Modules
         </span>
         {% endif %}
+    </div>
+
+    <!-- Universal User Controls Cluster (EXTREME RIGHT with auto margin gap) -->
+    <div class="top-nav-right-cluster">
+        {% include 'accounts_app/notification_bell.html' %}
+        <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px;">
+            🌙 Dark
+        </button>
+        {% include 'accounts_app/user_profile_dropdown.html' %}
     </div>
 </header>
 

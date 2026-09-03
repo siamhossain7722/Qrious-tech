@@ -297,29 +297,24 @@
         <div style="display:flex;align-items:center;gap:8px">
             {% include 'accounts_app/notification_bell.html' %}
             <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px;">
-                🌙
+                🌙 Dark
             </button>
-            <a href="/settings/" style="text-decoration:none">
-                <div class="user-avatar" style="width:30px;height:30px;font-size:12px">
-                    {% if request.user.profile.avatar %}
-                    <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
-                    {% else %}
-                    {{ request.user.email|first|upper }}
-                    {% endif %}
-                </div>
-            </a>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </header>
 
     <div class="topbar">
         <h1 class="page-title">⚙️ User Profile & Settings</h1>
-        <div class="topbar-user-controls">
+        <div class="topbar-user-controls" style="display:flex;align-items:center;gap:10px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="theme-toggle-btn btn btn-outline" onclick="toggleTheme()">🌙 Dark</button>
             {% if request.user.enrollments.exists %}
             <a href="/student/dashboard/" class="btn btn-outline">← Back to Student Dashboard</a>
             {% else %}
             <a href="/student/dashboard/" class="btn btn-outline">← Back to Dashboard</a>
             {% endif %}
             <a href="/auth/password/change/" class="btn btn-primary">🔒 Change Password</a>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </div>
 

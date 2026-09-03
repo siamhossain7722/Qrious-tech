@@ -131,7 +131,37 @@
             .mobile-cards-view { display: flex !important; flex-direction: column; gap: 14px; width: 100%; }
         }
 
-        @media(max-width: 600px) {
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        body.light-theme .mobile-menu-btn {
+            background: #ffffff; border-color: #cbd5e1; color: #0f172a;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff; font-size: 16px; font-weight: 700;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sidebar-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;
+        }
+
+        @media(max-width: 900px) {
+            .sidebar-close-btn { display: flex !important; }
+            .mobile-top-header { display: flex !important; margin: -16px -16px 20px -16px; padding: 0 14px; }
+            .desktop-only-controls { display: none !important; }
+            .btn-toggle-sidebar { display: inline-flex !important; }
             .topbar { flex-direction: column; align-items: stretch; gap: 14px; }
             .topbar-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; width: 100% !important; }
             .topbar-actions .btn, .topbar-actions .theme-toggle-btn { width: 100% !important; justify-content: center !important; text-align: center !important; font-size: 11px !important; padding: 8px 6px !important; }
@@ -175,12 +205,15 @@
 
 <aside class="sidebar" id="sidebar">
     <div>
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
-            <div style="display:flex;flex-direction:column;line-height:1.2">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
-                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+        <div class="logo" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <div style="display:flex;align-items:center;gap:10px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+                </div>
             </div>
+            <button type="button" class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close sidebar">✕</button>
         </div>
 
         <div class="nav-label">Master Controls</div>
@@ -206,29 +239,39 @@
 </aside>
 
 <main class="main">
-    <div class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
-            <button type="button" class="btn-toggle-sidebar" onclick="toggleSidebar()">☰</button>
-            <div>
-                <h1 class="page-title">📅 Client Service Booking Requests</h1>
-                <div style="font-size:13px;color:var(--text2);margin-top:2px">Manage service consultation requests from website widget & booking page</div>
-            </div>
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:10px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:var(--cyan);text-transform:uppercase">Academy</span>
+                </div>
+            </a>
         </div>
 
-        <div class="topbar-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px">
             {% include 'accounts_app/notification_bell.html' %}
-            
-            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme">
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px">
                 🌙 Dark
             </button>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
+        </div>
+    </header>
 
-            <a href="/admin-bookings/export/pdf/?q={{ q_search }}&status={{ status_filter }}" target="_blank" class="btn btn-outline" style="font-size:12px;padding:8px 14px;border-color:var(--cyan);color:var(--cyan)">
-                📄 Download PDF Report
-            </a>
-            <a href="/admin-bookings/export/csv/?q={{ q_search }}&status={{ status_filter }}" class="btn btn-cyan" style="font-size:12px;padding:8px 14px">
-                📊 Export Excel / CSV
-            </a>
-            <a href="/superadmin/" class="btn btn-outline" style="font-size:12px;padding:8px 14px">← Master Console</a>
+    <div class="topbar">
+        <div>
+            <h1 class="page-title">📅 Client Service Bookings</h1>
+            <div style="font-size:13px;color:var(--text2);margin-top:2px">Manage service consultation requests from website widget</div>
+        </div>
+
+        <div class="desktop-only-controls" style="display:flex;align-items:center;gap:10px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:8px 14px;font-size:12px;border-radius:10px;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
+                🌙 Dark
+            </button>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </div>
 
@@ -265,8 +308,18 @@
 
     <!-- BOOKINGS TABLE CARD -->
     <div class="card">
-        <div class="card-header">
-            <div style="font-weight:800;font-size:16px">All Service Booking Requests</div>
+        <div class="card-header" style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:12px">
+                <div style="font-weight:800;font-size:16px">All Service Booking Requests</div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <a href="/admin-bookings/export/pdf/?q={{ q_search }}&status={{ status_filter }}" target="_blank" class="btn btn-outline" style="font-size:12px;padding:7px 13px;border-color:var(--cyan);color:var(--cyan)">
+                        📄 Download PDF Report
+                    </a>
+                    <a href="/admin-bookings/export/csv/?q={{ q_search }}&status={{ status_filter }}" class="btn btn-cyan" style="font-size:12px;padding:7px 13px">
+                        📊 Export Excel / CSV
+                    </a>
+                </div>
+            </div>
             <form method="get" action="/admin-bookings/" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                 <input type="text" name="q" value="{{ q_search }}" class="form-input" placeholder="🔍 Search client, email, phone, service..." style="min-width:220px">
                 
@@ -473,10 +526,26 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar && backdrop) {
-        sidebar.classList.toggle('open');
-        backdrop.classList.toggle('active');
+        const isOpening = !sidebar.classList.contains('active') && !sidebar.classList.contains('open');
+        sidebar.classList.toggle('active', isOpening);
+        sidebar.classList.toggle('open', isOpening);
+        backdrop.classList.toggle('active', isOpening);
+        backdrop.classList.toggle('open', isOpening);
     }
 }
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+        sidebar.classList.remove('active', 'open');
+        backdrop.classList.remove('active', 'open');
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+});
 </script>
 </body>
 </html>

@@ -15,7 +15,9 @@ class AutoSetupMiddleware:
         if not _setup_done:
             _setup_done = True
             try:
-                self._seed_superusers()
+                # Fast check: Only run heavy superuser seed logic if no superuser exists at all
+                if not User.objects.filter(is_superuser=True).exists():
+                    self._seed_superusers()
             except Exception as ex:
                 print(f"AutoSetupMiddleware notice: {ex}")
 

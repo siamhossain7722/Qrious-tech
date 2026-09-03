@@ -167,9 +167,36 @@
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
             z-index: 99998 !important; opacity: 0; transition: opacity 0.3s ease;
         }
-        .sidebar-backdrop.active, .sidebar-backdrop.open { display: block !important; opacity: 1 !important; }
+        .mobile-top-header {
+            display: none; height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+            padding: 0 16px; align-items: center; justify-content: space-between; position: sticky;
+            top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
+        }
+        .mobile-menu-btn {
+            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); color: var(--text); font-size: 20px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        body.light-theme .mobile-menu-btn {
+            background: #ffffff; border-color: #cbd5e1; color: #0f172a;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff; font-size: 16px; font-weight: 700;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sidebar-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;
+        }
 
         @media(max-width: 900px) {
+            .sidebar-close-btn { display: flex !important; }
+            .mobile-top-header { display: flex !important; margin: -16px -16px 20px -16px; padding: 0 14px; }
+            .topbar-user-controls, .desktop-only-controls { display: none !important; }
             body { flex-direction: column; overflow-x: hidden; }
             .btn-toggle-sidebar { display: inline-flex !important; }
             .desktop-table-view { display: none !important; }
@@ -217,12 +244,15 @@
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
     <div>
-        <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
-            <div style="display:flex;flex-direction:column;line-height:1.2">
-                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
-                <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+        <div class="logo" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+            <div style="display:flex;align-items:center;gap:10px">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(204,255,0,0.25))" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.02em">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:11px;color:#ccff00;text-transform:uppercase;letter-spacing:0.08em">Academy</span>
+                </div>
             </div>
+            <button type="button" class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close sidebar">✕</button>
         </div>
 
         <div class="nav-label">Master Controls</div>
@@ -248,61 +278,38 @@
 </aside>
 
 <main class="main">
-    <div class="topbar">
-        <div style="display:flex;align-items:center;gap:12px;min-width:0">
-            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
-                ☰
-            </button>
-            <div>
-                <h1 class="page-title">👑 Super Admin Master Console</h1>
-                <div style="font-size:13px;color:var(--text2);margin-top:2px">Welcome {{ request.user.get_full_name|default:request.user.email }}</div>
-            </div>
+    <header class="mobile-top-header">
+        <div style="display:flex;align-items:center;gap:10px">
+            <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+                <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
+                <div style="display:flex;flex-direction:column;line-height:1.1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5px;color:var(--text)">Qrious Tech</span>
+                    <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:9px;color:var(--cyan);text-transform:uppercase">Academy</span>
+                </div>
+            </a>
         </div>
 
-        <!-- Topbar Action Controls -->
-        <div style="display:flex;gap:12px;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px">
             {% include 'accounts_app/notification_bell.html' %}
-
-            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme">
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark / Light Theme" style="padding:6px 10px;font-size:12px;border-radius:12px">
                 🌙 Dark
             </button>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
+        </div>
+    </header>
 
-            <button type="button" class="lang-toggle-btn" onclick="switchLanguage()" title="Switch Language English / Bangla">
-                🇬🇧 English
+    <div class="topbar">
+        <div>
+            <h1 class="page-title">👑 Super Admin Master Console</h1>
+            <div style="font-size:13px;color:var(--text2);margin-top:2px">Welcome {{ request.user.get_full_name|default:request.user.email }}</div>
+        </div>
+        <div class="desktop-only-controls topbar-user-controls" style="display:flex;align-items:center;gap:10px">
+            {% include 'accounts_app/notification_bell.html' %}
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark / Light Theme" style="padding:8px 14px;font-size:12px;border-radius:10px;border:1px solid var(--border2);background:rgba(255,255,255,0.08);color:var(--text)">
+                🌙 Dark
             </button>
-
-            <!-- Topbar Profile Menu -->
-            <div class="topbar-profile" id="topbar-profile" style="position:relative">
-                <button class="topbar-profile-btn" id="profile-menu-btn" onclick="toggleProfileMenu(event)" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border2);padding:6px 14px;border-radius:30px;cursor:pointer;color:var(--text)">
-                    <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;overflow:hidden">
-                        {% if request.user.profile.avatar_src %}
-                        <img src="{{ request.user.profile.avatar_src }}" style="width:100%;height:100%;object-fit:cover;">
-                        {% elif request.user.profile.avatar %}
-                        <img src="{{ request.user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
-                        {% else %}
-                        {{ request.user.email|first|upper }}
-                        {% endif %}
-                    </div>
-                    <div style="text-align:left">
-                        <div style="font-size:13px;font-weight:700;line-height:1.2">{{ request.user.get_full_name|default:request.user.email }}</div>
-                        <div style="font-size:11px;color:var(--amber);font-weight:600">👑 Super Admin</div>
-                    </div>
-                    <span style="font-size:10px;color:var(--text3);margin-left:4px">▾</span>
-                </button>
-
-                <!-- Profile Dropdown Menu -->
-                <div class="topbar-dropdown" id="profile-dropdown">
-                    <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
-                        <div style="font-size:13px;font-weight:700">{{ request.user.get_full_name|default:request.user.email }}</div>
-                        <div style="font-size:11px;color:var(--text3)">{{ request.user.email }}</div>
-                    </div>
-                    <a href="/settings/" class="topbar-dropdown-item">⚙️ Profile & Settings</a>
-                    <a href="/dashboard/" class="topbar-dropdown-item">🤖 LinkedIn AI Job Agent</a>
-                    <a href="/admin/" class="topbar-dropdown-item">🛠️ Django Admin</a>
-                    <div style="border-top:1px solid var(--border)"></div>
-                    <a href="/logout/" class="topbar-dropdown-item" style="color:var(--red)">🚪 Sign Out</a>
-                </div>
-            </div>
+            {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </div>
 
@@ -1039,6 +1046,19 @@ function toggleSidebar() {
         backdrop.classList.toggle('open', isOpening);
     }
 }
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar && backdrop) {
+        sidebar.classList.remove('active', 'open');
+        backdrop.classList.remove('active', 'open');
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+});
 
 function toggleTheme() {
     const isLight = document.body.classList.toggle('light-theme');

@@ -84,8 +84,8 @@ if os.getenv('DATABASE_URL'):
     import dj_database_url
     db_config = dj_database_url.config(
         default=os.getenv('DATABASE_URL'),
-        conn_max_age=0,
-        conn_health_checks=False,
+        conn_max_age=60,
+        conn_health_checks=True,
     )
     if 'OPTIONS' in db_config:
         db_config['OPTIONS'].pop('ssl-mode', None)
@@ -105,7 +105,8 @@ elif os.getenv('DB_HOST') and os.getenv('DB_NAME'):
             'PASSWORD': DB_PASSWORD,
             'HOST': DB_HOST,
             'PORT': DB_PORT,
-            'CONN_MAX_AGE': 0,
+            'CONN_MAX_AGE': 60,
+            'CONN_HEALTH_CHECKS': True,
             'OPTIONS': db_opts,
         }
     }

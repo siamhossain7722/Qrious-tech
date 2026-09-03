@@ -232,7 +232,7 @@ def generate_users_report_pdf(users_qs):
         Paragraph("ID", header_table_style),
         Paragraph("Full Name & Email", header_table_style),
         Paragraph("Phone / WhatsApp", header_table_style),
-        Paragraph("Plan", header_table_style),
+        Paragraph("Enrolled Batch", header_table_style),
         Paragraph("Date Joined", header_table_style),
         Paragraph("Contact Status", header_table_style),
     ]]
@@ -240,12 +240,13 @@ def generate_users_report_pdf(users_qs):
     for idx, u in enumerate(users_qs, 1):
         is_over = u.date_joined <= seven_days_ago
         c_status = "Contact Completed" if u.profile.is_contacted else ("Need Contact (>7D)" if is_over else "New (<7 Days)")
+        batch_names = ", ".join([e.batch.name if e.batch else e.course_name for e in u.enrollments.all()]) or "Not Enrolled"
         table_data.append([
             Paragraph(str(idx), normal_style),
             Paragraph(f"#{u.id}", normal_style),
             Paragraph(f"<b>{u.get_full_name() or u.email}</b><br/><font color='#64748b'>{u.email}</font>", normal_style),
             Paragraph(u.profile.phone or 'N/A', normal_style),
-            Paragraph(u.profile.plan.upper(), normal_style),
+            Paragraph(batch_names, normal_style),
             Paragraph(u.date_joined.strftime('%b %d, %Y'), normal_style),
             Paragraph(f"<b>{c_status}</b>", normal_style),
         ])
@@ -346,6 +347,104 @@ def generate_bookings_report_pdf(bookings_qs):
         ])
 
     t = Table(table_data, colWidths=[20, 30, 170, 80, 110, 60, 60])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f172a')),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#cbd5e1')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f8fafc')])
+    ]))
+    story.append(t)
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def generate_payments_report_pdf(payments_qs):
+    """Generate professional PDF Student Payments Report binary buffer using ReportLab."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+    story = []
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=18,
+        leading=22,
+        textColor=colors.HexColor('#0f172a')
+    )
+    subtitle_style = ParagraphStyle(
+        'DocSubtitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=10,
+        leading=14,
+        textColor=colors.HexColor('#ccff00')
+    )
+    normal_style = ParagraphStyle(
+        'NormalText',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=8,
+        leading=11,
+        textColor=colors.HexColor('#334155')
+    )
+    header_table_style = ParagraphStyle(
+        'HeaderTh',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=8,
+        leading=10,
+        textColor=colors.HexColor('#ffffff')
+    )
+
+    from django.utils import timezone
+
+    # Title & Header
+    story.append(Paragraph("Qrious Tech Academy — Super Admin Console", subtitle_style))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph("Student Payments & Fee Verifications Report", title_style))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph(f"Generated: {timezone.now().strftime('%B %d, %Y - %H:%M')} UTC | Total Matching Records: {payments_qs.count()}", normal_style))
+    story.append(Spacer(1, 10))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#e2e8f0'), spaceAfter=10))
+
+    # Table Header
+    table_data = [[
+        Paragraph("#", header_table_style),
+        Paragraph("Invoice ID", header_table_style),
+        Paragraph("Student Email & ID", header_table_style),
+        Paragraph("Amount (BDT)", header_table_style),
+        Paragraph("Method & Ref", header_table_style),
+        Paragraph("Date Submitted", header_table_style),
+        Paragraph("Status", header_table_style),
+    ]]
+
+    for idx, p in enumerate(payments_qs, 1):
+        status_label = p.status.capitalize()
+        table_data.append([
+            Paragraph(str(idx), normal_style),
+            Paragraph(f"<b>{p.invoice_id}</b>", normal_style),
+            Paragraph(f"<b>{p.enrollment.user.email}</b><br/><font color='#64748b'>ID: {p.enrollment.student_id}</font>", normal_style),
+            Paragraph(f"৳{p.amount:.2f}", normal_style),
+            Paragraph(f"{p.payment_method}<br/><font color='#64748b'>{p.transaction_ref}</font>", normal_style),
+            Paragraph(p.created_at.strftime('%b %d, %Y'), normal_style),
+            Paragraph(f"<b>{status_label}</b>", normal_style),
+        ])
+
+    t = Table(table_data, colWidths=[20, 85, 140, 75, 90, 65, 55])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f172a')),
         ('ALIGN', (0,0), (-1,-1), 'LEFT'),
