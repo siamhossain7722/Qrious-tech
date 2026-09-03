@@ -945,6 +945,7 @@ def superadmin_payments_list(request):
         'total_approved_amount': total_approved_amount,
         'pending_count': pending_count,
         'pending_amount': pending_amount,
+        'approved_count': approved_count,
         'rejected_count': rejected_count,
         'status_choices': StudentPayment.STATUS_CHOICES,
     }
@@ -953,6 +954,142 @@ def superadmin_payments_list(request):
         return render(request, 'accounts_app/_payments_table_partial.html', context)
 
     return render(request, 'accounts_app/superadmin_payments_list.html', context)
+
+
+@login_required
+@user_passes_test(_is_superuser)
+def superadmin_broadcast_due_payment_reminders(request):
+    """Super Admin: Broadcast automated email reminder & notification to active students with pending tuition fee balance."""
+    if request.method != 'POST':
+        return redirect('/admin-payments/')
+
+    from django.core.mail import EmailMultiAlternatives
+    from django.conf import settings
+    from .models import StudentEnrollment
+
+    # Query all active enrollments excluding 100% completed students
+    active_enrollments = StudentEnrollment.objects.filter(
+        is_completed=False
+    ).select_related('user')
+
+    sent_count = 0
+    domain = request.build_absolute_uri('/')[:-1] if request else "https://qrious-tech.vercel.app"
+    payment_portal_url = f"{domain}/student/invoices/"
+
+    for enrollment in active_enrollments:
+        if not enrollment.user or not enrollment.user.email:
+            continue
+
+        due_amount = enrollment.due_amount
+        if due_amount <= 0:
+            continue  # Skip students who have 0 due balance!
+
+        student = enrollment.user
+        student_name = student.get_full_name() or student.username or student.email
+
+        subject = f"📌 Friendly Reminder: Pending Tuition Fee Balance for {enrollment.course_name}"
+
+        text_content = f"""
+Dear {student_name},
+
+This is a friendly reminder from Qrious Tech Academy regarding your tuition fee balance for {enrollment.course_name}.
+
+Enrolled Course: {enrollment.course_name} (Student ID: {enrollment.student_id})
+Pending Due Amount: ৳{due_amount:.2f} BDT
+
+Please submit your due tuition fee and upload your payment transaction reference / receipt on your student portal to ensure seamless access to live classes and assignments.
+
+Submit Payment Proof: {payment_portal_url}
+
+Note: If you have already paid or recently submitted your payment proof, please ignore this automated notice.
+
+Best regards,
+Accounts & Finance Team
+Qrious Tech Academy
+        """
+
+        html_content = f"""
+        <div style="font-family:'Plus Jakarta Sans','Inter',sans-serif;max-width:600px;margin:0 auto;background:#0d1117;color:#f8fafc;padding:30px;border-radius:20px;border:1px solid #1e293b">
+            <div style="text-align:center;margin-bottom:24px">
+                <span style="font-size:36px">💳</span>
+                <h2 style="color:#ccff00;margin:10px 0 4px;font-size:22px;font-weight:800">Tuition Fee Payment Reminder</h2>
+                <p style="color:#94a3b8;font-size:13px;margin:0">Qrious Tech Academy Accounts & Billing</p>
+            </div>
+
+            <div style="background:#161f2e;border:1px solid #334155;border-radius:14px;padding:20px;margin-bottom:24px">
+                <p style="color:#e2e8f0;font-size:15px;margin:0 0 14px">Hello <strong>{student_name}</strong>,</p>
+                <p style="color:#cbd5e1;font-size:13.5px;line-height:1.6;margin:0 0 16px">
+                    We hope you are enjoying your learning journey at Qrious Tech Academy! This is a friendly reminder regarding your remaining tuition fee balance for <strong>{enrollment.course_name}</strong>.
+                </p>
+
+                <table style="width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:12px">
+                    <tr style="border-bottom:1px solid #334155">
+                        <td style="color:#94a3b8;padding:8px 0;font-weight:600">Student ID:</td>
+                        <td style="color:#ffffff;font-weight:700;text-align:right">{enrollment.student_id}</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #334155">
+                        <td style="color:#94a3b8;padding:8px 0;font-weight:600">Course:</td>
+                        <td style="color:#38bdf8;font-weight:700;text-align:right">{enrollment.course_name}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#94a3b8;padding:10px 0;font-weight:600">Pending Due Balance:</td>
+                        <td style="color:#ccff00;font-size:16px;font-weight:800;text-align:right">৳{due_amount:.2f} BDT</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="color:#94a3b8;font-size:12.5px;line-height:1.6;margin-bottom:24px">
+                Please complete your payment via bKash/Nagad/Bank and upload your transaction reference receipt on your student billing portal to update your verification status.
+            </p>
+
+            <div style="text-align:center;margin-bottom:24px">
+                <a href="{payment_portal_url}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#ccff00,#10b981);color:#090d16;font-size:14px;font-weight:800;padding:14px 28px;border-radius:14px;text-decoration:none;box-shadow:0 6px 20px rgba(204,255,0,0.25)">
+                    💳 Upload Payment Proof on Portal ↗
+                </a>
+            </div>
+
+            <div style="background:rgba(204,255,0,0.05);border:1px dashed rgba(204,255,0,0.25);border-radius:12px;padding:12px 16px;font-size:12px;color:#cbd5e1;line-height:1.5">
+                💡 <em><strong>Note:</strong> If you have already completed your full payment or recently uploaded your transaction proof, please ignore this notice while our accounts team verifies your receipt.</em>
+            </div>
+
+            <div style="border-top:1px solid #1e293b;margin-top:28px;padding-top:16px;text-align:center;font-size:11px;color:#64748b">
+                Qrious Tech Academy • Official Student Accounts Department
+            </div>
+        </div>
+        """
+
+        try:
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@qrioustech.com'),
+                to=[student.email]
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=True)
+            sent_count += 1
+        except Exception as e:
+            print(f"Error sending due reminder email to {student.email}: {e}")
+
+        # Also create in-app notification for the student
+        try:
+            create_notification(
+                user=student,
+                title=f"📌 Pending Tuition Fee Reminder (৳{due_amount:.2f} BDT)",
+                message=f"Friendly reminder: You have a pending tuition fee balance of ৳{due_amount:.2f} BDT for {enrollment.course_name}. Please upload your payment receipt.",
+                notification_type="billing",
+                category="warning",
+                link="/student/invoices/"
+            )
+        except Exception:
+            pass
+
+    if sent_count > 0:
+        messages.success(request, f"🎉 Due payment email reminders & notifications successfully broadcasted to {sent_count} active enrolled students!")
+    else:
+        messages.info(request, "ℹ️ No active enrolled students currently have unpaid tuition due balance.")
+
+    return redirect('/admin-payments/')
 
 
 @login_required

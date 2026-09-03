@@ -80,6 +80,7 @@ urlpatterns = [
     # All Student Payments & Proof Verifications Routes
     path('admin-payments/', accounts_views.superadmin_payments_list, name='admin_payments'),
     path('superadmin/payments/', accounts_views.superadmin_payments_list, name='superadmin_payments_list'),
+    path('admin-payments/broadcast-due-reminder/', accounts_views.superadmin_broadcast_due_payment_reminders, name='superadmin_broadcast_due_payment_reminders'),
     path('admin-payments/export/csv/', accounts_views.export_payments_csv, name='export_payments_csv'),
     path('superadmin/payments/export/csv/', accounts_views.export_payments_csv),
     path('admin-payments/export/pdf/', accounts_views.export_payments_pdf, name='export_payments_pdf'),
