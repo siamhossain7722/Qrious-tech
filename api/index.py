@@ -6,7 +6,7 @@ root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linkedin_agent.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'qrious_tech.settings')
 
 # Ensure staticfiles directory exists and contains all static assets on serverless startup
 staticfiles_dir = os.path.join(root_dir, 'staticfiles')

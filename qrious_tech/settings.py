@@ -48,10 +48,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'linkedin_agent.auto_setup.AutoSetupMiddleware',
+    'qrious_tech.auto_setup.AutoSetupMiddleware',
 ]
 
-ROOT_URLCONF = 'linkedin_agent.urls'
+ROOT_URLCONF = 'qrious_tech.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'linkedin_agent.wsgi.application'
+WSGI_APPLICATION = 'qrious_tech.wsgi.application'
 
 #  DATABASE (MySQL for Production Deployment) 
 DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.mysql')

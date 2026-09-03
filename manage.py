@@ -13,7 +13,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linkedin_agent.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'qrious_tech.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
