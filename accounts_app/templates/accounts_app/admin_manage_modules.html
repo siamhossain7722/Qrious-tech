@@ -306,7 +306,7 @@
         <!-- Form 3: Upload Recorded Video Class -->
         <div class="card" style="grid-column: span 2;">
             <h2 style="font-size:18px;font-weight:800;margin-bottom:16px;color:var(--cyan)">🎥 Upload Recorded Video Class</h2>
-            <form method="post" action="">
+            <form method="post" action="" hx-post="/student/classroom/admin/" hx-target="#modules-list-container" hx-swap="outerHTML" hx-indicator="#upload-spinner">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="add_lesson">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -358,82 +358,19 @@
                     <label class="form-label">Class Notes & Key Takeaways</label>
                     <textarea name="notes" class="form-textarea" rows="2" placeholder="Summary notes for students..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-cyan">🚀 Upload & Publish Video Class</button>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <button type="submit" class="btn btn-cyan">🚀 Upload & Publish Video Class</button>
+                    <span id="upload-spinner" class="htmx-indicator" style="font-size:13px;color:var(--cyan);font-weight:700">⏳ Uploading, Publishing & Notifying Students...</span>
+                </div>
             </form>
         </div>
     </div>
 
     <!-- Active Modules & Uploaded Classes Listing -->
     <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px">
-            <h2 style="font-size:20px;font-weight:900;color:var(--text)">📚 Course Modules & Recorded Classes</h2>
-            <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:12px;font-weight:700;color:var(--text2)">Filter by Batch:</span>
-                <a href="/student/classroom/admin/" class="btn btn-outline {% if not selected_batch_id %}btn-cyan{% endif %}" style="padding:5px 12px;font-size:12px">All Batches</a>
-                {% for b in batches %}
-                <a href="/student/classroom/admin/?batch_id={{ b.id }}" class="btn btn-outline {% if selected_batch_id == b.id|stringformat:'s' %}btn-amber{% endif %}" style="padding:5px 12px;font-size:12px">
-                    🏷️ {{ b.name }}
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="module-list">
-            {% for m in modules %}
-            <div class="module-box">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
-                    <div style="font-size:16.5px;font-weight:800;color:var(--cyan)">{{ m.title }}</div>
-                    <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this module?');" style="display:inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="delete_module">
-                        <input type="hidden" name="module_id" value="{{ m.id }}">
-                        <button type="submit" class="btn btn-outline" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:rgba(239,68,68,0.3)">🗑️ Delete Module</button>
-                    </form>
-                </div>
-                {% if m.description %}
-                <div style="font-size:12.5px;color:var(--text2);margin-bottom:12px">{{ m.description }}</div>
-                {% endif %}
-
-                {% if m.lessons.all %}
-                <div>
-                    {% for l in m.lessons.all %}
-                    <div class="lesson-row">
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                            <span class="badge badge-cyan">🎬 Video</span>
-                            <span class="badge badge-amber">🏷️ {{ l.batch.name|default:"Batch 01" }}</span>
-                            {% if not l.is_published %}
-                            <span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)">🕒 Scheduled: {{ l.scheduled_at|date:"M d, Y @ h:i A" }}</span>
-                            {% else %}
-                            <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)">🟢 Live / Published</span>
-                            {% endif %}
-                            <strong style="font-size:13.5px;color:var(--text)">{{ l.title }}</strong>
-                            <span style="font-size:11.5px;color:var(--text3)">({{ l.duration }})</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <button type="button" class="btn btn-outline" style="padding:5px 12px;font-size:12px" onclick="openEditLessonModal('{{ l.id }}', '{{ m.id }}', '{{ l.title|escapejs }}', '{{ l.video_url|escapejs }}', '{{ l.duration|escapejs }}', '{{ l.notes|escapejs }}', '{{ l.batch.id|default:"" }}')">
-                                ✏️ Edit Class
-                            </button>
-                            <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this class?');" style="display:inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_lesson">
-                                <input type="hidden" name="lesson_id" value="{{ l.id }}">
-                                <button type="submit" class="btn btn-outline" style="padding:5px 12px;font-size:12px;color:var(--red);border-color:rgba(239,68,68,0.3)">
-                                    🗑️ Delete Class
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div style="padding:14px;background:var(--bg2);border-radius:10px;font-size:12.5px;color:var(--text3);font-style:italic">
-                    No video classes uploaded for this module yet.
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
+        {% include 'accounts_app/_modules_list_partial.html' %}
     </div>
+</main>
 </main>
 
 <!-- Modal: Edit Lesson -->

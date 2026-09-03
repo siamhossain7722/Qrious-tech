@@ -1,3 +1,4 @@
+import datetime
 import stripe
 import json
 from decimal import Decimal
@@ -930,10 +931,13 @@ def superadmin_payments_list(request):
         'total_approved_amount': total_approved_amount,
         'pending_count': pending_count,
         'pending_amount': pending_amount,
-        'approved_count': approved_count,
         'rejected_count': rejected_count,
         'status_choices': StudentPayment.STATUS_CHOICES,
     }
+
+    if request.headers.get('HX-Request') or request.META.get('HTTP_HX_REQUEST'):
+        return render(request, 'accounts_app/_payments_table_partial.html', context)
+
     return render(request, 'accounts_app/superadmin_payments_list.html', context)
 
 
@@ -1736,6 +1740,20 @@ def admin_manage_modules(request):
             lesson.delete()
             messages.success(request, "Recorded Class deleted successfully!")
 
+        if request.headers.get('HX-Request') or request.META.get('HTTP_HX_REQUEST'):
+            batches = CourseBatch.objects.all()
+            selected_batch_id = request.GET.get('batch_id')
+            active_batch = None
+            if selected_batch_id:
+                active_batch = get_object_or_404(CourseBatch, pk=selected_batch_id)
+            modules = CourseModule.objects.prefetch_related('lessons').order_by('course_slug', 'order', 'module_number').all()
+            return render(request, 'accounts_app/_modules_list_partial.html', {
+                'modules': modules,
+                'batches': batches,
+                'active_batch': active_batch,
+                'selected_batch_id': selected_batch_id,
+            })
+
         return redirect('/student/classroom/admin/')
 
     from .models import CourseModule, CourseLesson, CourseBatch
@@ -1780,6 +1798,15 @@ def admin_manage_modules(request):
         active_batch = get_object_or_404(CourseBatch, pk=selected_batch_id)
 
     modules = CourseModule.objects.prefetch_related('lessons').order_by('course_slug', 'order', 'module_number').all()
+
+    if request.headers.get('HX-Request') or request.META.get('HTTP_HX_REQUEST'):
+        return render(request, 'accounts_app/_modules_list_partial.html', {
+            'modules': modules,
+            'batches': batches,
+            'active_batch': active_batch,
+            'selected_batch_id': selected_batch_id,
+        })
+
     return render(request, 'accounts_app/admin_manage_modules.html', {
         'modules': modules,
         'batches': batches,
@@ -2783,6 +2810,111 @@ def notify_students_updated_lesson(lesson):
         return 0
 
 
+def notify_students_new_assignment(assignment):
+    """
+    Sends real-time bell notifications AND dispatches HTML email notifications
+    to all enrolled students in the target batch when a new homework or exam assignment is published.
+    """
+    try:
+        from .models import StudentEnrollment
+        from django.contrib.auth import get_user_model
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+
+        User = get_user_model()
+
+        if assignment.batch:
+            enrollments = StudentEnrollment.objects.filter(batch=assignment.batch).select_related('user')
+            batch_name = assignment.batch.name
+        else:
+            enrollments = StudentEnrollment.objects.select_related('user').all()
+            batch_name = "All Enrolled Batches"
+
+        target_users = set(e.user for e in enrollments if e.user)
+        if not target_users:
+            target_users = set(User.objects.filter(is_superuser=False))
+
+        due_date_formatted = assignment.due_date.strftime("%a, %b %d, %Y @ %I:%M %p") if assignment.due_date else "N/A"
+        assignments_url = "https://qrious-tech.vercel.app/student/assignments/"
+
+        sent_count = 0
+        for user in target_users:
+            student_name = user.get_full_name() or user.username or user.email
+
+            # 1. Real-time Bell Notification
+            create_notification(
+                user=user,
+                title=f"📚 Week {assignment.week_number} Homework Posted: {assignment.title}",
+                message=f"A new homework/exam assignment '{assignment.title}' for {batch_name} has been published. Due date: {due_date_formatted}. Maximum Marks: {assignment.total_marks}.",
+                notification_type="course",
+                category="warning",
+                link="/student/assignments/"
+            )
+
+            # 2. HTML Email Notification
+            try:
+                email_subject = f"[Homework Posted] 📚 Week {assignment.week_number}: {assignment.title} — {batch_name}"
+                html_content = f"""
+                <!DOCTYPE html>
+                <html>
+                <body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0b0f19; color: #f8fafc; margin: 0; padding: 20px;">
+                  <div style="max-width: 600px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                    <div style="background: linear-gradient(135deg, #0284c7, #7c3aed); padding: 24px; text-align: center;">
+                      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">Qrious Tech Academy</h1>
+                      <p style="color: rgba(255,255,255,0.9); margin: 6px 0 0 0; font-size: 14px;">🎓 Homework & Exam Assignment Published</p>
+                    </div>
+                    <div style="padding: 28px;">
+                      <h2 style="color: #38bdf8; margin-top: 0; font-size: 18px;">Hello {student_name}, 👋</h2>
+                      <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                        A new homework assignment has been published for your enrolled batch <strong>{batch_name}</strong>. Please review the details below and submit your text answer script before the deadline.
+                      </p>
+
+                      <div style="background: #1e293b; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 18px; margin: 20px 0;">
+                        <div style="font-size: 12px; font-weight: 700; color: #f59e0b; text-transform: uppercase; margin-bottom: 4px;">Week {assignment.week_number} Assignment</div>
+                        <div style="font-size: 17px; font-weight: 800; color: #ffffff; margin-bottom: 10px;">{assignment.title}</div>
+                        <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">📅 <strong>Due Deadline:</strong> {due_date_formatted}</div>
+                        <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">🏆 <strong>Maximum Marks:</strong> {assignment.total_marks} Marks</div>
+                        <div style="font-size: 13px; color: #94a3b8; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                          <strong>Instructions:</strong><br>{assignment.description}
+                        </div>
+                      </div>
+
+                      <div style="text-align: center; margin-top: 28px;">
+                        <a href="{assignments_url}" style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
+                          📄 Open & Submit Homework
+                        </a>
+                      </div>
+                    </div>
+                    <div style="background: #090d16; padding: 16px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.08);">
+                      © 2026 Qrious Tech Academy. All rights reserved.<br>
+                      If you have questions, please reach out to your course mentor.
+                    </div>
+                  </div>
+                </body>
+                </html>
+                """
+
+                text_content = f"Dear {student_name},\n\nA new assignment '{assignment.title}' has been published for {batch_name}.\nWeek: {assignment.week_number}\nDue Date: {due_date_formatted}\nTotal Marks: {assignment.total_marks}\nSubmit here: {assignments_url}\n\nQrious Tech Academy"
+
+                msg = EmailMultiAlternatives(
+                    subject=email_subject,
+                    body=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[user.email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=True)
+                sent_count += 1
+            except Exception as email_err:
+                print(f"Error sending assignment email to {user.email}: {email_err}")
+
+        print(f"Dispatched {sent_count} HTML emails for assignment '{assignment.title}'.")
+        return sent_count
+    except Exception as ex:
+        print(f"Error notifying students for new assignment: {ex}")
+        return 0
+
+
 @login_required
 def notifications_api_list(request):
     """API: Returns JSON list of notifications & unread count for current user."""
@@ -3030,23 +3162,12 @@ def admin_manage_assignments(request):
                     total_marks=total_marks
                 )
 
-                # Send notifications to students in batch
-                enrolled_students = StudentEnrollment.objects.filter(batch=batch).select_related('user')
-                notif_count = 0
-                for enr in enrolled_students:
-                    create_notification(
-                        user=enr.user,
-                        title=f"📚 Week {week_number} Homework Posted: {title}",
-                        message=f"New Week {week_number} assignment for {batch.name} posted! Due: {due_date.strftime('%b %d, %Y')}. Submit your answer on the homework portal.",
-                        notification_type="course",
-                        category="warning",
-                        link="/student/assignments/"
-                    )
-                    notif_count += 1
+                # Send real-time bell notifications & HTML emails to target batch students
+                notif_count = notify_students_new_assignment(assignment)
 
                 messages.success(
                     request,
-                    f"🎉 Homework Assignment (Week {week_number}) '{title}' created for {batch.name}! Sent {notif_count} student notifications."
+                    f"🎉 Homework Assignment (Week {week_number}) '{title}' created for {batch.name}! Sent {notif_count} student notifications & HTML emails."
                 )
             else:
                 messages.error(request, "Please fill in all required fields (Batch, Title, Instructions, Due Date).")

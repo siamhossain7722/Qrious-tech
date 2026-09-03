@@ -45,7 +45,23 @@ body.light-theme .user-dropdown-item:hover, html.light-theme .user-dropdown-item
 }
 </style>
 
+<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 <script>
+(function() {
+    if (window.__htmxCsrfInitialized) return;
+    window.__htmxCsrfInitialized = true;
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+        const cookies = document.cookie.split('; ');
+        const csrfCookie = cookies.find(row => row.startsWith('csrftoken='));
+        if (csrfCookie) {
+            evt.detail.headers['X-CSRFToken'] = csrfCookie.split('=')[1];
+        } else {
+            const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (input) evt.detail.headers['X-CSRFToken'] = input.value;
+        }
+    });
+})();
+
 (function() {
     if (window.__userDropdownInitialized) return;
     window.__userDropdownInitialized = true;

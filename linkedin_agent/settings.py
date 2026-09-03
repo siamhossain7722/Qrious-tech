@@ -234,6 +234,8 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
+DATETIME_FORMAT = 'M d, Y, h:i A'
+TIME_FORMAT = 'h:i A'
 
 #  STATIC & MEDIA 
 STATIC_URL = '/static/'

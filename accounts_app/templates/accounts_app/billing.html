@@ -218,7 +218,7 @@
                         {% else %}📄{% endif %}
                     </div>
                     <div class="log-text">{{ log.get_event_display }}</div>
-                    <div class="log-time">{{ log.created_at|date:"M d, H:i" }}</div>
+                    <div class="log-time">{{ log.created_at|date:"M d, h:i A" }}</div>
                 </div>
                 {% endfor %}
             </div>

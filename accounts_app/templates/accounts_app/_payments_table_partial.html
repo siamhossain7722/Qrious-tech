@@ -1,0 +1,186 @@
+<div id="payments-table-container" class="card" style="padding:0;overflow:hidden">
+    <!-- Desktop Table View -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student / ID</th>
+                    <th>Invoice ID</th>
+                    <th>Amount (BDT)</th>
+                    <th>Method & Ref TrxID</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if payments_page %}
+                    {% for p in payments_page %}
+                        <tr>
+                            <td>
+                                <div style="font-weight:700;color:var(--text)">{{ p.enrollment.user.get_full_name|default:p.enrollment.user.email }}</div>
+                                <div style="font-size:11px;color:var(--text3);font-weight:600">ID: <a href="/superadmin/student/{{ p.enrollment.id }}/profile/" style="color:#2563eb;text-decoration:none">{{ p.enrollment.student_id }}</a></div>
+                                <div style="font-size:11px;color:var(--text2)">{{ p.enrollment.user.email }}</div>
+                            </td>
+                            <td>
+                                <span style="font-family:monospace;font-weight:700;color:#2563eb">{{ p.invoice_id }}</span>
+                            </td>
+                            <td>
+                                <span style="font-weight:800;color:#059669;font-size:15px">৳{{ p.amount|floatformat:2 }} BDT</span>
+                            </td>
+                            <td>
+                                <div style="font-weight:700;font-size:13px">{{ p.payment_method }}</div>
+                                <div style="font-family:monospace;font-size:12px;color:#0284c7">{{ p.transaction_ref|default:"N/A" }}</div>
+                            </td>
+                            <td>
+                                <div style="font-size:12px;font-weight:600">{{ p.created_at|date:"M d, Y" }}</div>
+                                <div style="font-size:11px;color:var(--text3)">{{ p.created_at|date:"h:i A" }}</div>
+                            </td>
+                            <td>
+                                {% if p.status == 'approved' %}
+                                    <span class="status-badge status-approved">✅ Approved</span>
+                                {% elif p.status == 'rejected' %}
+                                    <span class="status-badge status-rejected">❌ Declined</span>
+                                {% else %}
+                                    <span class="status-badge status-pending">⏳ Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                                    <button type="button" class="btn btn-outline" style="font-size:11px;padding:5px 10px"
+                                            onclick="openPaymentDetailsModal('{{ p.id }}', '{{ p.invoice_id }}', '{{ p.enrollment.user.get_full_name|escapejs }}', '{{ p.enrollment.user.email|escapejs }}', '{{ p.enrollment.student_id }}', '{{ p.enrollment.course_name|escapejs }}', '{{ p.amount|floatformat:2 }}', '{{ p.payment_method }}', '{{ p.transaction_ref|default:"N/A"|escapejs }}', '{{ p.notes|default:"None"|escapejs }}', '{% if p.proof_image_src %}{{ p.proof_image_src }}{% endif %}', '{{ p.status }}', '{{ p.created_at|date:"M d, Y - h:i A" }}', '{{ p.admin_notes|default:""|escapejs }}')">
+                                        👁️ Details
+                                    </button>
+
+                                    {% if p.status == 'pending' %}
+                                        <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="display:inline-flex;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="btn btn-success" style="font-size:11px;padding:5px 10px" title="Approve payment & email official PDF invoice">
+                                                ✓ Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="display:inline-flex;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="btn btn-outline" style="font-size:11px;padding:5px 8px;color:#ef4444;border-color:rgba(239,68,68,0.3)" title="Decline payment submission">
+                                                ✕ Decline
+                                            </button>
+                                        </form>
+                                    {% elif p.status == 'approved' %}
+                                        <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="font-size:11px;padding:5px 8px;color:#2563eb">
+                                            📄 Invoice
+                                        </a>
+                                    {% endif %}
+
+                                    <button type="button" class="btn btn-sm" onclick="openDeletePaymentModal('{{ p.id }}', '{{ p.invoice_id|escapejs }}', '{{ p.enrollment.user.email|escapejs }}')" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:4px 8px;font-weight:700" title="Delete Payment Record">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:40px;color:var(--text2)">
+                            💳 No payment verification records found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View (For Small Devices) -->
+    <div class="mobile-payment-cards">
+        {% if payments_page %}
+            {% for p in payments_page %}
+                <div class="mobile-p-card">
+                    <div class="mobile-p-card-header">
+                        <div>
+                            <span style="font-family:monospace;font-weight:800;color:#2563eb;font-size:14px">{{ p.invoice_id }}</span>
+                            <div style="font-size:11px;color:var(--text3)">{{ p.created_at|date:"M d, Y - h:i A" }}</div>
+                        </div>
+                        <div>
+                            {% if p.status == 'approved' %}
+                                <span class="status-badge status-approved">✅ Approved</span>
+                            {% elif p.status == 'rejected' %}
+                                <span class="status-badge status-rejected">❌ Declined</span>
+                            {% else %}
+                                <span class="status-badge status-pending">⏳ Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <div style="font-weight:800;color:var(--text);font-size:14px">{{ p.enrollment.user.get_full_name|default:p.enrollment.user.email }}</div>
+                            <div style="font-size:11px;color:var(--text3)">ID: {{ p.enrollment.student_id }} • {{ p.enrollment.user.email }}</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-weight:900;color:#059669;font-size:16px">৳{{ p.amount|floatformat:2 }}</div>
+                            <div style="font-size:11px;color:#0284c7;font-weight:700">{{ p.payment_method }} • {{ p.transaction_ref|default:"N/A" }}</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+                        <button type="button" class="btn btn-outline" style="font-size:12px;flex:1;justify-content:center"
+                                onclick="openPaymentDetailsModal('{{ p.id }}', '{{ p.invoice_id }}', '{{ p.enrollment.user.get_full_name|escapejs }}', '{{ p.enrollment.user.email|escapejs }}', '{{ p.enrollment.student_id }}', '{{ p.enrollment.course_name|escapejs }}', '{{ p.amount|floatformat:2 }}', '{{ p.payment_method }}', '{{ p.transaction_ref|default:"N/A"|escapejs }}', '{{ p.notes|default:"None"|escapejs }}', '{% if p.payment_proof %}{{ p.payment_proof.url }}{% endif %}', '{{ p.status }}', '{{ p.created_at|date:"M d, Y - h:i A" }}', '{{ p.admin_notes|default:""|escapejs }}')">
+                            👁️ View Details
+                        </button>
+
+                        {% if p.status == 'pending' %}
+                            <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="flex:1">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="btn btn-success" style="width:100%;font-size:12px;justify-content:center">
+                                    ✓ Approve
+                                </button>
+                            </form>
+                            <form method="POST" action="/superadmin/payment/{{ p.id }}/verify/" style="flex:1">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="btn btn-outline" style="width:100%;font-size:12px;justify-content:center;color:#ef4444;border-color:rgba(239,68,68,0.3)">
+                                    ✕ Decline
+                                </button>
+                            </form>
+                        {% elif p.status == 'approved' %}
+                            <a href="/invoice/{{ p.invoice_id }}/" target="_blank" class="btn btn-outline" style="font-size:12px;flex:1;justify-content:center;color:#2563eb">
+                                📄 Invoice
+                            </a>
+                        {% endif %}
+
+                        <button type="button" class="btn btn-sm" onclick="openDeletePaymentModal('{{ p.id }}', '{{ p.invoice_id|escapejs }}', '{{ p.enrollment.user.email|escapejs }}')" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:4px 8px;font-weight:700" title="Delete Payment Record">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align:center;padding:30px;color:var(--text2)">
+                💳 No payment verification records found.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if payments_page.has_other_pages %}
+        <div class="pagination">
+            {% if payments_page.has_previous %}
+                <button type="button" hx-get="?page={{ payments_page.previous_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" hx-target="#payments-table-container" hx-swap="outerHTML" class="page-link">← Prev</button>
+            {% endif %}
+
+            {% for num in payments_page.paginator.page_range %}
+                {% if payments_page.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                {% else %}
+                    <button type="button" hx-get="?page={{ num }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" hx-target="#payments-table-container" hx-swap="outerHTML" class="page-link">{{ num }}</button>
+                {% endif %}
+            {% endfor %}
+
+            {% if payments_page.has_next %}
+                <button type="button" hx-get="?page={{ payments_page.next_page_number }}{% if q_search %}&q={{ q_search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" hx-target="#payments-table-container" hx-swap="outerHTML" class="page-link">Next →</button>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
