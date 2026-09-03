@@ -103,6 +103,15 @@
         .table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
         .table th { background: rgba(255,255,255,0.02); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
         .table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .mobile-menu-btn {
+            display: none; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(204,255,0,0.18), rgba(204,255,0,0.06));
+            border: 1.5px solid rgba(204,255,0,0.45); color: #ccff00; font-size: 11px; font-weight: 800;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer; box-shadow: 0 0 15px rgba(204,255,0,0.18); transition: all 0.25s ease; flex-shrink: 0;
+        }
+        @media(max-width: 900px) { .mobile-menu-btn { display: inline-flex; } }
+        .mobile-menu-btn:hover { background: linear-gradient(135deg, rgba(204,255,0,0.3), rgba(204,255,0,0.12)); border-color: #ccff00; box-shadow: 0 0 22px rgba(204,255,0,0.4); transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -144,8 +153,9 @@
 <main class="main">
     <div class="topbar">
         <div style="display:flex;align-items:center;gap:12px;min-width:0">
-            <button type="button" class="btn-toggle-sidebar" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
-                ☰
+            <button type="button" class="mobile-menu-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                Menu
             </button>
             <div>
                 <h1 class="page-title">🎓 Student Management & Billing</h1>

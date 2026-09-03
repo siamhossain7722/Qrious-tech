@@ -32,9 +32,12 @@
         .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
         .page-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; }
 
-        .week-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
-        .week-tab { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; background: var(--card); border: 1px solid var(--border); color: var(--text2); text-decoration: none; transition: all 0.2s; }
+        .week-filter-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+        .week-tab { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; background: var(--card); border: 1px solid var(--border2); color: var(--text2); text-decoration: none; transition: all 0.2s; font-family: 'Inter', sans-serif; }
         .week-tab:hover, .week-tab.active { background: #2563eb; color: #ffffff; border-color: #3b82f6; }
+        .week-select-input { background: var(--card); border: 1px solid var(--border2); color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; outline: none; transition: all 0.2s; }
+        .week-select-input:hover, .week-select-input:focus { border-color: #3b82f6; background: rgba(255,255,255,0.06); }
+        .week-select-input option { background: #0f172a; color: #f8fafc; padding: 8px; }
 
         .assignment-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 24px; }
         .assignment-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
@@ -51,9 +54,35 @@
             top: 0; z-index: 99; width: calc(100% + 32px); margin: -20px -16px 20px -16px;
         }
         .mobile-menu-btn {
-            width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06);
-            border: 1px solid var(--border); color: var(--text); font-size: 20px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(204,255,0,0.18), rgba(204,255,0,0.06));
+            border: 1.5px solid rgba(204,255,0,0.45);
+            color: #ccff00;
+            font-size: 11px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(204,255,0,0.18);
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover, .mobile-menu-btn:active {
+            background: linear-gradient(135deg, rgba(204,255,0,0.3), rgba(204,255,0,0.12));
+            border-color: #ccff00;
+            box-shadow: 0 0 22px rgba(204,255,0,0.4);
+            transform: translateY(-1px);
+        }
+        body.light-theme .mobile-menu-btn {
+            background: linear-gradient(135deg, rgba(2,132,199,0.18), rgba(2,132,199,0.06));
+            border-color: rgba(2,132,199,0.45);
+            color: #0284c7;
+            box-shadow: 0 0 12px rgba(2,132,199,0.18);
         }
         .sidebar-backdrop {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
@@ -119,7 +148,14 @@
     <!-- Mobile Top Header Bar (Visible on Screens <= 992px) -->
     <header class="mobile-top-header">
         <div style="display:flex;align-items:center;gap:10px">
-            <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">☰</button>
+            <button type="button" class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span>Menu</span>
+            </button>
             <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
                 <img src="{% static 'images/logo.png' %}" alt="Qrious Tech Academy" style="height:32px;width:auto;object-fit:contain;" onerror="this.onerror=null; this.src='{% static 'images/logo.png' %}';">
                 <div style="display:flex;flex-direction:column;line-height:1.1">
@@ -145,7 +181,6 @@
         <div class="topbar-user-controls" style="display:flex;align-items:center;gap:12px">
             {% include 'accounts_app/notification_bell.html' %}
             <button type="button" class="theme-toggle-btn btn btn-outline" onclick="toggleTheme()">🌙 Dark</button>
-            <a href="/student/dashboard/" class="btn btn-outline">← Back to Dashboard</a>
             {% include 'accounts_app/user_profile_dropdown.html' %}
         </div>
     </div>
@@ -178,18 +213,26 @@
         </div>
     </div>
 
-    <!-- Week Selector Tabs -->
+    <!-- Sleek 2-Control Week Filter Bar -->
     <div class="week-filter-bar">
-        <a href="/student/assignments/" class="week-tab {% if not selected_week %}active{% endif %}">All Weekly Tasks</a>
-        {% for w in week_numbers %}
-        <a href="/student/assignments/?week={{ w }}" class="week-tab {% if selected_week == w %}active{% endif %}">Week {{ w }}</a>
-        {% endfor %}
+        <button type="button" id="btn-all-weeks" class="week-tab {% if not selected_week %}active{% endif %}" onclick="filterByWeek('all')" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+            📊 All Weekly Tasks
+        </button>
+
+        <div style="position:relative;display:inline-flex;align-items:center">
+            <select id="week-select-dropdown" class="week-select-input" onchange="filterByWeek(this.value)">
+                <option value="all" {% if not selected_week %}selected{% endif %}>📅 Filter by Week (Select Week)</option>
+                {% for w in week_numbers %}
+                <option value="{{ w }}" {% if selected_week == w %}selected{% endif %}>Week {{ w }} Homework & Exam Task</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 
     <!-- Assignments List -->
     {% if assignments %}
         {% for a in assignments %}
-        <div class="assignment-card">
+        <div class="assignment-card" data-week="{{ a.week_number }}">
             <div class="assignment-header">
                 <div>
                     <span class="badge-week">🗓 Week {{ a.week_number }} Assignment</span>
@@ -251,10 +294,17 @@
             {% endif %}
         </div>
         {% endfor %}
+
+        <!-- Empty Filter State Notice -->
+        <div id="empty-assignments-notice" style="display:none;padding:60px 20px;text-align:center;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:20px;margin-top:10px">
+            <div style="font-size:36px;margin-bottom:10px">📌</div>
+            <div style="font-size:16px;font-weight:700;color:var(--text)" id="empty-notice-title">No homework or exam assignments found for this week</div>
+            <div style="font-size:13px;margin-top:4px">Check back later or select a different Week from the filter dropdown above.</div>
+        </div>
     {% else %}
-    <div style="padding:60px 20px;text-align:center;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:20px">
+    <div id="empty-assignments-notice" style="padding:60px 20px;text-align:center;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:20px">
         <div style="font-size:36px;margin-bottom:10px">📌</div>
-        <div style="font-size:16px;font-weight:700;color:var(--text)">No homework or exam assignments found</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)" id="empty-notice-title">No homework or exam assignments found</div>
         <div style="font-size:13px;margin-top:4px">Check back later or select a different Week tab above.</div>
     </div>
     {% endif %}
@@ -336,6 +386,87 @@ function handleHomeworkSubmit(form) {
     }
     if (cancelBtn) cancelBtn.style.display = 'none';
 }
+
+function filterByWeek(week) {
+    const allBtn = document.getElementById('btn-all-weeks');
+    const dropdown = document.getElementById('week-select-dropdown');
+    const cards = document.querySelectorAll('.assignment-card');
+    const emptyNotice = document.getElementById('empty-assignments-notice');
+    const emptyTitle = document.getElementById('empty-notice-title');
+
+    if (week === 'all' || !week) {
+        if (allBtn) allBtn.classList.add('active');
+        if (dropdown) dropdown.value = 'all';
+        let visibleCount = 0;
+        cards.forEach(card => {
+            card.style.display = 'block';
+            visibleCount++;
+        });
+        if (emptyNotice) emptyNotice.style.display = visibleCount === 0 ? 'block' : 'none';
+        if (emptyTitle) emptyTitle.innerText = 'No homework or exam assignments found';
+    } else {
+        if (allBtn) allBtn.classList.remove('active');
+        if (dropdown) dropdown.value = week;
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const cardWeek = card.getAttribute('data-week');
+            if (cardWeek === String(week)) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        if (emptyNotice) {
+            emptyNotice.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+        if (emptyTitle) {
+            emptyTitle.innerText = `No homework or exam tasks found for Week ${week}`;
+        }
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme', isLight);
+    const newTheme = isLight ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleUI(newTheme);
+}
+
+function updateThemeToggleUI(theme) {
+    const btns = document.querySelectorAll('.theme-toggle-btn');
+    btns.forEach(btn => {
+        if (theme === 'light') {
+            btn.innerHTML = '☀️ Light';
+            btn.style.background = '#e2e8f0';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#cbd5e1';
+        } else {
+            btn.innerHTML = '🌙 Dark';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.style.color = '#f8fafc';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+        }
+    });
+}
+
+// Automatically apply filter & theme on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.documentElement.classList.add('light-theme');
+        updateThemeToggleUI('light');
+    } else {
+        updateThemeToggleUI('dark');
+    }
+
+    const dropdown = document.getElementById('week-select-dropdown');
+    if (dropdown && dropdown.value && dropdown.value !== 'all') {
+        filterByWeek(dropdown.value);
+    }
+});
 </script>
 
 </body>
