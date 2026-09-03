@@ -15,11 +15,17 @@ class AutoSetupMiddleware:
         if not _setup_done:
             _setup_done = True
             try:
-                # Fast check: Only run heavy superuser seed logic if no superuser exists at all
+                # Automatically run database migrations to create any missing tables (e.g. accounts_app_courseassignment) on Vercel remote MySQL DB
+                call_command('migrate', interactive=False)
+            except Exception as ex:
+                print(f"AutoSetupMiddleware migration notice: {ex}")
+
+            try:
+                # Seed Superuser and Default CourseBatch if no superuser exists
                 if not User.objects.filter(is_superuser=True).exists():
                     self._seed_superusers()
             except Exception as ex:
-                print(f"AutoSetupMiddleware notice: {ex}")
+                print(f"AutoSetupMiddleware seed notice: {ex}")
 
         return self.get_response(request)
 

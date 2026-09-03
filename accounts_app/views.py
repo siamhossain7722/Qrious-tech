@@ -3163,22 +3163,25 @@ def admin_manage_assignments(request):
                 except Exception:
                     due_date = timezone.now() + datetime.timedelta(days=7)
 
-                assignment = CourseAssignment.objects.create(
-                    batch=batch,
-                    week_number=week_number,
-                    title=title,
-                    description=description,
-                    due_date=due_date,
-                    total_marks=total_marks
-                )
+                try:
+                    assignment = CourseAssignment.objects.create(
+                        batch=batch,
+                        week_number=week_number,
+                        title=title,
+                        description=description,
+                        due_date=due_date,
+                        total_marks=total_marks
+                    )
 
-                # Send real-time bell notifications & HTML emails to target batch students
-                notif_count = notify_students_new_assignment(assignment)
+                    # Send real-time bell notifications & HTML emails to target batch students
+                    notif_count = notify_students_new_assignment(assignment)
 
-                messages.success(
-                    request,
-                    f"🎉 Homework Assignment (Week {week_number}) '{title}' created for {batch.name}! Sent {notif_count} student notifications & HTML emails."
-                )
+                    messages.success(
+                        request,
+                        f"🎉 Homework Assignment (Week {week_number}) '{title}' created for {batch.name}! Sent {notif_count} student notifications & HTML emails."
+                    )
+                except Exception as create_err:
+                    messages.error(request, f"Could not create assignment: {create_err}")
             else:
                 messages.error(request, "Please fill in all required fields (Batch, Title, Instructions, Due Date).")
 
