@@ -490,7 +490,9 @@ class CourseAssignment(models.Model):
         ordering = ['-due_date']
 
     def __str__(self):
-        return f"{self.batch.name} - {self.title} (Due: {self.due_date.strftime('%b %d, %Y')})"
+        due_str = self.due_date.strftime('%b %d, %Y') if self.due_date else 'No Deadline'
+        batch_name = self.batch.name if self.batch else 'No Batch'
+        return f"{batch_name} - {self.title} (Due: {due_str})"
 
 
 class AssignmentSubmission(models.Model):

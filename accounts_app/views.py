@@ -3226,15 +3226,19 @@ def admin_manage_assignments(request):
 
         return redirect('/superadmin/assignments/')
 
+    batches = list(_get_active_batches())
+
     assignments = []
-    batches = []
-    submissions = []
     try:
         assignments = list(CourseAssignment.objects.select_related('batch').prefetch_related('submissions', 'submissions__enrollment__user').all())
-        batches = list(_get_active_batches())
+    except Exception as ex:
+        print(f"[WARN] admin_manage_assignments assignments query info: {ex}")
+
+    submissions = []
+    try:
         submissions = list(AssignmentSubmission.objects.select_related('assignment', 'assignment__batch', 'enrollment', 'enrollment__user').order_by('-submitted_at'))
     except Exception as ex:
-        print(f"[WARN] admin_manage_assignments query info: {ex}")
+        print(f"[WARN] admin_manage_assignments submissions query info: {ex}")
 
     pending_submissions_count = sum(1 for s in submissions if getattr(s, 'status', '') == 'submitted')
     graded_submissions_count = sum(1 for s in submissions if getattr(s, 'status', '') == 'graded')
