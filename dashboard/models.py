@@ -5,89 +5,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 
-class JobApplication(models.Model):
-    """Tracks every job the agent has processed."""
-
-    STATUS_CHOICES = [
-        ("applied", "Applied ✅"),
-        ("dry_run", "Dry Run 🔵"),
-        ("skipped", "Skipped ⏭️"),
-        ("failed", "Failed ❌"),
-        ("error", "Error 💥"),
-        ("already_applied", "Already Applied ℹ️"),
-        ("pending", "Pending ⏳"),
-        ("interview", "Interview 🎉"),
-        ("rejected", "Rejected 😔"),
-        ("offer", "Offer Received 🏆"),
-    ]
-
-    job_id = models.CharField(max_length=100, blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='job_applications', null=True, blank=True)
-    title = models.CharField(max_length=300)
-    company = models.CharField(max_length=300)
-    location = models.CharField(max_length=200, blank=True)
-    url = models.URLField(max_length=1000, blank=True)
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="pending")
-    notes = models.TextField(blank=True)
-    cover_letter = models.TextField(blank=True)
-    description = models.TextField(blank=True)
-    applicant_count = models.CharField(max_length=100, blank=True)
-    is_easy_apply = models.BooleanField(default=False)
-    workplace_type = models.CharField(max_length=50, blank=True, default="", help_text="Remote / On-site / Hybrid")
-    date_applied = models.DateTimeField(auto_now_add=True)
-    date_updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ["-date_applied"]
-
-    def __str__(self):
-        return f"{self.title} @ {self.company} [{self.status}] ({self.match_score}%)"
-
-    @property
-    def status_color(self):
-        colors = {
-            "applied": "success",
-            "dry_run": "info",
-            "skipped": "secondary",
-            "failed": "danger",
-            "error": "danger",
-            "already_applied": "warning",
-            "pending": "warning",
-            "interview": "success",
-            "rejected": "danger",
-            "offer": "success",
-        }
-        return colors.get(self.status, "secondary")
-
-
-class AgentRun(models.Model):
-    """Records each agent run session."""
-
-    STATUS_CHOICES = [
-        ("running", "Running"),
-        ("completed", "Completed"),
-        ("failed", "Failed"),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='agent_runs', null=True, blank=True)
-    started_at = models.DateTimeField(auto_now_add=True)
-    finished_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="running")
-    dry_run = models.BooleanField(default=True)
-    keywords = models.CharField(max_length=500, blank=True)
-    total_found = models.IntegerField(default=0)
-    total_applied = models.IntegerField(default=0)
-    total_skipped = models.IntegerField(default=0)
-    total_failed = models.IntegerField(default=0)
-    log_output = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ["-started_at"]
-
-    def __str__(self):
-        return f"Run {self.id} - {self.started_at.strftime('%Y-%m-%d %H:%M')} [{self.status}]"
-
-
 def _obfuscate(text: str) -> str:
     """Simple reversible obfuscation for dashboard display (NOT encryption)."""
     return base64.b64encode(text.encode()).decode()
@@ -116,7 +33,6 @@ class LinkedInAccount(models.Model):
     _password_token = models.TextField(db_column="password_token")  # obfuscated
     is_active = models.BooleanField(default=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="active")
-
 
     # Scraped profile data
     full_name = models.CharField(max_length=300, blank=True)
@@ -181,49 +97,6 @@ class LinkedInAccount(models.Model):
 
 def resume_upload_path(instance, filename):
     """Store resumes in media/resumes/<user_id>/<filename>."""
-    uid = instance.user_id if instance.user_id else 'general'
+    uid = getattr(instance, 'user_id', 'general')
     return f"resumes/{uid}/{filename}"
 
-
-class Resume(models.Model):
-    """Uploaded CV/Resume PDF files."""
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resumes', null=True, blank=True)
-    account = models.ForeignKey(
-        LinkedInAccount,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name="resumes",
-        help_text="LinkedIn account this resume belongs to (optional)",
-    )
-    name = models.CharField(max_length=200)
-    file = models.FileField(upload_to=resume_upload_path)
-    is_active = models.BooleanField(default=False)
-    file_size_kb = models.IntegerField(default=0)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-uploaded_at"]
-
-    def __str__(self):
-        active = " [ACTIVE]" if self.is_active else ""
-        return f"{self.name}{active}"
-
-    def save(self, *args, **kwargs):
-        # Compute file size on save
-        if self.file:
-            try:
-                self.file_size_kb = self.file.size // 1024
-            except Exception:
-                pass
-
-        # Only one resume can be active at a time
-        if self.is_active:
-            Resume.objects.exclude(pk=self.pk).update(is_active=False)
-
-        super().save(*args, **kwargs)
-
-    @property
-    def filename(self):
-        import os
-        return os.path.basename(self.file.name) if self.file else ""

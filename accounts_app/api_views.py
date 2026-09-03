@@ -1,12 +1,12 @@
 from rest_framework import viewsets, permissions, filters
 from django.contrib.auth.models import User
 from .models import (
-    UserProfile, Subscription, StudentEnrollment,
+    UserProfile, StudentEnrollment,
     StudentPayment, CourseModule, CourseLesson,
     Notification, LiveClassSchedule
 )
 from .serializers import (
-    UserSerializer, UserProfileSerializer, SubscriptionSerializer,
+    UserSerializer, UserProfileSerializer,
     StudentEnrollmentSerializer, StudentPaymentSerializer,
     CourseModuleSerializer, CourseLessonSerializer,
     NotificationSerializer, LiveClassScheduleSerializer
@@ -14,8 +14,8 @@ from .serializers import (
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """ModelViewSet for Django Users with prefetch_related for profile and subscription."""
-    queryset = User.objects.all().prefetch_related('profile', 'subscription', 'enrollments').order_by('-date_joined')
+    """ModelViewSet for Django Users with prefetch_related for profile."""
+    queryset = User.objects.all().prefetch_related('profile', 'enrollments').order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -30,21 +30,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['user__email', 'user__username', 'company', 'phone']
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        if not self.request.user.is_superuser:
-            return qs.filter(user=self.request.user)
-        return qs
-
-
-class SubscriptionViewSet(viewsets.ModelViewSet):
-    """ModelViewSet for Subscription with select_related('user')."""
-    queryset = Subscription.objects.select_related('user').order_by('-created_at')
-    serializer_class = SubscriptionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['user__email', 'plan', 'status']
 
     def get_queryset(self):
         qs = super().get_queryset()

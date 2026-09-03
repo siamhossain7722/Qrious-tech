@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
-    UserProfile, Subscription, StudentEnrollment,
+    UserProfile, StudentEnrollment,
     StudentPayment, CourseModule, CourseLesson,
     Notification, LiveClassSchedule
 )
@@ -19,14 +19,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id', 'user', 'avatar', 'phone', 'company', 'bio', 'is_contacted', 'created_at']
-
-
-class SubscriptionSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Subscription
-        fields = ['id', 'user', 'plan', 'status', 'stripe_subscription_id', 'created_at', 'updated_at']
 
 
 class CourseLessonSerializer(serializers.ModelSerializer):

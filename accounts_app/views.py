@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from .models import UserProfile, Subscription, UsageLog, StudentEnrollment, StudentPayment, CourseBatch, Notification
+from .models import UserProfile, UsageLog, StudentEnrollment, StudentPayment, CourseBatch, Notification
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

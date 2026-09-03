@@ -16,20 +16,18 @@ from rest_framework_simplejwt.views import (
 
 from rest_framework.routers import DefaultRouter
 from accounts_app.api_views import (
-    UserViewSet, UserProfileViewSet, SubscriptionViewSet,
+    UserViewSet, UserProfileViewSet,
     StudentEnrollmentViewSet, StudentPaymentViewSet,
     CourseModuleViewSet, CourseLessonViewSet,
     NotificationViewSet, LiveClassScheduleViewSet
 )
 from dashboard.views import (
-    JobApplicationViewSet, AgentRunViewSet,
-    LinkedInAccountViewSet, ResumeViewSet
+    LinkedInAccountViewSet
 )
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'profiles', UserProfileViewSet, basename='userprofile')
-router.register(r'subscriptions', SubscriptionViewSet, basename='subscription')
 router.register(r'enrollments', StudentEnrollmentViewSet, basename='studentenrollment')
 router.register(r'payments', StudentPaymentViewSet, basename='studentpayment')
 router.register(r'modules', CourseModuleViewSet, basename='coursemodule')
@@ -38,10 +36,7 @@ router.register(r'user-notifications', NotificationViewSet, basename='usernotifi
 router.register(r'live-sessions', LiveClassScheduleViewSet, basename='liveclasssession')
 
 # Dashboard & Agent ViewSets
-router.register(r'job-applications', JobApplicationViewSet, basename='jobapplication')
-router.register(r'agent-runs', AgentRunViewSet, basename='agentrun')
 router.register(r'linkedin-accounts', LinkedInAccountViewSet, basename='linkedinaccount')
-router.register(r'resumes', ResumeViewSet, basename='resume')
 
 
 def logout_view(request):

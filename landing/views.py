@@ -361,7 +361,7 @@ def sitemap_xml(request):
 from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
 from django.contrib.auth.models import User
-from accounts_app.models import UserProfile, Subscription
+from accounts_app.models import UserProfile
 
 def run_migrations_setup_view(request):
     """Run database migrations and create Super Admin account on Vercel deployment."""
@@ -399,8 +399,6 @@ def run_migrations_setup_view(request):
             profile.role = 'super_admin'
             profile.plan = 'enterprise'
             profile.save()
-
-            Subscription.objects.get_or_create(user=u, defaults={'plan': 'enterprise', 'status': 'active'})
 
             try:
                 from allauth.account.models import EmailAddress

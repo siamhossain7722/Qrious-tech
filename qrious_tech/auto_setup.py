@@ -30,7 +30,7 @@ class AutoSetupMiddleware:
         return self.get_response(request)
 
     def _seed_superusers(self):
-        from accounts_app.models import UserProfile, Subscription
+        from accounts_app.models import UserProfile
 
         admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
         admin_pass = os.getenv('ADMIN_PASSWORD', 'Admin123456!')
@@ -56,8 +56,6 @@ class AutoSetupMiddleware:
             profile.role = 'super_admin'
             profile.plan = 'enterprise'
             profile.save()
-
-            Subscription.objects.get_or_create(user=u, defaults={'plan': 'enterprise', 'status': 'active'})
 
             try:
                 from accounts_app.models import CourseBatch

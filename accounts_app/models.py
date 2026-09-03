@@ -64,67 +64,10 @@ class UserProfile(models.Model):
         return self.user.enrollments.filter(is_completed=True).exists()
 
 
-class Subscription(models.Model):
-    """User subscription to a plan."""
-
-    PLAN_CHOICES = [
-        ('free', 'Free'),
-        ('pro', 'Pro'),
-        ('business', 'Business'),
-    ]
-
-    STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('cancelled', 'Cancelled'),
-        ('past_due', 'Past Due'),
-        ('trialing', 'Trialing'),
-        ('incomplete', 'Incomplete'),
-    ]
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='subscription')
-    plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='free')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-
-    # Stripe fields
-    stripe_customer_id = models.CharField(max_length=100, blank=True)
-    stripe_subscription_id = models.CharField(max_length=100, blank=True)
-
-    # Billing cycle
-    current_period_start = models.DateTimeField(null=True, blank=True)
-    current_period_end = models.DateTimeField(null=True, blank=True)
-    cancel_at_period_end = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.user.email} — {self.plan} ({self.status})"
-
-    @property
-    def is_active(self):
-        return self.status in ('active', 'trialing')
-
-    @property
-    def limits(self):
-        return settings.PLAN_LIMITS.get(self.plan, settings.PLAN_LIMITS['free'])
-
     def applications_this_month(self):
-        """Count applications submitted this calendar month."""
-        from dashboard.models import JobApplication
-        now = timezone.now()
-        return JobApplication.objects.filter(
-            user=self.user,
-            date_applied__year=now.year,
-            date_applied__month=now.month,
-            status='applied',
-        ).count()
+        return 0
 
     def can_apply(self):
-        """Returns (bool, reason) — whether user can submit another application."""
-        limit = self.limits['applications_per_month']
-        used = self.applications_this_month()
-        if used >= limit:
-            return False, f"You've used {used}/{limit} applications this month. Upgrade to apply more."
         return True, ""
 
     def applications_remaining(self):
