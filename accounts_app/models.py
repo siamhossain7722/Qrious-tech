@@ -42,17 +42,11 @@ class UserProfile(models.Model):
 
     @property
     def subscription(self):
-        try:
-            return self.user.subscription
-        except Subscription.DoesNotExist:
-            return None
+        return None
 
     @property
     def plan(self):
-        sub = self.subscription
-        if sub and sub.is_active:
-            return sub.plan
-        return 'free'
+        return 'enterprise' if (self.user and (self.user.is_superuser or self.user.is_staff)) else 'free'
 
     @property
     def plan_limits(self):

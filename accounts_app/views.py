@@ -32,9 +32,14 @@ def _get_active_batches():
 
 
 def _ensure_subscription(user):
-    """Create free subscription if none exists."""
-    sub, _ = Subscription.objects.get_or_create(user=user, defaults={'plan': 'free', 'status': 'active'})
-    return sub
+    """Return a mock subscription object for legacy billing view."""
+    class DummySub:
+        plan = 'enterprise' if (user and (user.is_superuser or user.is_staff)) else 'free'
+        status = 'active'
+        is_active = True
+        stripe_subscription_id = ''
+        current_period_end = None
+    return DummySub()
 
 
 @login_required
@@ -437,7 +442,6 @@ from .models import ServiceBooking, StudentEnrollment
 @user_passes_test(_is_superuser)
 def superadmin_master_dashboard(request):
     """Master Super Admin Console for managing users, courses, student progress, and service bookings."""
-    from dashboard.models import JobApplication
     from django.core.paginator import Paginator
     from django.db.models import Q, F
 
@@ -494,7 +498,7 @@ def superadmin_master_dashboard(request):
         'total_enrollments': StudentEnrollment.objects.count(),
         'completed_certificates': StudentEnrollment.objects.filter(is_completed=True).count(),
         'total_bookings': total_bookings_count,
-        'total_applications': JobApplication.objects.count(),
+        'total_applications': 0,
         'users': users,
         'enrollments': enrollments_page,
         'bookings': bookings,
@@ -518,7 +522,7 @@ def superadmin_users_list(request):
     from django.db.models import Q
     from django.utils import timezone
     from datetime import timedelta
-    from .models import Subscription, UserProfile
+    from .models import UserProfile
 
     q_search = request.GET.get('q', '').strip()
     enrollment_filter = request.GET.get('enrollment', '').strip()
@@ -566,7 +570,7 @@ def superadmin_users_list(request):
         'date_filter': date_filter,
         'status_filter': status_filter,
         'total_users_count': User.objects.count(),
-        'active_subscriptions': Subscription.objects.filter(status='active').count(),
+        'active_subscriptions': User.objects.count(),
         'need_contact_count': need_contact_count,
     }
     return render(request, 'accounts_app/superadmin_users_list.html', context)
