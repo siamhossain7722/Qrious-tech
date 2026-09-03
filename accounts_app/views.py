@@ -3257,9 +3257,96 @@ def admin_manage_assignments(request):
     return render(request, 'accounts_app/admin_manage_assignments.html', context)
 
 
+def send_admin_submission_notification_email_helper(submission, request):
+    """Sends an automated HTML email to Super Admin when a student submits an assignment script."""
+    try:
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+        import os
+
+        admin_email = os.getenv('ADMIN_EMAIL', 'mdsiamh77@gmail.com')
+        student = submission.enrollment.user if (submission.enrollment and submission.enrollment.user) else request.user
+        student_name = student.get_full_name() or student.username or student.email
+        assignment = submission.assignment
+
+        # Build absolute URL to Super Admin Homework & Exams portal page
+        domain = request.build_absolute_uri('/')[:-1] if request else "https://qrious-tech.vercel.app"
+        admin_portal_url = f"{domain}/superadmin/assignments/"
+
+        subject = f"📥 New Homework Submission: {student_name} - Week {assignment.week_number}: {assignment.title}"
+        
+        text_content = f"""
+New Assignment Submission Received!
+
+Student: {student_name} ({student.email})
+Assignment: Week {assignment.week_number} - {assignment.title}
+Submitted At: {timezone.now().strftime('%b %d, %Y %I:%M %p')}
+
+Evaluation Page Link: {admin_portal_url}
+        """
+
+        attachment_html = f"<tr><td style='color:#94a3b8;padding:8px 0;font-weight:600'>Attachment:</td><td style='color:#38bdf8'><a href='{submission.attachment_url}' target='_blank' style='color:#38bdf8'>View Attachment Link ↗</a></td></tr>" if submission.attachment_url else ""
+
+        html_content = f"""
+        <div style="font-family:'Plus Jakarta Sans','Inter',sans-serif;max-width:600px;margin:0 auto;background:#0d1117;color:#f8fafc;padding:30px;border-radius:20px;border:1px solid #1e293b">
+            <div style="text-align:center;margin-bottom:24px">
+                <span style="font-size:32px">📚</span>
+                <h2 style="color:#ccff00;margin:10px 0 4px;font-size:22px;font-weight:800">New Student Assignment Submission!</h2>
+                <p style="color:#94a3b8;font-size:13px;margin:0">Qrious Tech Academy Evaluation System</p>
+            </div>
+
+            <div style="background:#161f2e;border:1px solid #334155;border-radius:14px;padding:20px;margin-bottom:24px">
+                <table style="width:100%;border-collapse:collapse;font-size:14px">
+                    <tr>
+                        <td style="color:#94a3b8;padding:8px 0;width:120px;font-weight:600">Student:</td>
+                        <td style="color:#ffffff;font-weight:700">{student_name} (<a href="mailto:{student.email}" style="color:#38bdf8;text-decoration:none">{student.email}</a>)</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#94a3b8;padding:8px 0;font-weight:600">Assignment:</td>
+                        <td style="color:#ccff00;font-weight:700">Week {assignment.week_number}: {assignment.title}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#94a3b8;padding:8px 0;font-weight:600">Submission Date:</td>
+                        <td style="color:#cbd5e1">{timezone.now().strftime('%B %d, %Y at %I:%M %p')}</td>
+                    </tr>
+                    {attachment_html}
+                </table>
+            </div>
+
+            <div style="background:#090d16;border:1px solid #1e293b;border-radius:12px;padding:16px;margin-bottom:26px">
+                <div style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Submitted Answer Script:</div>
+                <div style="font-size:13.5px;color:#e2e8f0;line-height:1.6;white-space:pre-wrap;word-break:break-word">{submission.submission_text[:300]}{'...' if len(submission.submission_text) > 300 else ''}</div>
+            </div>
+
+            <div style="text-align:center">
+                <a href="{admin_portal_url}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#ccff00,#10b981);color:#090d16;font-size:14px;font-weight:800;padding:14px 28px;border-radius:14px;text-decoration:none;box-shadow:0 6px 20px rgba(204,255,0,0.25)">
+                    🎓 Open Admin Evaluation Portal ↗
+                </a>
+            </div>
+
+            <div style="border-top:1px solid #1e293b;margin-top:28px;padding-top:16px;text-align:center;font-size:11px;color:#64748b">
+                Automated System Alert • Qrious Tech Academy Portal
+            </div>
+        </div>
+        """
+
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@qrioustech.com'),
+            to=[admin_email]
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=True)
+    except Exception as e:
+        print(f"Error sending admin submission email: {e}")
+
+
 @login_required
 def student_submit_assignment(request):
     """Student view: Submit text homework/exam answer script."""
+    from .models import CourseAssignment, AssignmentSubmission
+
     if request.method == 'POST':
         assignment_id = request.POST.get('assignment_id')
         submission_text = request.POST.get('submission_text', '').strip()
