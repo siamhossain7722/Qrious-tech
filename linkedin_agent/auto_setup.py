@@ -54,6 +54,12 @@ class AutoSetupMiddleware:
             Subscription.objects.get_or_create(user=u, defaults={'plan': 'enterprise', 'status': 'active'})
 
             try:
+                from accounts_app.models import CourseBatch
+                CourseBatch.objects.get_or_create(name="Batch - 01", defaults={"description": "Default Batch 01"})
+            except Exception:
+                pass
+
+            try:
                 from allauth.account.models import EmailAddress
                 ea, _ = EmailAddress.objects.get_or_create(user=u, email=admin_email)
                 ea.verified = True

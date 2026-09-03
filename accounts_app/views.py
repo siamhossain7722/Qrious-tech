@@ -21,6 +21,16 @@ from .models import UserProfile, Subscription, UsageLog, StudentEnrollment, Stud
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+def _get_active_batches():
+    """Returns all CourseBatch objects, ensuring default 'Batch - 01' exists if none present."""
+    from .models import CourseBatch
+    batches = CourseBatch.objects.all()
+    if not batches.exists():
+        CourseBatch.objects.get_or_create(name="Batch - 01", defaults={"description": "Default Batch 01"})
+        batches = CourseBatch.objects.all()
+    return batches
+
+
 def _ensure_subscription(user):
     """Create free subscription if none exists."""
     sub, _ = Subscription.objects.get_or_create(user=user, defaults={'plan': 'free', 'status': 'active'})
@@ -3221,7 +3231,7 @@ def admin_manage_assignments(request):
     submissions = []
     try:
         assignments = list(CourseAssignment.objects.select_related('batch').prefetch_related('submissions', 'submissions__enrollment__user').all())
-        batches = list(CourseBatch.objects.all())
+        batches = list(_get_active_batches())
         submissions = list(AssignmentSubmission.objects.select_related('assignment', 'assignment__batch', 'enrollment', 'enrollment__user').order_by('-submitted_at'))
     except Exception as ex:
         print(f"[WARN] admin_manage_assignments query info: {ex}")
