@@ -1,4 +1,4 @@
-4 bvcm"""
+"""
 Context processor to inject subscription info into all templates.
 """
 from django.conf import settings
