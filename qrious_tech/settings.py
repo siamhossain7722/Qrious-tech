@@ -11,8 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*', '.vercel.app', '.now.sh', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://*.now.sh', 'http://127.0.0.1:8000', 'http://localhost:8000']
+ALLOWED_HOSTS = ['*', '.alwaysdata.net', '.vercel.app', '.now.sh', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.alwaysdata.net', 'https://*.vercel.app', 'https://*.now.sh', 'http://127.0.0.1:8000', 'http://localhost:8000']
 
 #  APPS 
 INSTALLED_APPS = [

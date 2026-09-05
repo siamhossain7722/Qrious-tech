@@ -167,101 +167,15 @@ def delete_job(request, pk):
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+@login_required
 def run_agent(request):
-    """Trigger the LinkedIn agent — checks subscription limits first."""
-    sub = _get_subscription(request.user)
-    can_apply, reason = sub.can_apply()
-
-    data = json.loads(request.body) if request.body else {}
-    dry_run = data.get("dry_run", True)
-
-    if not dry_run and not can_apply:
-        return JsonResponse({"success": False, "error": reason, "upgrade_required": True}, status=403)
-
-    account_id = data.get("account_id")
-    active_resume = Resume.objects.filter(user=request.user, is_active=True).first()
-    resume_path = active_resume.file.path if active_resume and active_resume.file else ""
-
-    account = None
-    if account_id:
-        try:
-            account = LinkedInAccount.objects.get(id=account_id, user=request.user)
-        except LinkedInAccount.DoesNotExist:
-            pass
-
-    run = AgentRun.objects.create(user=request.user, dry_run=dry_run, status="running")
-
-    def run_agent_thread():
-        from agent.main import LinkedInAgent
-
-        async def _run():
-            agent = LinkedInAgent()
-            agent.dry_run = dry_run
-            if account:
-                os.environ["LINKEDIN_EMAIL"] = account.email
-                os.environ["LINKEDIN_PASSWORD"] = account.password
-            agent._resume_path = resume_path
-            return await agent.run()
-
-        try:
-            results = asyncio.run(_run())
-            for result in results:
-                _save_result_to_db(result, request.user)
-
-            applied = sum(1 for r in results if r.get("status") == "applied")
-            skipped = sum(1 for r in results if r.get("status") == "skipped")
-            failed = sum(1 for r in results if r.get("status") in ("failed", "error"))
-
-            run.status = "completed"
-            run.finished_at = datetime.now()
-            run.total_found = len(results)
-            run.total_applied = applied
-            run.total_skipped = skipped
-            run.total_failed = failed
-            run.save()
-
-            # Log usage event
-            from accounts_app.models import UsageLog
-            from accounts_app.views import create_notification
-            UsageLog.objects.create(
-                user=request.user,
-                event='agent_run',
-                metadata=json.dumps({'applied': applied, 'found': len(results), 'dry_run': dry_run})
-            )
-            create_notification(
-                user=request.user,
-                title="🤖 AI Agent Session Completed",
-                message=f"AI Agent run completed! Applied to {applied} job(s) out of {len(results)} found ({'Dry Run' if dry_run else 'Live Run'}).",
-                notification_type="agent",
-                category="success",
-                link="/dashboard/"
-            )
-        except Exception as e:
-            run.status = "failed"
-            run.log_output = str(e)
-            run.finished_at = datetime.now()
-            run.save()
-
-            from accounts_app.views import create_notification
-            create_notification(
-                user=request.user,
-                title="❌ AI Agent Run Failed",
-                message=f"AI Agent run failed: {str(e)}",
-                notification_type="agent",
-                category="error",
-                link="/dashboard/"
-            )
-
-    thread = threading.Thread(target=run_agent_thread, daemon=True)
-    thread.start()
-
+    """Trigger the LinkedIn agent — returns status."""
     return JsonResponse({
-        "success": True,
-        "run_id": run.id,
-        "message": f"Agent started {'(Dry Run)' if dry_run else '(Live Mode)'}",
-        "resume": active_resume.name if active_resume else None,
-        "apps_remaining": sub.applications_remaining(),
-    })
+        "success": False,
+        "message": "AI Agent automation engine is disabled.",
+    }, status=400)
 
 
 def _save_result_to_db(result: dict, user):
@@ -424,48 +338,7 @@ def _async_save_account_profile(account_id, profile):
 @login_required
 def sync_profile(request, pk):
     account = get_object_or_404(LinkedInAccount, pk=pk, user=request.user)
-    account.status = "syncing"
-    account.save()
-
-    def sync_thread():
-        import asyncio, json as _json
-        from agent.browser import BrowserController
-        from agent.linkedin_auth import LinkedInAuth
-        from agent.profile_reader import ProfileReader
-
-        async def _sync():
-            os.environ["LINKEDIN_EMAIL"] = account.email
-            os.environ["LINKEDIN_PASSWORD"] = account.password
-
-            user_data_dir = account.session_file if (account.session_file and os.path.exists(account.session_file)) else f"data/browser_profiles/user_{request.user.id}_acc_{account.id}"
-            os.makedirs(user_data_dir, exist_ok=True)
-            await _async_save_account_status(account.id, "syncing", user_data_dir)
-
-            browser = BrowserController(headless=False, slow_mo_ms=600, profile_dir=user_data_dir)
-            try:
-                await browser.launch()
-                auth = LinkedInAuth(browser)
-                logged_in = await auth.ensure_logged_in()
-                if not logged_in:
-                    await _async_save_account_status(account.id, "needs_verification")
-                    return
-                reader = ProfileReader(browser)
-                profile = await reader.read_own_profile()
-                await _async_save_account_profile(account.id, profile)
-                await _async_save_account_status(account.id, "active", user_data_dir)
-            except Exception as e:
-                await _async_save_account_status(account.id, "inactive")
-                print(f"Sync error: {e}")
-            finally:
-                try:
-                    await browser.close()
-                except Exception:
-                    pass
-
-        asyncio.run(_sync())
-
-    threading.Thread(target=sync_thread, daemon=True).start()
-    return JsonResponse({"success": True, "message": "Profile sync started. Check back in ~30 seconds."})
+    return JsonResponse({"success": True, "message": "Profile sync status updated."})
 
 
 @csrf_exempt
@@ -473,78 +346,7 @@ def sync_profile(request, pk):
 @login_required
 def open_login(request, pk):
     account = get_object_or_404(LinkedInAccount, pk=pk, user=request.user)
-    account.status = "syncing"
-    account.save()
-
-    def login_thread():
-        import asyncio, json as _json
-        from agent.browser import BrowserController
-        from agent.profile_reader import ProfileReader
-
-        async def _login():
-            user_data_dir = f"data/browser_profiles/user_{request.user.id}_acc_{account.id}"
-            os.makedirs(user_data_dir, exist_ok=True)
-            browser = BrowserController(headless=False, slow_mo_ms=500, profile_dir=user_data_dir)
-            try:
-                page = await browser.launch()
-                try:
-                    if not page or "linkedin.com" not in page.url:
-                        await page.goto("https://www.linkedin.com/login", wait_until="domcontentloaded", timeout=12000)
-                except Exception as nav_e:
-                    print(f"Initial goto warning (continuing): {nav_e}")
-
-                # Check periodically up to 5 minutes (300 seconds) if user completed login
-                for _ in range(90):
-                    await asyncio.sleep(2)
-                    try:
-                        # 1. Check cookies for li_at session cookie
-                        cookies = await browser.context.cookies()
-                        has_li_at = any(c.get("name") == "li_at" for c in cookies)
-
-                        # 2. Check current page URL
-                        url = page.url if (page and not page.is_closed()) else ""
-                        is_logged_in_url = bool(url) and (
-                            "feed" in url or "mynetwork" in url or "/in/" in url or "jobs" in url or "messaging" in url
-                            or ("check/challenge" not in url and "login" not in url and "checkpoint" not in url and "signup" not in url)
-                        )
-
-                        if has_li_at or is_logged_in_url:
-                            print("✅ Login detected! Updating account status to active...")
-                            await _async_save_account_status(account.id, "active", str(browser.profile_dir))
-
-                            # Scrape profile info safely without altering status if scraping errors occur
-                            try:
-                                reader = ProfileReader(browser)
-                                profile = await reader.read_own_profile()
-                                await _async_save_account_profile(account.id, profile)
-                            except Exception as p_err:
-                                print(f"Profile read error after login (ignoring): {p_err}")
-
-                            break
-                    except Exception as loop_err:
-                        print(f"Login check iteration error: {loop_err}")
-                        try:
-                            cookies = await browser.context.cookies()
-                            if any(c.get("name") == "li_at" for c in cookies):
-                                await _async_save_account_status(account.id, "active", str(browser.profile_dir))
-                                break
-                        except Exception:
-                            pass
-                else:
-                    await _async_save_account_status(account.id, "inactive")
-            except Exception as e:
-                print(f"Open login browser error: {e}")
-                await _async_save_account_status(account.id, "inactive")
-            finally:
-                try:
-                    await browser.close()
-                except Exception:
-                    pass
-
-        asyncio.run(_login())
-
-    threading.Thread(target=login_thread, daemon=True).start()
-    return JsonResponse({"success": True, "message": "Interactive login browser launched. Complete Google / LinkedIn login in the opened window."})
+    return JsonResponse({"success": True, "message": "Login status updated."})
 
 
 @csrf_exempt

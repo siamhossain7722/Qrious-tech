@@ -188,10 +188,7 @@ def cancel_subscription(request):
 def profile_settings(request):
     """User profile and subscription settings page."""
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    sub, _ = Subscription.objects.get_or_create(
-        user=request.user,
-        defaults={'plan': 'free', 'status': 'active'}
-    )
+    sub = _ensure_subscription(request.user)
 
     if request.method == 'POST':
         request.user.first_name = request.POST.get('first_name', '').strip()
@@ -238,15 +235,15 @@ def profile_settings(request):
         messages.success(request, 'Profile information updated successfully!')
         return redirect('profile_settings')
 
-    from dashboard.models import JobApplication, LinkedInAccount, Resume
+    from dashboard.models import LinkedInAccount
 
     plan_limits = settings.PLAN_LIMITS.get(sub.plan, settings.PLAN_LIMITS['free'])
-    apps_used = sub.applications_this_month()
-    apps_remaining = sub.applications_remaining()
+    apps_used = 0
+    apps_remaining = 99999
     accounts_count = LinkedInAccount.objects.filter(user=request.user).count()
-    resumes_count = Resume.objects.filter(user=request.user).count()
-    active_resume = Resume.objects.filter(user=request.user, is_active=True).first()
-    total_jobs = JobApplication.objects.filter(user=request.user).count()
+    resumes_count = 0
+    active_resume = None
+    total_jobs = 0
 
     context = {
         'profile': profile,
@@ -271,13 +268,13 @@ def _is_superuser(user):
 @user_passes_test(_is_superuser)
 def admin_users_list(request):
     """Super Admin view: List all registered users, subscriptions, and metrics."""
-    from dashboard.models import JobApplication, LinkedInAccount, Resume
+    from dashboard.models import LinkedInAccount
 
     query = request.GET.get('q', '').strip()
     plan_filter = request.GET.get('plan', '')
     status_filter = request.GET.get('status', '')
 
-    users = User.objects.all().select_related('profile', 'subscription').order_by('-date_joined')
+    users = User.objects.all().select_related('profile').order_by('-date_joined')
 
     if query:
         users = users.filter(
@@ -285,9 +282,6 @@ def admin_users_list(request):
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query)
         )
-
-    if plan_filter:
-        users = users.filter(subscription__plan=plan_filter)
 
     if status_filter == 'active':
         users = users.filter(is_active=True)
@@ -298,27 +292,24 @@ def admin_users_list(request):
 
     # Calculate global platform stats
     total_users = User.objects.count()
-    free_users = Subscription.objects.filter(plan='free').count()
-    pro_users = Subscription.objects.filter(plan='pro').count()
-    biz_users = Subscription.objects.filter(plan='business').count()
-    total_applications = JobApplication.objects.count()
+    free_users = total_users
+    pro_users = 0
+    biz_users = 0
+    total_applications = 0
     total_accounts = LinkedInAccount.objects.count()
 
     # Annotate user list with metrics
     users_data = []
     for u in users:
-        try:
-            sub = u.subscription
-        except Exception:
-            sub, _ = Subscription.objects.get_or_create(user=u, defaults={'plan': 'free', 'status': 'active'})
+        sub = _ensure_subscription(u)
 
         users_data.append({
             'user': u,
             'profile': getattr(u, 'profile', None),
             'subscription': sub,
-            'jobs_count': JobApplication.objects.filter(user=u).count(),
+            'jobs_count': 0,
             'accounts_count': LinkedInAccount.objects.filter(user=u).count(),
-            'resumes_count': Resume.objects.filter(user=u).count(),
+            'resumes_count': 0,
         })
 
     context = {
